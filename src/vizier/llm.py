@@ -34,7 +34,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
 
 import somm
 from somm.errors import (

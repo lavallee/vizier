@@ -20,10 +20,8 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from urllib.parse import urljoin
 
 import frontmatter
-from bs4 import BeautifulSoup
 
 from ..schema import Item
 from ..storage import corpus_root, iter_items

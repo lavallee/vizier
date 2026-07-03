@@ -1,0 +1,46 @@
+/* base.css — self-contained design tokens for the chart-forms guide.
+ *
+ * Previously this pulled from the host site's /lib/base.css; the guide now
+ * ships its own tokens so it serves as a static site with no build step and
+ * no external dependency. Palette is aligned with the vizier / somm family
+ * (dark-first, JetBrains Mono + Inter, accent #93c5fd) plus an editorial
+ * serif for the guide's masthead.
+ */
+
+:root {
+  --font-sans:  Inter, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:  'JetBrains Mono', 'SF Mono', 'Fira Code', Consolas, 'Liberation Mono', monospace;
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+
+  /* dark surfaces */
+  --bg:            #141416;   /* raised surface: cards, demo panels */
+  --text:          #e8e8e8;
+  --text-muted:    #b4b7bd;
+  --text-dim:      #8a8f98;
+  --border:        #2a2a2e;
+  --border-subtle: #202024;
+  --border-strong: #3a3a40;
+
+  /* signal colors — consistent with the computable checks' vocabulary */
+  --accent:  #93c5fd;
+  --success: #86efac;
+  --error:   #fca5a5;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #0a0a0a;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: var(--accent); }
+
+::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }

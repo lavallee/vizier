@@ -4,17 +4,21 @@
 - `fetch_html`: pluggable cached fetch (see below)
 - `soup`: BeautifulSoup with lxml or html.parser fallback
 
-Fetching is pluggable so ingest works with or without a proprietary fetcher.
-Resolution order in `fetch_html`:
+Fetching is pluggable so ingest works with or without an optional richer
+fetcher. Resolution order in `fetch_html`:
   1. a custom `FETCHER` callable, if you set one;
-  2. the `fetch` package (rich strategy chain + on-disk cache), if installed;
+  2. an optional richer fetcher (strategy chain + on-disk cache), if you point
+     `VIZIER_FETCHER` at an importable module that exposes
+     `fetch(url, cache=...) -> obj` with a `.html` attribute;
   3. a plain httpx GET with a browser UA (the bundled default).
-Point (2) is how the maintainers wire in a proprietary fetcher; (3) is what every
-open-source user gets out of the box.
+Point (2) is the plug point for a heavier fetcher when one is available; (3) is
+what every open-source user gets out of the box, with no extra dependencies.
 """
 
 from __future__ import annotations
 
+import importlib
+import os
 import re
 import unicodedata
 from pathlib import Path
@@ -25,6 +29,10 @@ from bs4 import BeautifulSoup
 
 CACHE_DIR = Path(__file__).resolve().parents[3] / ".fetch-cache"
 _UA = "vizier/0.1 (+https://github.com/lavallee/vizier; dataviz corpus ingest)"
+
+# Import path of an optional richer fetcher module (see module docstring). Unset
+# by default — the bundled httpx fetch below covers the open-source path.
+_FETCHER_ENV = "VIZIER_FETCHER"
 
 # Set to a callable(url) -> html|None to override the default fetch entirely.
 FETCHER: Callable[[str], str | None] | None = None
@@ -39,13 +47,22 @@ def _httpx_fetch(url: str) -> str | None:
         return None
 
 
-def _fetch_fetch(url: str, cache_dir: Path | None) -> str | None:
+def plugin_fetch(url: str, cache_dir: Path | None = None) -> str | None:
+    """Try the optional richer fetcher named by `$VIZIER_FETCHER`, else None.
+
+    The named module must expose `fetch(url, cache=...) -> obj` whose result has
+    a `.html` attribute. Any import or runtime failure falls through to None so
+    the caller can drop back to the bundled httpx fetch.
+    """
+    mod_name = os.environ.get(_FETCHER_ENV)
+    if not mod_name:
+        return None
     try:
-        import fetch  # optional — proprietary fetcher, not required for OSS use
+        mod = importlib.import_module(mod_name)
     except ImportError:
         return None
     try:
-        r = fetch.fetch(url, cache=cache_dir) if cache_dir else fetch.fetch(url)
+        r = mod.fetch(url, cache=cache_dir) if cache_dir else mod.fetch(url)
         return r.html or None
     except Exception:
         return None
@@ -55,7 +72,7 @@ def fetch_html(url: str, *, cache: bool = True) -> str | None:
     """Return raw HTML for a URL, or None on failure. Pluggable — see module docstring."""
     if FETCHER is not None:
         return FETCHER(url)
-    html = _fetch_fetch(url, CACHE_DIR if cache else None)
+    html = plugin_fetch(url, CACHE_DIR if cache else None)
     return html if html is not None else _httpx_fetch(url)
 
 

@@ -12,12 +12,11 @@ import hashlib
 import json
 import sqlite3
 import time
-from pathlib import Path
 
 import numpy as np
 
 from ..schema import Item
-from ..storage import corpus_root, iter_items
+from ..storage import iter_items
 from .connect import connect
 
 

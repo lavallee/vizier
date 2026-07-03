@@ -12,10 +12,9 @@
 // handful of patterns under it in full. "Instead, reach for..."
 // alternatives transclude their capsules AND link to the right page.
 
-import data from './data.json'
+import data from './data.json' with { type: 'json' }
 import { DEMO_BY_ID, INTERACTIVE_PATTERNS, renderDistributionTriad, renderSpatialTriad } from './live-examples.js'
 import { GLOSSARY, linkifyGlossary } from './glossary.js'
-import interactivityMdRaw from './INTERACTIVITY.md?raw'
 
 // Caption text to display under each live demo.
 const DEMO_CAPTIONS = {
@@ -774,7 +773,7 @@ function renderCompare() {
   })
 }
 
-function renderInteractivityDoc() {
+async function renderInteractivityDoc() {
   setBreadcrumb([
     { label: 'Chart forms', href: '#/' },
     { label: 'Interactivity principles' },
@@ -785,11 +784,16 @@ function renderInteractivityDoc() {
     el('h2', {}, 'Interactivity principles'),
     el('p', { className: 'q' }, 'How we decide when a chart earns an interactive affordance, and what touch and mobile do to the design. A working doc — the evolution log captures what each implementation taught us.'),
   ]))
-  page.appendChild(el('div', {
-    className: 'prose-doc',
-    html: mdDocToHtml(interactivityMdRaw),
-  }))
+  const prose = el('div', { className: 'prose-doc' }, 'Loading…')
+  page.appendChild(prose)
   page.appendChild(el('a', { className: 'back-to-top', href: '#/' }, '↑ back to TOC'))
+  // Fetched on demand (no build step) so the doc stays a plain markdown file.
+  try {
+    const md = await fetch(new URL('./INTERACTIVITY.md', import.meta.url)).then(r => r.text())
+    prose.innerHTML = mdDocToHtml(md)
+  } catch (e) {
+    prose.textContent = 'Interactivity notes are unavailable.'
+  }
 }
 
 function renderGlossary(scrollToSlug) {

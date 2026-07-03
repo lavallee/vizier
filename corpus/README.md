@@ -27,5 +27,5 @@ Schema is defined in `src/vizier/schema.py` (pydantic). Item types:
 `src/vizier/ingest/`. Don't hand-edit files — edit the script and re-ingest.
 Following weaver's ingest convention.
 
-**Caching:** HTML fetches go through `fetch.fetch(url, cache=.fetch-cache)`,
-scoped to this repo and git-ignored. Re-running an ingest is cheap.
+**Caching:** HTML fetches are cached under `.fetch-cache/`, scoped to this repo
+and git-ignored. Re-running an ingest is cheap.

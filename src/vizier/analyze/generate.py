@@ -81,7 +81,8 @@ def suggest_palette(
 
 
 def _interp(a: str, b: str, t: float) -> str:
-    ah = a.lstrip("#"); bh = b.lstrip("#")
+    ah = a.lstrip("#")
+    bh = b.lstrip("#")
     ar, ag, ab = (int(ah[i:i + 2], 16) for i in (0, 2, 4))
     br, bg, bb = (int(bh[i:i + 2], 16) for i in (0, 2, 4))
     return "#%02x%02x%02x" % (

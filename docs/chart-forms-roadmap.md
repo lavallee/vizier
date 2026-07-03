@@ -15,12 +15,12 @@ future session can pick up cold.*
   `kantar`, `sigma`, `junkcharts`, `pudding`, `weaver` (internal
   principles), `rubrics`, `ft-vocab`, `source-opennews`, `eagereyes`,
   `visualising-data`, `cairo-blog`, `nightingale`, `snd`, `observable`.
-- **Shared scaffolding:** `_sitemap_blog.py` (sitemap + fetch
-  fallback for Cloudflare), `_fetch_html.py` (raw HTML + image
-  caching at `corpus/<source>/_raw/` and `_images/`, gitignored).
+- **Shared scaffolding:** `_sitemap_blog.py` (sitemap + optional
+  richer-fetcher fallback for Cloudflare), `_fetch_html.py` (raw HTML +
+  image caching at `corpus/<source>/_raw/` and `_images/`, gitignored).
 - FT Chart Doctor + SND.Ink **deferred** — both gated (subscription,
-  account). If creds arrive, try `fetch.fetch(url,
-  strategies=BROWSER_STRATEGIES)` with login.
+  account). If creds arrive, route through the optional richer fetcher
+  (`$VIZIER_FETCHER`) with a browser strategy and login.
 
 ### Phase 2 · queryable substrate
 **Goal:** make the corpus callable from agents and fast to query. **State: done.**
@@ -211,7 +211,7 @@ uv run vizier patterns list            # 36 patterns
 
 # rebuild
 uv run vizier db build                 # walks corpus/, upserts, re-embeds changed rows
-uv run vizier patterns export -o reader/data.json
+uv run vizier patterns export -o docs/reader/data.json
 
 # serve
 uv run vizier mcp                      # stdio MCP server
@@ -220,12 +220,13 @@ uv run vizier mcp                      # stdio MCP server
 uv run vizier eval full
 ```
 
-**Weaver (Vite):**
+**Preview the guide (static — no build):**
 ```
-cd /Users/lavallee/Projects/weaver
-npm run dev                          # vite @ localhost:5173-5175
-# visit http://localhost:<port>/reader/
+cd ~/Projects/vizier
+python -m http.server 8000 -d docs   # then open http://localhost:8000/reader/
 ```
+The guide vendors its own d3 and design tokens, so it serves as plain static
+files (this is also what GitHub Pages serves out of `docs/`).
 
 **MCP config (Claude Desktop / Cursor / claude.ai):**
 ```json
@@ -256,10 +257,11 @@ npm run dev                          # vite @ localhost:5173-5175
 | `vizier/scripts/suggest_pattern_examples.py` | Replayable find_similar-based curation |
 | `vizier/docs/chart-forms-plan.md` | Schema + taxonomy plan doc |
 | `vizier/docs/process-notes-sources.md` | Source-tiering reference |
-| `reader/` | The reader |
-| `reader/data.json` | Exported snapshot from vizier |
-| `reader/live-examples.js` | 36 demo renderers + comparison triads |
-| `reader/main.js` | Hash router + pattern-section renderer |
+| `vizier/docs/index.html` | Landing page (GitHub Pages) |
+| `vizier/docs/reader/` | The chart-forms guide (self-contained static) |
+| `vizier/docs/reader/data.json` | Exported snapshot from vizier |
+| `vizier/docs/reader/live-examples.js` | 36 demo renderers + comparison triads |
+| `vizier/docs/reader/main.js` | Hash router + pattern-section renderer |
 | `weaver/projects/sankey-when-and-how/` | Earlier sibling project — specific-form essay |
 
 ---
@@ -306,8 +308,8 @@ Family slugs: `flow`, `part-to-whole`, `ranking`, `change-over-time`,
 Tier 1 + the customer-feedback asks are all in. The next natural
 pickup set is Tier 2 + the `vizier critique` extensions:
 
-1. **Pre-flight**: `uv run vizier db build` (fast now) + `uv run vizier patterns export -o reader/data.json` + `cd ../weaver && BASE=http://localhost:517x npm run check:chart-forms`. Three commands, ~10 seconds.
-2. **Extend `vizier critique`**: SVG input (rasterize via `cairosvg` or headless chromium), URL input (fetch fetch + page screenshot). Also useful: a `--pattern auto` mode that surfaces the classifier's top-3 candidates rather than forcing one choice.
+1. **Pre-flight**: `uv run vizier db build` (fast now) + `uv run vizier patterns export -o docs/reader/data.json`, then preview with `python -m http.server 8000 -d docs`. Fast; no build step.
+2. **Extend `vizier critique`**: SVG input (rasterize via `cairosvg` or headless chromium), URL input (fetch + page screenshot). Also useful: a `--pattern auto` mode that surfaces the classifier's top-3 candidates rather than forcing one choice.
 3. **Worked examples pulled from corpus** (Tier 2) — for the 5-10 highest-signal canonical references, cache one image from `corpus/<source>/_images/<item>/` and display inline as "from the corpus".
 4. **Per-family decision diagrams** (Tier 2) — generalize the sankey-when-and-how tree pattern.
 5. **New patterns** (Tier 2) — radar/spider, marimekko, calendar heatmap, lollipop, box-and-jitter-strip hybrid.

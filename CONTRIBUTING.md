@@ -47,6 +47,6 @@ test.
 
 ## Fetching is pluggable
 
-The corpus fetcher (`src/vizier/ingest/_common.py`) uses httpx by default and the
-`fetch` package if installed. To use your own, set `FETCHER` or add an adapter —
-don't hard-code a proprietary client into the ingest path.
+The corpus fetcher (`src/vizier/ingest/_common.py`) uses httpx by default, and an
+optional richer fetcher if you point `$VIZIER_FETCHER` at one. To use your own, set
+`FETCHER` or add an adapter — don't hard-code a proprietary client into the ingest path.

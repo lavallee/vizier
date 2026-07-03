@@ -18,16 +18,15 @@ from __future__ import annotations
 
 import hashlib
 import re
-import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
 import httpx
-from bs4 import BeautifulSoup, Tag
+from bs4 import Tag
 
 from ..storage import corpus_root
-from ._common import fetch_html as _fetch_html_cached, slugify, soup
+from ._common import fetch_html as _fetch_html_cached, slugify
 
 
 _IMG_EXT_RE = re.compile(r"\.(png|jpg|jpeg|gif|webp|svg)(\?.*)?$", re.IGNORECASE)
@@ -252,5 +251,5 @@ def html_to_markdown(article: Tag) -> str:
 
 
 def fetch_item(url: str, *, cache: bool = True) -> str | None:
-    """Thin wrapper around fetch.fetch so every ingester routes through the same cache."""
+    """Thin wrapper around `_common.fetch_html` so every ingester routes through the same cache."""
     return _fetch_html_cached(url, cache=cache)

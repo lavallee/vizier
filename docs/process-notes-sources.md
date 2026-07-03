@@ -1,5 +1,10 @@
 # Practitioner walkthroughs — source tiering
 
+> For *why* the corpus draws on these kinds of sources — award juries, structural
+> critique, practitioner walkthroughs, canonical theory — and the philosophy behind
+> distilling them into a determination, see [`INFLUENCES.md`](../INFLUENCES.md). This
+> doc is the operational companion: where that content lives and how to ingest it.
+
 The corpus is well-covered on *what passed* (jury commentary, award tiers,
 curated winners). It is under-covered on *how decisions were made* — the
 practitioner walkthrough, which is what teaches transferable judgment.
@@ -73,7 +78,7 @@ But a lot of book-adjacent commentary is retrievable:
 |---|---|
 | **Conference talk transcripts** | OpenVisConf, OutlierConf, Tapestry, IEEE VIS, SNDMakes. YouTube auto-captions get us passable transcripts. 50 top-talks = ~30 hours of content. Per-talk work; do a curated pass. |
 | **Podcast transcripts** | Data Stories (Bertini/Stefaner), PolicyViz (Schwabish). Interview format; practitioner decision-making. Some auto-transcribed; many need Whisper. |
-| **IEEE VIS application papers** | A subset of academic papers are effectively practitioner walkthroughs of real deployed viz. Different register; same DNA. Retrievable via papers. |
+| **IEEE VIS application papers** | A subset of academic papers are effectively practitioner walkthroughs of real deployed viz. Different register; same DNA. Retrievable from the usual academic indexes (arXiv, Semantic Scholar, OpenAlex, DOI). |
 
 ## Storage convention (new for this ingest pass)
 
@@ -117,16 +122,17 @@ For this round, in execution order:
    multi-media, newspaper/magazine-design, profiles, innovation,
    AR/VR/AI, illustrations, creative-conference-calls). Yields ~180
    unique posts after dedup.
-4. **Nightingale** (DVS magazine) — Cloudflare-fronted, needs fetch's
-   direct strategy for sitemap; standard WP after that. ~740 posts.
+4. **Nightingale** (DVS magazine) — Cloudflare-fronted, so the sitemap fetch
+   needs the optional richer fetcher (`$VIZIER_FETCHER`); standard WP after
+   that. ~740 posts.
 5. **Observable** — notebooks; curated seed (20 practitioner profiles +
    /explore). Extraction parses the Next.js JSON blob to concat md + code
    cells. We drop notebooks with <300 chars of markdown (pure-code
    recipes aren't walkthroughs). ~350 notebooks from the seed.
-6. ~~FT Chart Doctor~~ — **deferred**, hard paywall. All fetch
-   strategies fail (direct, googlebot, archive_today, wayback, browser).
-   Chart Doctor articles require an FT subscription to render. If we
-   obtain credentials we can revisit via `browser_login`.
+6. ~~FT Chart Doctor~~ — **deferred**, hard paywall. Every fetch strategy
+   fails (direct, googlebot-UA, archive, wayback, headless browser).
+   Chart Doctor articles require an FT subscription to render. With
+   credentials this could be revisited via a logged-in browser fetch.
 7. **Tier 3 and 4** — as-needed, later.
 
 ## Ingester implementation notes (what we learned)

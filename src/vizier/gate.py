@@ -1,10 +1,10 @@
 """vizier.gate — adaptive "does this need data visuals?" gate.
 
-Commissioned 2026-05-06 to support the upstream → weaver pipeline. The
+Sits in front of the weaver chart-authoring pipeline: an upstream
 orchestrator asks vizier whether a piece warrants chart authoring before
 committing to the cost of producing charts.
 
-Input: a upstream reporting-bundle (with `draft/annotations.json` from the
+Input: a reporting-bundle directory (with `draft/annotations.json` from the
 compositor agent that proposed candidate charts).
 Output: a structured decision — yes/no, kept candidates, dropped
 candidates with reasons. Each kept candidate is a vizier/chart-spec/v1

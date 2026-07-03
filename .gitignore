@@ -17,7 +17,7 @@ build/
 # Private working notes / handoffs (may reference internal tooling — never publish)
 FOLLOWUPS.md
 _*.md
-# fetch cache (large, regenerable). Leading-dot covers both file and dir forms.
+# Fetch cache (large, regenerable). Leading-dot covers both file and dir forms.
 .fetch-cache
 .fetch-cache/
 # somm telemetry (machine-local call log + decisions)

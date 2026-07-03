@@ -9,10 +9,9 @@ tags: [editorial, journalism, parity, framing, transparency]
 # Data editor's critical lens
 
 A structured pre-publication audit for any data-driven story or
-profile. Borrows the workflow shape from `upstream/skills/audit` (named
-pass, structured artifact, runs before refine) but the content of
-the lens is what a senior data editor would catch in a 15-minute
-read of the bundle.
+profile. Runs as a named pass that emits a structured artifact
+before the refine step, but the content of the lens is what a senior
+data editor would catch in a 15-minute read of the bundle.
 
 This is the editorial counterpart to the chart-form critique vizier
 already produces. Chart-form critique looks at *one image at a

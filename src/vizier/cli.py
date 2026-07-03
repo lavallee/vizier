@@ -75,9 +75,9 @@ def stats():
             if item.year:
                 years[item.year] += 1
         click.echo(f"\n{source}:")
-        click.echo(f"  types: " + ", ".join(f"{t}={c}" for t, c in types.most_common()))
+        click.echo("  types: " + ", ".join(f"{t}={c}" for t, c in types.most_common()))
         if tiers:
-            click.echo(f"  tiers: " + ", ".join(f"{t}={c}" for t, c in tiers.most_common()))
+            click.echo("  tiers: " + ", ".join(f"{t}={c}" for t, c in tiers.most_common()))
         if years:
             yspan = f"{min(years)}–{max(years)}"
             click.echo(f"  years: {yspan} ({len(years)} years covered)")
@@ -139,7 +139,6 @@ def db_build(embed: bool):
     info = D.build.populate(embed=embed)
     click.echo(_json.dumps(info, indent=2))
     if not embed:
-        pending = info.get("items_written", 0)
         # Hint only on fresh-ish builds where a meaningful number of items
         # probably don't have embeddings yet.
         from .db.query import stats as _stats
@@ -370,7 +369,7 @@ def patterns_list(family: str | None):
 def patterns_export(out: str):
     """Dump all chart_pattern items with transclusion resolved.
 
-    Intended as input to downstream readers (weaver/chart-forms-guide).
+    Intended as input to the bundled chart-forms guide (docs/reader/data.json).
     Emits one JSON object: { patterns: {id: {...resolved...}}, families: [...] }.
     """
     from . import db as D
@@ -663,7 +662,6 @@ def _print_judge_results(judge_dir: str):
 @click.option("--judge-dir", default=None, help="Specific judge dir (default: latest).")
 def eval_results(judge_dir: str | None):
     """Print a summary of the latest (or specified) judge run."""
-    import json as _json
     from pathlib import Path as _Path
     base = _Path(__file__).resolve().parents[2] / "evals" / "judge"
     if judge_dir:

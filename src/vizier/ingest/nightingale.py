@@ -2,8 +2,8 @@
 
 nightingaledvs.com — the Data Visualization Society's online magazine.
 Long-form interviews, essays, and process posts from practitioners and
-researchers. WordPress, Cloudflare-fronted (so the sitemap fetch uses
-fetch's strategy chain via `_fetch_sitemap_xml`).
+researchers. WordPress, Cloudflare-fronted (so the sitemap fetch may need the
+optional richer fetcher via `_fetch_sitemap_xml`).
 """
 
 from __future__ import annotations

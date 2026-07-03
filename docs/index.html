@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>vizier · generate and critique journalistic data visualizations</title>
+<meta name="description" content="vizier helps build journalistic data visualizations — it recommends the right chart form and encoding, and critiques finished charts against a corpus of critical writing. Colorblind-safe color, structural checks, MCP-native. A deterministic core with no keys.">
+<meta property="og:title" content="vizier">
+<meta property="og:description" content="Generate and critique journalistic data visualizations — chart-form choice, encoding, colorblind-safe color, and a corpus-backed critic. MCP-native.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230a0a0a'/%3E%3Crect x='3' y='8' width='2.4' height='5' fill='%2393c5fd'/%3E%3Crect x='6.8' y='5' width='2.4' height='8' fill='%2386efac'/%3E%3Crect x='10.6' y='3' width='2.4' height='10' fill='%23fca5a5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="./">
+      <span class="mark">vizier</span>
+      <span class="mark-sub">/ v0.1.0</span>
+    </a>
+    <nav>
+      <a href="#halves">halves</a>
+      <a href="#decides">decisions</a>
+      <a href="#install">install</a>
+      <a href="reader/">guide</a>
+      <a class="gh" href="https://github.com/lavallee/vizier" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Journalistic data visualization</p>
+      <h1>Generate and critique<br>the charts that carry<br>a data story.</h1>
+      <p class="lede">
+        vizier decides the parts of a chart that are actually
+        <em>decidable</em> — which form fits the comparison, whether a palette
+        survives colorblindness and contrast, whether the label ink is being
+        confused for a series hue — and, with a corpus of critical writing,
+        judges what a finished chart got wrong. Generation and critique, from
+        one set of thresholds.
+      </p>
+
+<pre class="code"><span class="prompt">$</span> pip install vizier
+<span class="prompt">$</span> vizier recommend-form <span class="str">"composition of a total over time"</span> --n-series 5
+<span class="c">→ stacked-area   (Part-to-whole · Change over time)</span>
+<span class="prompt">$</span> vizier validate <span class="str">"#e69f00,#0072b2,#009e73"</span> --pairs all
+<span class="c">→ ALL CHECKS PASS   (CVD ΔE, WCAG contrast, OKLCH lightness/chroma)</span></pre>
+
+      <div class="hero-cta">
+        <a class="btn" href="reader/">Browse the chart-forms guide</a>
+        <a class="btn btn-ghost" href="https://github.com/lavallee/vizier" rel="noopener">Read the code</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="halves" class="section">
+    <div class="wrap">
+      <h2>Two halves, one system</h2>
+      <p class="section-lede">
+        vizier started as a critic and grew a generator, and the two are
+        colocated on purpose — they share the same DNA. The thresholds that
+        let vizier <em>suggest</em> a form or palette are the thresholds it
+        <em>critiques</em> against, so what it proposes is what it would pass.
+        Held apart, they can be pointed at each other: a generator proposes,
+        the critic pushes back.
+      </p>
+
+      <div class="duo">
+        <div class="half">
+          <span class="kind">generate</span>
+          <h3>Give me one that's right</h3>
+          <p>
+            Chart-form recommendation, colorblind-safe palettes and ordinal
+            ramps, legible label ink — every suggestion validated before it's
+            returned. A request that can't be satisfied honestly errors
+            instead of returning something that fails.
+          </p>
+        </div>
+        <div class="half">
+          <span class="kind">critique</span>
+          <h3>Is this one right?</h3>
+          <p>
+            Structural and color checks straight from an SVG or HTML chart,
+            plus retrieval-augmented judgment against a corpus of award
+            commentary, structural critique, and practitioner walkthroughs —
+            with prior-art citation.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="decides" class="section section-alt">
+    <div class="wrap">
+      <h2>What it decides</h2>
+      <p class="section-lede">
+        The computable half is deterministic, needs no LLM and no keys. What
+        vizier suggests is what vizier would pass — the color math is a
+        faithful port of a published validator (Machado-2009 CVD transforms,
+        OKLCH lightness/chroma, WCAG contrast).
+      </p>
+
+      <div class="row-list">
+        <div class="row">
+          <h3>Chart-form recommendation</h3>
+          <p>
+            Describe the comparison and the data shape; get the form that
+            matches, with the honest alternatives and the anti-patterns.
+            Backed by 43 patterns across the nine <em>FT Visual Vocabulary</em>
+            families.
+          </p>
+        </div>
+        <div class="row">
+          <h3>Colorblind-safe color</h3>
+          <p>
+            Categorical palettes and one-hue ordinal ramps generated <em>and</em>
+            validated: CVD separation under deuteranopia / protanopia /
+            tritanopia, an OKLCH lightness band and chroma floor, and contrast
+            against the surface. Legible label ink for any fill.
+          </p>
+        </div>
+        <div class="row">
+          <h3>Structural checks from the artifact</h3>
+          <p>
+            Point <code>vizier analyze</code> at a chart's SVG or HTML and get
+            the palette pulled out and checked, plus structural issues — no
+            re-typing the colors, no guessing the encoding.
+          </p>
+        </div>
+        <div class="row">
+          <h3>Corpus-backed critique</h3>
+          <p>
+            <code>vizier critique &lt;image&gt;</code> retrieves the relevant
+            pattern checklist and critical writing, then an LLM synthesizes a
+            structured review — the language of critique, grounded in prior art
+            rather than vibes.
+          </p>
+        </div>
+        <div class="row">
+          <h3>MCP-native</h3>
+          <p>
+            <code>vizier mcp</code> serves every decision above — plus the
+            corpus query — as an MCP stdio server. Your Claude Code / Cursor
+            session, or a charting tool, asks vizier for the right call instead
+            of re-deriving it.
+          </p>
+        </div>
+        <div class="row">
+          <h3>A core with no keys and no heavy deps</h3>
+          <p>
+            <code>validate</code>, <code>suggest</code>, <code>recommend</code>,
+            <code>analyze</code>, <code>ink</code>, and the pattern query all
+            work from <code>pip install vizier</code> alone. Retrieval and LLM
+            critique are opt-in extras.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" class="section">
+    <div class="wrap">
+      <h2>Install</h2>
+
+<pre class="code"><span class="prompt">$</span> pip install vizier                 <span class="c"># computable toolkit + pattern query + MCP server</span>
+<span class="prompt">$</span> pip install <span class="str">"vizier[search]"</span>       <span class="c"># + semantic retrieval (find_similar)</span>
+<span class="prompt">$</span> pip install <span class="str">"vizier[critique]"</span>     <span class="c"># + LLM critique/eval (routes through somm)</span>
+<span class="prompt">$</span> pip install <span class="str">"vizier[ingest]"</span>       <span class="c"># + rebuild the corpus from source</span></pre>
+
+      <p class="section-lede">
+        Python 3.11+. The core has no proprietary and no heavyweight
+        dependencies. Register the MCP server with one line:
+      </p>
+
+<pre class="code"><span class="prompt">$</span> claude mcp add vizier -- vizier mcp</pre>
+
+      <h3 class="sub">Try the computable toolkit — no keys</h3>
+
+<pre class="code"><span class="prompt">$</span> vizier suggest-palette 6                 <span class="c"># a CVD-safe categorical palette, validated</span>
+<span class="prompt">$</span> vizier suggest-ramp 5 --hue navy         <span class="c"># a one-hue ordinal ramp, validated</span>
+<span class="prompt">$</span> vizier ink <span class="str">"#0072b2"</span>                     <span class="c"># the legible text color for a fill</span>
+<span class="prompt">$</span> vizier analyze chart.svg                 <span class="c"># palette + structural checks from an SVG</span></pre>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="wrap">
+      <h2>The chart-forms guide</h2>
+      <div class="callout">
+        <h3>43 patterns, nine families, live demos</h3>
+        <p>
+          A self-contained reader: for every chart form, when it earns its
+          place, when to reach for something else, the common mistakes, and a
+          reading checklist — each with a live d3 demo you can drive. Generated
+          from the same pattern data vizier answers <code>recommend-form</code>
+          with.
+        </p>
+        <a class="btn" href="reader/">Open the guide →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>Critique &amp; evaluation</h2>
+      <p class="section-lede">
+        The critique path (<code>vizier critique</code>) and the
+        <code>vizier eval</code> harness use an LLM, routed through
+        <a href="https://github.com/lavallee/somm" rel="noopener">somm</a> — a
+        self-hosted gateway on PyPI. Provide a key in <code>.env</code>, or swap
+        in any client by adapting one small module. The color-CVD case under
+        <code>evals/</code> measures the lift the computable findings give a
+        critique: alignment rose from 2 to 5 on the focused A/B.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="wrap">
+      <h2>vizier &amp; weaver</h2>
+      <p class="section-lede">
+        vizier is the decision + critique companion to
+        <a href="https://github.com/lavallee/weaver" rel="noopener">weaver</a>,
+        which renders the graphics. weaver draws the pixels; vizier decides
+        which form and which colors, and judges the result. The same thresholds
+        serve both directions.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>Status</h2>
+      <p class="section-lede">
+        v0.1.0 · MIT licensed. What the corpus draws on and the philosophy
+        behind distilling broad expert taste into a determination are in
+        <a href="https://github.com/lavallee/vizier/blob/main/INFLUENCES.md">INFLUENCES.md</a>;
+        the house posture on charts is in
+        <a href="https://github.com/lavallee/vizier/blob/main/PRINCIPLES.md">PRINCIPLES.md</a>.
+      </p>
+      <p><a class="btn" href="https://github.com/lavallee/vizier" rel="noopener">Star on GitHub →</a></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>
+      vizier · <a href="https://github.com/lavallee/vizier" rel="noopener">source</a> ·
+      <a href="https://github.com/lavallee/vizier/blob/main/LICENSE">MIT license</a> ·
+      <a href="https://github.com/lavallee/vizier/blob/main/CHANGELOG.md">changelog</a> ·
+      <a href="https://github.com/lavallee/vizier/blob/main/INFLUENCES.md">influences</a> ·
+      <a href="reader/">chart-forms guide</a>
+    </p>
+    <p class="tiny">Generation and critique, from one set of thresholds.</p>
+  </div>
+</footer>
+
+</body>
+</html>

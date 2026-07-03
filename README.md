@@ -1,22 +1,28 @@
 # vizier
 
-**Data-visualization expertise — generation *and* critique.** vizier answers the parts
-of a chart that are actually decidable: *which form, which colors, does the palette
-pass colorblind-safety and contrast, is the label ink not a series hue* — and, with a
-corpus, *what did a finished chart get wrong*.
+**Building journalistic data visualizations — generating *and* critiquing.** vizier helps
+make the graphics that carry a data story: it recommends the right chart *form* and
+encoding, and — with a corpus of critical writing — judges what a finished chart got
+wrong. It answers the parts of a chart that are actually *decidable*, and refuses the
+ones that aren't honest.
 
-Two halves, kept distinct on purpose:
+Generation and critique live side by side on purpose — they share the same DNA. The
+thresholds that let vizier *suggest* a form or palette are the thresholds it *critiques*
+against, so what it proposes is what it would pass. Kept distinct, the two halves can even
+be pointed at each other: a generator proposes, the critic pushes back.
 
-- **Computable** (deterministic, no LLM, no keys) — colorblind-safe palette
-  generation + validation, ordinal ramps, legible ink, chart-form recommendation,
-  and structural checks. What vizier *suggests* is what vizier would *pass*. The color
-  math is a faithful port of the `dataviz` method's validator (same thresholds,
-  same Machado-2009 colorblind transforms).
+- **Computable** (deterministic, no LLM, no keys) — chart-form recommendation and
+  structural checks, plus colorblind-safe palette generation + validation, ordinal ramps,
+  and legible ink. What vizier *suggests* is what vizier would *pass*. The color math is a
+  faithful port of the `dataviz` method's validator (same thresholds, same Machado-2009
+  colorblind transforms).
 - **Corpus-backed critique** (optional, LLM) — retrieval-augmented judgment of an
   existing chart against a library of critique writing, with prior-art citation.
 
-It's built to be **called by an agent or a generator** (like a charting tool) over
-MCP, so the tool asks vizier for the right decision instead of re-deriving it.
+It's built to be **called by an agent or a generator** (like a charting tool) over MCP, so
+the tool asks vizier for the right decision instead of re-deriving it. It's the decision +
+critique companion to [`weaver`](https://github.com/lavallee/weaver), which renders the
+graphics.
 
 ## Install
 
@@ -74,10 +80,20 @@ vizier patterns list
 vizier recommend-form --family Flow
 ```
 
-`reader/` is a self-contained static guide (open `reader/index.html`) that renders
-the whole library with live d3 demos, generated from the pattern data
-(`vizier patterns export`). It was extracted from the companion generator
-[`weaver`](https://github.com/lavallee/weaver) and is distributed here.
+`docs/reader/` is a self-contained static guide (open `docs/reader/index.html`, or the
+published site — see below) that renders the whole library with live d3 demos, generated
+from the pattern data (`vizier patterns export -o docs/reader/data.json`). It vendors its
+own d3 and design tokens — no build step, no external dependencies.
+
+## Website
+
+The landing page and the chart-forms guide are served from GitHub Pages out of `docs/`
+(`docs/index.html` + `docs/reader/`, with `.nojekyll` so the static files serve as-is).
+Regenerate the guide's data whenever patterns change:
+
+```bash
+vizier patterns export -o docs/reader/data.json
+```
 
 ## Corpus (rebuild your own)
 
@@ -88,12 +104,14 @@ The third-party sources are **not redistributed** (they're copyrighted); rebuild
 locally:
 
 ```bash
-vizier ingest all        # fetch + parse into corpus/<source>/  (see SOURCES.md)
+vizier ingest all        # fetch + parse into corpus/<source>/
 vizier db build --embed  # index for search + retrieval
 ```
 
+What the corpus draws on and why is described in [INFLUENCES.md](INFLUENCES.md); the
+per-source ingest notes are in [docs/process-notes-sources.md](docs/process-notes-sources.md).
 Fetching is pluggable (`src/vizier/ingest/_common.py`): the bundled default is httpx;
-install a richer fetcher or set your own. See [docs/process-notes-sources.md](docs/process-notes-sources.md).
+point `$VIZIER_FETCHER` at a richer fetcher, or set your own `FETCHER`.
 
 ## Critique + evaluation (optional)
 
@@ -113,7 +131,12 @@ colors, and judges the result. The same thresholds serve both directions — see
 
 ```bash
 uv sync
-uv run python tests/test_color.py      # + test_generate.py, test_forms_structure.py
+uv run pytest -q            # 17 tests (also runnable per-file: python tests/test_color.py)
+uv run ruff check src/ tests/
 ```
 
-MIT licensed. Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+Both run in CI on every PR and push (`.github/workflows/ci.yml`, Python 3.11–3.13).
+
+MIT licensed. Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Release
+process and versioning: [RELEASING.md](RELEASING.md); notable changes:
+[CHANGELOG.md](CHANGELOG.md).

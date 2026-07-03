@@ -5,12 +5,12 @@ build-backend = "hatchling.build"
 [project]
 name = "vizier"
 version = "0.1.0"
-description = "Data-visualization expertise — computable form/color decisions plus corpus-backed critique"
+description = "Generate and critique journalistic data visualizations — chart-form choice, encoding, and a corpus-backed critic"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Marc Lavallee" }]
-keywords = ["dataviz", "data-visualization", "colorblind", "accessibility", "critique", "mcp"]
+keywords = ["dataviz", "data-visualization", "journalism", "charts", "colorblind", "accessibility", "critique", "mcp"]
 
 # Core — the turn-key computable toolkit + pattern query (BM25) + MCP server.
 # No proprietary and no heavyweight deps; `vizier validate/suggest/recommend/
@@ -29,11 +29,11 @@ dependencies = [
 # Semantic retrieval — `find_similar`, `vizier db embed`. Pulls onnxruntime; the rest
 # of vizier (BM25 search, recommend_form, the computable toolkit) works without it.
 search = ["fastembed>=0.4"]
-# LLM critique + evaluation. `somm` is vizier's LLM gateway (assumed published
-# alongside vizier); swap in any client by adapting src/vizier/llm.py.
-critique = ["somm", "somm-core", "fastembed>=0.4"]
+# LLM critique + evaluation. `somm` is vizier's LLM gateway (on PyPI); swap in
+# any client by adapting src/vizier/llm.py.
+critique = ["somm>=0.7", "somm-core>=0.7", "fastembed>=0.4"]
 # Rebuild the corpus from source. Fetching is pluggable (src/vizier/ingest/_common.py):
-# the bundled default is httpx; install `fetch` for a richer strategy chain.
+# the bundled default is httpx; point $VIZIER_FETCHER at a richer fetcher if you have one.
 ingest = ["beautifulsoup4>=4.12", "lxml>=5.0"]
 # Headless-browser fetch for sites that block plain HTTP (used by some ingesters).
 browser = ["patchright"]
@@ -50,6 +50,18 @@ packages = ["src/vizier"]
 
 [tool.ruff]
 target-version = "py311"
+
+[tool.ruff.lint]
+# E741: `l` is the OKLab/OKLCH lightness channel in analyze/color.py — the
+# domain-correct name for that math. Renaming it would make the port less
+# faithful to the reference, so allow the single-letter name project-wide.
+ignore = ["E741"]
+
+[tool.pytest.ini_options]
+# src layout: put the package on the path so tests import `vizier` whether or
+# not it's installed. testpaths keeps collection to the suite.
+pythonpath = ["src"]
+testpaths = ["tests"]
 
 [dependency-groups]
 dev = ["pytest>=8.0", "ruff>=0.6"]

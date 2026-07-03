@@ -24,14 +24,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 import httpx
 from bs4 import BeautifulSoup, Tag
 
 from ..schema import Item
 from ..storage import corpus_root
-from ._common import fetch_html, slugify, soup
+from ._common import fetch_html, plugin_fetch, slugify, soup
 from ._fetch_html import (
     fetch_images,
     html_to_markdown,
@@ -65,10 +65,11 @@ class BlogConfig:
 
 
 def _fetch_sitemap_xml(url: str) -> str | None:
-    """Fetch a sitemap XML, falling back to fetch if direct httpx 403s.
+    """Fetch a sitemap XML, falling back to the richer fetcher if httpx 403s.
 
-    Cloudflare-fronted sites (Nightingale, some WP hosts) block naive UAs.
-    fetch's `direct` strategy rotates UAs that those guards let through.
+    Cloudflare-fronted sites (some WP hosts) block naive UAs. When a heavier
+    fetcher is wired in via `$VIZIER_FETCHER` (see `_common.plugin_fetch`), its
+    UA-rotating strategies get through where a bare httpx GET does not.
     """
     try:
         r = httpx.get(url, follow_redirects=True, timeout=30,
@@ -78,14 +79,9 @@ def _fetch_sitemap_xml(url: str) -> str | None:
     except Exception:
         pass
     try:
-        import fetch  # optional proprietary fetcher; OSS falls back to httpx above
-    except ImportError:
-        return None
-    try:
-        res = fetch.fetch(url, strategies=fetch.BROWSER_STRATEGIES,
-                              min_words=0, timeout=30.0)
-        if res.status == "success" and res.html:
-            return res.html
+        html = plugin_fetch(url)
+        if html and html.lstrip().startswith("<"):
+            return html
     except Exception as e:
         print(f"  sitemap fallback failed: {url}: {e}", flush=True)
     return None
@@ -95,7 +91,7 @@ def fetch_sitemap_urls(sitemap_urls: list[str]) -> list[str]:
     """Return every <loc> found across one or more sitemap URLs or sitemap indexes.
 
     Handles nested sitemap indexes (sitemap → sitemap → pages) and falls
-    back to fetch when a direct httpx fetch is blocked.
+    back to the optional richer fetcher when a direct httpx fetch is blocked.
     """
     all_urls: list[str] = []
     seen: set[str] = set()

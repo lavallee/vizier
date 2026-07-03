@@ -41,7 +41,7 @@ from pydantic import BaseModel, Field
 
 from .. import manifest as manifest_mod
 from ..ingest._common import slugify
-from ..storage import corpus_root, iter_items
+from ..storage import iter_items
 
 load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
