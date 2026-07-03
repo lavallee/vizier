@@ -14,6 +14,9 @@ dist/
 build/
 .env
 .DS_Store
+# Private working notes / handoffs (may reference internal tooling — never publish)
+FOLLOWUPS.md
+_*.md
 # fetch cache (large, regenerable). Leading-dot covers both file and dir forms.
 .fetch-cache
 .fetch-cache/
