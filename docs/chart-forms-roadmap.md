@@ -42,7 +42,7 @@ future session can pick up cold.*
 - **36 `chart_pattern` corpus items** across all 9 FT Visual
   Vocabulary families. Each pattern carries structured fields
   (see schema below) and a prose body.
-- **Weaver reader** (`../weaver/projects/chart-forms-guide/`)
+- **Weaver reader** (`reader/`)
   renders the 36 patterns as a hash-routed guide:
   - Root TOC: "Decide by question" ladder + full family grid
   - Per-family pages at `#/family/<slug>` (primary-first pattern order)
@@ -172,7 +172,7 @@ to full objects.
 ### Tier 1 · polish + correctness
 - [x] **Cross-link to sankey-when-and-how** — shipped via a new `related_projects` field on the sankey pattern (threaded through `query.get_pattern` + rendered as "Go deeper" card in the reader).
 - [x] **Decoder rings for parallel-sets, violin, cartogram** — all three shipped. Violin's decoder contrasts unimodal vs bimodal ("a boxplot would hide this"); parallel-sets makes the "axis order is editorial" rule visual; cartogram states "shape is NOT geography".
-- [x] **Glossary** — 17-term glossary at `weaver/projects/chart-forms-guide/glossary.js`. Route `#/glossary` + deep-link `#/glossary/<slug>`. First-occurrence-per-pattern inline linkify on body/checklist/mistakes (~27 links on the distribution family page). Flash-highlight on deep-link arrival.
+- [x] **Glossary** — 17-term glossary at `reader/glossary.js`. Route `#/glossary` + deep-link `#/glossary/<slug>`. First-occurrence-per-pattern inline linkify on body/checklist/mistakes (~27 links on the distribution family page). Flash-highlight on deep-link arrival.
 - [x] **Review harness as regression check** — `npm run check:chart-forms` runs playwright headlessly against `#/review`, counts clean/flagged, and exits non-zero on any issue. Current: 36 demos, 36 clean, 0 flagged.
 
 ### Customer-feedback asks (integrated this session)
@@ -211,7 +211,7 @@ uv run vizier patterns list            # 36 patterns
 
 # rebuild
 uv run vizier db build                 # walks corpus/, upserts, re-embeds changed rows
-uv run vizier patterns export -o ../weaver/projects/chart-forms-guide/data.json
+uv run vizier patterns export -o reader/data.json
 
 # serve
 uv run vizier mcp                      # stdio MCP server
@@ -224,7 +224,7 @@ uv run vizier eval full
 ```
 cd /Users/lavallee/Projects/weaver
 npm run dev                          # vite @ localhost:5173-5175
-# visit http://localhost:<port>/projects/chart-forms-guide/
+# visit http://localhost:<port>/reader/
 ```
 
 **MCP config (Claude Desktop / Cursor / claude.ai):**
@@ -256,10 +256,10 @@ npm run dev                          # vite @ localhost:5173-5175
 | `vizier/scripts/suggest_pattern_examples.py` | Replayable find_similar-based curation |
 | `vizier/docs/chart-forms-plan.md` | Schema + taxonomy plan doc |
 | `vizier/docs/process-notes-sources.md` | Source-tiering reference |
-| `weaver/projects/chart-forms-guide/` | The reader |
-| `weaver/projects/chart-forms-guide/data.json` | Exported snapshot from vizier |
-| `weaver/projects/chart-forms-guide/live-examples.js` | 36 demo renderers + comparison triads |
-| `weaver/projects/chart-forms-guide/main.js` | Hash router + pattern-section renderer |
+| `reader/` | The reader |
+| `reader/data.json` | Exported snapshot from vizier |
+| `reader/live-examples.js` | 36 demo renderers + comparison triads |
+| `reader/main.js` | Hash router + pattern-section renderer |
 | `weaver/projects/sankey-when-and-how/` | Earlier sibling project — specific-form essay |
 
 ---
@@ -306,7 +306,7 @@ Family slugs: `flow`, `part-to-whole`, `ranking`, `change-over-time`,
 Tier 1 + the customer-feedback asks are all in. The next natural
 pickup set is Tier 2 + the `vizier critique` extensions:
 
-1. **Pre-flight**: `uv run vizier db build` (fast now) + `uv run vizier patterns export -o ../weaver/projects/chart-forms-guide/data.json` + `cd ../weaver && BASE=http://localhost:517x npm run check:chart-forms`. Three commands, ~10 seconds.
+1. **Pre-flight**: `uv run vizier db build` (fast now) + `uv run vizier patterns export -o reader/data.json` + `cd ../weaver && BASE=http://localhost:517x npm run check:chart-forms`. Three commands, ~10 seconds.
 2. **Extend `vizier critique`**: SVG input (rasterize via `cairosvg` or headless chromium), URL input (fetch fetch + page screenshot). Also useful: a `--pattern auto` mode that surfaces the classifier's top-3 candidates rather than forcing one choice.
 3. **Worked examples pulled from corpus** (Tier 2) — for the 5-10 highest-signal canonical references, cache one image from `corpus/<source>/_images/<item>/` and display inline as "from the corpus".
 4. **Per-family decision diagrams** (Tier 2) — generalize the sankey-when-and-how tree pattern.
