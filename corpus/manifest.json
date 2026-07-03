@@ -1,0 +1,187 @@
+{
+  "generated_at": "2026-04-22T23:32:11.334601+00:00",
+  "total_items": 6657,
+  "total_body_bytes": 28938758,
+  "corpus_hash": "86495effff13ce01",
+  "sources": {
+    ".embeddings": {
+      "items": 0,
+      "body_bytes": 0,
+      "tiers": {},
+      "types": {},
+      "year_min": null,
+      "year_max": null,
+      "hash": "e3b0c44298fc1c14"
+    },
+    "cairo-blog": {
+      "items": 726,
+      "body_bytes": 1073348,
+      "tiers": {},
+      "types": {
+        "process_note": 726
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "0bd96444bae47e1d"
+    },
+    "eagereyes": {
+      "items": 568,
+      "body_bytes": 2307704,
+      "tiers": {},
+      "types": {
+        "process_note": 568
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "bf33c19858e41d67"
+    },
+    "ft-vocab": {
+      "items": 1,
+      "body_bytes": 11234,
+      "tiers": {},
+      "types": {
+        "rubric": 1
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "b260cd9ec1581bc3"
+    },
+    "junkcharts": {
+      "items": 647,
+      "body_bytes": 1946385,
+      "tiers": {},
+      "types": {
+        "critique": 647
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "1100254b4fd8928e"
+    },
+    "kantar": {
+      "items": 1056,
+      "body_bytes": 197438,
+      "tiers": {
+        "gold": 113,
+        "silver": 112,
+        "bronze": 114,
+        "shortlist": 667,
+        "winner": 46,
+        "most-beautiful": 1,
+        "most-impactful-community-leader": 1,
+        "rising-star": 1,
+        "test-of-time": 1
+      },
+      "types": {
+        "award_entry": 1056
+      },
+      "year_min": 2012,
+      "year_max": 2024,
+      "hash": "36aabca724153b69"
+    },
+    "nightingale": {
+      "items": 740,
+      "body_bytes": 7830458,
+      "tiers": {},
+      "types": {
+        "process_note": 740
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "5945549d72057a21"
+    },
+    "observable": {
+      "items": 162,
+      "body_bytes": 1558100,
+      "tiers": {},
+      "types": {
+        "process_note": 162
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "e038c02a2c69967e"
+    },
+    "pudding": {
+      "items": 15,
+      "body_bytes": 139605,
+      "tiers": {},
+      "types": {
+        "process_note": 15
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "da5feae34b1ec61c"
+    },
+    "rubrics": {
+      "items": 1,
+      "body_bytes": 703,
+      "tiers": {},
+      "types": {
+        "rubric": 1
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "245ff66e13e6961a"
+    },
+    "sigma": {
+      "items": 376,
+      "body_bytes": 587524,
+      "tiers": {
+        "shortlist": 314,
+        "winner": 56,
+        "honorable-mention": 2,
+        "citation": 4
+      },
+      "types": {
+        "award_entry": 376
+      },
+      "year_min": 2020,
+      "year_max": 2025,
+      "hash": "4467508e6caff322"
+    },
+    "snd": {
+      "items": 159,
+      "body_bytes": 732947,
+      "tiers": {},
+      "types": {
+        "process_note": 159
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "7f05a74f642a90f4"
+    },
+    "source-opennews": {
+      "items": 1125,
+      "body_bytes": 8734295,
+      "tiers": {},
+      "types": {
+        "process_note": 1125
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "db64c71aeab02336"
+    },
+    "visualising-data": {
+      "items": 1040,
+      "body_bytes": 3770215,
+      "tiers": {},
+      "types": {
+        "process_note": 1040
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "6a3ace28d0eead2a"
+    },
+    "weaver": {
+      "items": 41,
+      "body_bytes": 48802,
+      "tiers": {},
+      "types": {
+        "principle": 38,
+        "process_note": 3
+      },
+      "year_min": null,
+      "year_max": null,
+      "hash": "81cbd05ffd60334b"
+    }
+  }
+}

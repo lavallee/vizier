@@ -1,0 +1,49 @@
+# Claude Code / playwright-mcp per-session local state
+.claude/
+.playwright-mcp/
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+.env
+.DS_Store
+# fetch cache (large, regenerable). Leading-dot covers both file and dir forms.
+.fetch-cache
+.fetch-cache/
+# somm telemetry (machine-local call log + decisions)
+.somm/
+# Raw HTML snapshots and fetched images (large, regenerable from ingest)
+corpus/*/_raw/
+corpus/*/_images/
+# SQLite index + embeddings cache (regenerable via `vizier db build`)
+corpus/.vizier.db
+corpus/.vizier.db-*
+corpus/.embeddings/
+# Third-party corpus — rebuilt by `vizier ingest`, NOT redistributed. These are
+# scrapes of copyrighted posts / award commentary and must never be committed.
+# Only vizier's OWN authored corpus ships: chart-forms/, rubrics/, ft-vocab/, weaver/.
+corpus/kantar/
+corpus/sigma/
+corpus/junkcharts/
+corpus/cairo-blog/
+corpus/nightingale/
+corpus/eagereyes/
+corpus/pudding/
+corpus/observable/
+corpus/snd/
+corpus/visualising-data/
+corpus/source-opennews/
+# Raw award CSVs and other fetched source data (ingest inputs, not redistributed)
+data/
+# Eval run outputs + vision-caption cache + test images (regenerable / project-specific)
+evals/runs/
+evals/judge/
+evals/captions/
+evals/test-images/
