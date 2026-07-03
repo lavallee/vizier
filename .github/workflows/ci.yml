@@ -25,5 +25,9 @@ jobs:
         run: uv sync
       - name: Lint (ruff check)
         run: uv run ruff check src/ tests/ --output-format=github
+      # Build the SQLite pattern index (BM25/FTS only — no --embed, so no
+      # fastembed/onnx). The recommend-form tests query it.
+      - name: Build corpus index
+        run: uv run vizier db build
       - name: Run tests
         run: uv run pytest -q
