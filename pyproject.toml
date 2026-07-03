@@ -7,7 +7,7 @@ name = "vizier"
 version = "0.1.0"
 description = "Generate and critique journalistic data visualizations — chart-form choice, encoding, and a corpus-backed critic"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [{ name = "Marc Lavallee" }]
 keywords = ["dataviz", "data-visualization", "journalism", "charts", "colorblind", "accessibility", "critique", "mcp"]
@@ -49,7 +49,7 @@ vizier = "vizier.cli:main"
 packages = ["src/vizier"]
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 # E741: `l` is the OKLab/OKLCH lightness channel in analyze/color.py — the

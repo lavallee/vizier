@@ -135,7 +135,7 @@ uv run pytest -q            # 17 tests (also runnable per-file: python tests/tes
 uv run ruff check src/ tests/
 ```
 
-Both run in CI on every PR and push (`.github/workflows/ci.yml`, Python 3.11–3.13).
+Both run in CI on every PR and push (`.github/workflows/ci.yml`, Python 3.12–3.13).
 
 MIT licensed. Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Release
 process and versioning: [RELEASING.md](RELEASING.md); notable changes:

@@ -32,7 +32,7 @@ is cut.
 - `INFLUENCES.md` describing the families of source vizier emulates and the
   philosophy of distilling broad expert taste into a determination.
 - Minimal CI (`.github/workflows/ci.yml`): `ruff` + `pytest` on Python
-  3.11–3.13; `RELEASING.md` release checklist.
+  3.12–3.13; `RELEASING.md` release checklist.
 
 ### Changed
 - Framing now leads with **building journalistic data visualizations —
