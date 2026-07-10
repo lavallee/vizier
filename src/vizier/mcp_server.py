@@ -29,7 +29,8 @@ mcp = FastMCP(
         "vizier is data-visualization expertise — generation and critique. "
         "COMPUTABLE color/form decisions (deterministic, no LLM): when building a "
         "chart, `suggest_palette` for CVD-safe series colors, `suggest_ramp` for a "
-        "one-hue ordinal ramp, `ink_on` for a legible label color; to check an "
+        "one-hue ordinal ramp, `ink_on` for a legible label color, and "
+        "`implementation_guide` for form + journalism checks; to check an "
         "existing chart, `validate_palette`, `analyze_artifact` (SVG/HTML), or "
         "`check_contrast`. What these suggest is what they would pass — call them "
         "instead of rolling your own color math. "
@@ -347,6 +348,39 @@ def recommend_form(
     from .analyze import forms as F
     try:
         return F.recommend_form(job, family=family, n_series=n_series, k=k)
+    except ValueError as e:
+        return {"error": str(e)}
+
+
+@mcp.tool(
+    description=(
+        "Guide a chart implementation before building it. Combines deterministic "
+        "form recommendations with a journalism checklist (reader decision, "
+        "headline claim, fair comparison, denominator, counter-reading, accessibility) "
+        "and corpus prior-art signals. Uses configured extension DBs, so private/local "
+        "editorial corpora can enrich guidance without hard-coding them."
+    ),
+)
+def implementation_guide(
+    job: Annotated[str, Field(description="Free-text chart/data job")],
+    context: Annotated[str | None, Field(description="Headline, caption, source, or implementation context")] = None,
+    family: Annotated[str | None, Field(description="Optional FT family override")] = None,
+    n_series: Annotated[int | None, Field(description="Series/category count for form guards")] = None,
+    k_forms: Annotated[int, Field(ge=1, le=10, description="How many form candidates to return")] = 4,
+    k_prior: Annotated[int, Field(ge=0, le=20, description="How many corpus signals to return")] = 5,
+    semantic: Annotated[bool, Field(description="Also use embedding retrieval if the search extra is installed")] = False,
+) -> dict[str, Any]:
+    from .analyze import guidance as G
+    try:
+        return G.implementation_guide(
+            job,
+            context=context,
+            family=family,
+            n_series=n_series,
+            k_forms=k_forms,
+            k_prior=k_prior,
+            semantic=semantic,
+        )
     except ValueError as e:
         return {"error": str(e)}
 

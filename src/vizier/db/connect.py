@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
+from urllib.parse import quote
 
 from ..storage import corpus_root
 from .schema import SCHEMA_SQL, SCHEMA_VERSION
@@ -20,6 +21,16 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
     _ensure_schema(conn)
+    return conn
+
+
+def connect_readonly(path: Path) -> sqlite3.Connection:
+    """Open an existing corpus DB without applying schema or changing pragmas."""
+    db_path = path.expanduser().resolve()
+    uri = f"file:{quote(str(db_path), safe='/')}?mode=ro"
+    conn = sqlite3.connect(uri, uri=True)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 

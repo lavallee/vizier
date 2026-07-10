@@ -13,14 +13,16 @@ Filters accepted by search/find_similar: `source`, `type`, `tier`,
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Sequence
 
 import numpy as np
 
 from .build import EMBED_DIMS, EMBED_MODEL
-from .connect import connect
+from .connect import DB_PATH, connect, connect_readonly
 
 
 @dataclass
@@ -63,6 +65,84 @@ class Hit:
             body = self.body or ""
             out["body"] = body[:body_chars] + ("…" if len(body) > body_chars else "")
         return out
+
+
+@dataclass
+class _ConnRef:
+    conn: sqlite3.Connection
+    label: str
+    close: bool
+    path: Path | None = None
+
+
+_EXTENSION_DB_ENV_VARS = ("VIZIER_EXTENSION_DBS", "VIZIER_EXTRA_DB_PATHS")
+
+
+def extension_db_paths() -> list[Path]:
+    """Return opt-in read-only extension DBs from pathsep-separated env vars."""
+    paths: list[Path] = []
+    seen: set[Path] = {DB_PATH.expanduser().resolve()}
+    for env_name in _EXTENSION_DB_ENV_VARS:
+        raw = os.getenv(env_name, "")
+        for part in raw.split(os.pathsep):
+            part = part.strip()
+            if not part:
+                continue
+            path = Path(part).expanduser().resolve()
+            if path in seen:
+                continue
+            seen.add(path)
+            paths.append(path)
+    return paths
+
+
+def _query_conns(
+    conn: sqlite3.Connection | None,
+    *,
+    include_extensions: bool = True,
+) -> list[_ConnRef]:
+    if conn is not None:
+        return [_ConnRef(conn=conn, label="primary", close=False)]
+
+    refs = [_ConnRef(conn=connect(), label="primary", close=True, path=DB_PATH)]
+    if not include_extensions:
+        return refs
+
+    for path in extension_db_paths():
+        try:
+            refs.append(
+                _ConnRef(
+                    conn=connect_readonly(path),
+                    label="extension-db",
+                    close=True,
+                    path=path,
+                )
+            )
+        except sqlite3.Error:
+            # Query calls should stay usable if an optional extension DB is stale
+            # or unreadable. `stats()` reports those errors for diagnosis.
+            continue
+    return refs
+
+
+def _close_query_conns(refs: Sequence[_ConnRef]) -> None:
+    for ref in refs:
+        if ref.close:
+            ref.conn.close()
+
+
+def _why(base: str, label: str) -> str:
+    return base if label == "primary" else f"{base}:{label}"
+
+
+def _dedupe_hits(hits: Sequence[Hit]) -> list[Hit]:
+    """Collapse duplicate source/item keys from primary + extension DBs."""
+    best: dict[str, Hit] = {}
+    for hit in hits:
+        prev = best.get(hit.key)
+        if prev is None or hit.score > prev.score:
+            best[hit.key] = hit
+    return list(best.values())
 
 
 def _row_to_hit(row: sqlite3.Row, score: float, why: str) -> Hit:
@@ -152,8 +232,9 @@ def _normalize_fts_query(q: str) -> str:
         verbatim)
       - preserves FTS5 operator keywords (`OR`, `AND`, `NOT`, `NEAR`,
         `NEAR(...)`)
-      - for any other token: replace `-` and `'` with spaces (splitting
-        into multiple AND-combined tokens, matching tokenizer behavior)
+      - for any other token: replace common separators (`-`, `'`, `,`, `;`,
+        `/`) with spaces (splitting into multiple AND-combined tokens, matching
+        tokenizer behavior)
       - tokens still containing `:` or `.` get wrapped in quotes so
         they can't be parsed as column qualifiers or operators
       - drops empty tokens
@@ -193,14 +274,16 @@ def _normalize_fts_query(q: str) -> str:
         ):
             out.append(tok)
             continue
-        # Split on hyphens/apostrophes to match how the FTS tokenizer
-        # indexed the corresponding text.
-        for part in tok.replace("-", " ").replace("'", " ").split():
+        # Split on casual separators to match how the FTS tokenizer indexed the
+        # corresponding text.
+        clean = tok.replace("-", " ").replace("'", " ").replace(",", " ")
+        clean = clean.replace(";", " ").replace("/", " ")
+        for part in clean.split():
             if not part:
                 continue
             # Still-dangerous punctuation (`:` column qualifier, `.` operator
             # prefix) → quote the part so FTS5 treats it as literal phrase.
-            if any(ch in part for ch in ":.") :
+            if any(ch in part for ch in ":."):
                 out.append(f'"{part.replace(chr(34), chr(34) * 2)}"')
             else:
                 out.append(part)
@@ -212,6 +295,7 @@ def search(
     *,
     k: int = 10,
     conn: sqlite3.Connection | None = None,
+    include_extensions: bool = True,
     **filters: Any,
 ) -> list[Hit]:
     """BM25-ranked FTS5 search over title + body.
@@ -222,8 +306,7 @@ def search(
     `NEAR(foo bar, 5)`. Title matches are boosted 2× via `bm25`.
     """
     q_normalized = _normalize_fts_query(q)
-    own = conn is None
-    conn = conn or connect()
+    refs = _query_conns(conn, include_extensions=include_extensions)
     try:
         sql = (
             "SELECT i.*, bm25(items_fts, 0.0, 2.0, 1.0) AS rank_score "
@@ -236,16 +319,19 @@ def search(
         params.extend(extra_params)
         sql += " ORDER BY rank_score LIMIT ?"
         params.append(k)
-        rows = conn.execute(sql, params).fetchall()
-        return [
-            # FTS5 BM25 returns negative values where lower is better; flip sign
-            # so "higher score = better" is consistent across search/find_similar.
-            _row_to_hit(r, score=-float(r["rank_score"]), why="fts5")
-            for r in rows
-        ]
+        hits: list[Hit] = []
+        for ref in refs:
+            rows = ref.conn.execute(sql, params).fetchall()
+            hits.extend(
+                # FTS5 BM25 returns negative values where lower is better; flip
+                # sign so "higher score = better" is consistent across search /
+                # find_similar.
+                _row_to_hit(r, score=-float(r["rank_score"]), why=_why("fts5", ref.label))
+                for r in rows
+            )
+        return sorted(_dedupe_hits(hits), key=lambda h: (-h.score, h.source, h.item_id))[:k]
     finally:
-        if own:
-            conn.close()
+        _close_query_conns(refs)
 
 
 def _embed_query(text: str) -> np.ndarray:
@@ -286,6 +372,7 @@ def find_similar(
     min_sim: float = 0.25,
     conn: sqlite3.Connection | None = None,
     model: str = EMBED_MODEL,
+    include_extensions: bool = True,
     **filters: Any,
 ) -> list[Hit]:
     """Embedding cosine-similarity retrieval.
@@ -294,31 +381,33 @@ def find_similar(
     items this is a single matmul and is fast enough to avoid introducing
     ANN infrastructure.
     """
-    own = conn is None
-    conn = conn or connect()
+    refs = _query_conns(conn, include_extensions=include_extensions)
     try:
-        rows, matrix = _load_matrix(conn, model, **filters)
-        if matrix.shape[0] == 0:
-            return []
-        q_vec = _embed_query(text)
-        sims = matrix @ q_vec
-        if k < sims.shape[0]:
-            idx = np.argpartition(-sims, k)[:k]
-            idx = idx[np.argsort(-sims[idx])]
-        else:
-            idx = np.argsort(-sims)
         out: list[Hit] = []
-        for i in idx:
-            s = float(sims[i])
-            if s < min_sim:
+        q_vec: np.ndarray | None = None
+        for ref in refs:
+            rows, matrix = _load_matrix(ref.conn, model, **filters)
+            if matrix.shape[0] == 0:
                 continue
-            out.append(_row_to_hit(rows[i], score=s, why=f"sim={s:.3f}"))
-            if len(out) >= k:
-                break
-        return out
+            if q_vec is None:
+                q_vec = _embed_query(text)
+            sims = matrix @ q_vec
+            limit = min(k, sims.shape[0])
+            if limit <= 0:
+                continue
+            if limit < sims.shape[0]:
+                idx = np.argpartition(-sims, limit - 1)[:limit]
+                idx = idx[np.argsort(-sims[idx])]
+            else:
+                idx = np.argsort(-sims)
+            for i in idx:
+                s = float(sims[i])
+                if s < min_sim:
+                    continue
+                out.append(_row_to_hit(rows[i], score=s, why=_why(f"sim={s:.3f}", ref.label)))
+        return sorted(_dedupe_hits(out), key=lambda h: (-h.score, h.source, h.item_id))[:k]
     finally:
-        if own:
-            conn.close()
+        _close_query_conns(refs)
 
 
 def lookup(
@@ -326,82 +415,108 @@ def lookup(
     item_id: str,
     *,
     conn: sqlite3.Connection | None = None,
+    include_extensions: bool = True,
 ) -> Hit | None:
-    own = conn is None
-    conn = conn or connect()
+    refs = _query_conns(conn, include_extensions=include_extensions)
     try:
-        r = conn.execute(
-            "SELECT * FROM items WHERE key = ?",
-            (f"{source}/{item_id}",),
-        ).fetchone()
-        return _row_to_hit(r, score=1.0, why="lookup") if r else None
+        for ref in refs:
+            r = ref.conn.execute(
+                "SELECT * FROM items WHERE key = ?",
+                (f"{source}/{item_id}",),
+            ).fetchone()
+            if r:
+                return _row_to_hit(r, score=1.0, why=_why("lookup", ref.label))
+        return None
     finally:
-        if own:
-            conn.close()
+        _close_query_conns(refs)
 
 
-def list_sources(*, conn: sqlite3.Connection | None = None) -> list[dict]:
+def _source_counts(refs: Sequence[_ConnRef]) -> list[dict]:
     """Source-level counts + type breakdown."""
-    own = conn is None
-    conn = conn or connect()
-    try:
-        sources = conn.execute(
+    merged: dict[str, dict] = {}
+    for ref in refs:
+        sources = ref.conn.execute(
             "SELECT source, COUNT(*) AS n FROM items GROUP BY source ORDER BY n DESC"
         ).fetchall()
-        out: list[dict] = []
         for s in sources:
             types = {
                 r["type"]: r["n"]
-                for r in conn.execute(
+                for r in ref.conn.execute(
                     "SELECT type, COUNT(*) AS n FROM items WHERE source = ? GROUP BY type",
                     (s["source"],),
                 ).fetchall()
             }
-            out.append({"source": s["source"], "count": s["n"], "types": types})
-        return out
+            entry = merged.setdefault(s["source"], {"source": s["source"], "count": 0, "types": {}})
+            entry["count"] += s["n"]
+            for item_type, count in types.items():
+                entry["types"][item_type] = entry["types"].get(item_type, 0) + count
+    return sorted(merged.values(), key=lambda x: (-x["count"], x["source"]))
+
+
+def list_sources(
+    *,
+    conn: sqlite3.Connection | None = None,
+    include_extensions: bool = True,
+) -> list[dict]:
+    """Source-level counts + type breakdown."""
+    refs = _query_conns(conn, include_extensions=include_extensions)
+    try:
+        return _source_counts(refs)
     finally:
-        if own:
-            conn.close()
+        _close_query_conns(refs)
 
 
 def list_principles(
     *,
     stage: str | None = None,
     conn: sqlite3.Connection | None = None,
+    include_extensions: bool = True,
 ) -> list[Hit]:
-    """Return weaver principles, optionally filtered by workflow stage."""
-    own = conn is None
-    conn = conn or connect()
+    """Return corpus principles, optionally filtered by workflow stage."""
+    refs = _query_conns(conn, include_extensions=include_extensions)
     try:
-        rows = conn.execute(
-            "SELECT * FROM items WHERE source = 'weaver' AND type = 'principle' ORDER BY title"
-        ).fetchall()
-        hits = [_row_to_hit(r, score=1.0, why="principle") for r in rows]
+        hits: list[Hit] = []
+        for ref in refs:
+            rows = ref.conn.execute(
+                "SELECT * FROM items WHERE type = 'principle' ORDER BY title"
+            ).fetchall()
+            hits.extend(
+                _row_to_hit(r, score=1.0, why=_why("principle", ref.label))
+                for r in rows
+            )
+        hits = _dedupe_hits(hits)
         if stage:
             s = stage.lower()
             hits = [
                 h for h in hits
                 if (h.details.get("stage") or "").lower() == s
             ]
-        return hits
+        return sorted(hits, key=lambda h: (h.title, h.source, h.item_id))
     finally:
-        if own:
-            conn.close()
+        _close_query_conns(refs)
 
 
-def list_rubrics(*, conn: sqlite3.Connection | None = None) -> list[Hit]:
+def list_rubrics(
+    *,
+    conn: sqlite3.Connection | None = None,
+    include_extensions: bool = True,
+) -> list[Hit]:
     """Return canonical rubric items (Cairo pillars, FT vocab, other rubrics)."""
-    own = conn is None
-    conn = conn or connect()
+    refs = _query_conns(conn, include_extensions=include_extensions)
     try:
-        rows = conn.execute(
-            "SELECT * FROM items WHERE type = 'rubric' OR source = 'rubrics' "
-            "OR source = 'ft-vocab' ORDER BY source, title"
-        ).fetchall()
-        return [_row_to_hit(r, score=1.0, why="rubric") for r in rows]
+        hits: list[Hit] = []
+        for ref in refs:
+            rows = ref.conn.execute(
+                "SELECT * FROM items WHERE type = 'rubric' OR source = 'rubrics' "
+                "OR source = 'ft-vocab' ORDER BY source, title"
+            ).fetchall()
+            hits.extend(
+                _row_to_hit(r, score=1.0, why=_why("rubric", ref.label))
+                for r in rows
+            )
+        return sorted(_dedupe_hits(hits), key=lambda h: (h.source, h.title, h.item_id))
     finally:
-        if own:
-            conn.close()
+        _close_query_conns(refs)
 
 
 def get_pattern(
@@ -417,90 +532,106 @@ def get_pattern(
     a caller sees one-hop neighbors without a second query. Set
     `transclude=False` for a bare-reference payload.
     """
-    own = conn is None
-    conn = conn or connect()
-    try:
-        hit = lookup("chart-forms", pattern_id, conn=conn)
-        if hit is None or hit.type != "chart_pattern":
-            return None
-        out: dict[str, Any] = hit.to_dict(body_chars=None)
-        # Expose the source-local id as `id` (not just `item_id`) — nicer
-        # for callers, matches how patterns are referenced in alternatives.
-        out["id"] = hit.item_id
-        # Hit.to_dict doesn't include details — grab directly from the Hit
-        details = hit.details or {}
-        for k in (
-            "purpose_families", "capsule", "when_to_use", "when_not_to_use",
-            "common_mistakes", "reading_checklist",
-        ):
-            out[k] = details.get(k)
-        out["alternatives"] = list(details.get("alternatives") or [])
-        out["canonical_examples"] = list(details.get("canonical_examples") or [])
-        out["antipattern_examples"] = list(details.get("antipattern_examples") or [])
-        out["related_principles"] = list(details.get("related_principles") or [])
-        out["related_projects"] = list(details.get("related_projects") or [])
+    include_lookup_extensions = conn is None
+    hit = lookup(
+        "chart-forms",
+        pattern_id,
+        conn=conn,
+        include_extensions=include_lookup_extensions,
+    )
+    if hit is None or hit.type != "chart_pattern":
+        return None
+    out: dict[str, Any] = hit.to_dict(body_chars=None)
+    # Expose the source-local id as `id` (not just `item_id`) — nicer
+    # for callers, matches how patterns are referenced in alternatives.
+    out["id"] = hit.item_id
+    # Hit.to_dict doesn't include details — grab directly from the Hit
+    details = hit.details or {}
+    for k in (
+        "purpose_families", "capsule", "when_to_use", "when_not_to_use",
+        "common_mistakes", "reading_checklist",
+    ):
+        out[k] = details.get(k)
+    out["alternatives"] = list(details.get("alternatives") or [])
+    out["canonical_examples"] = list(details.get("canonical_examples") or [])
+    out["antipattern_examples"] = list(details.get("antipattern_examples") or [])
+    out["related_principles"] = list(details.get("related_principles") or [])
+    out["related_projects"] = list(details.get("related_projects") or [])
 
-        if not transclude:
-            return out
-
-        # Resolve alternatives
-        resolved_alts: list[dict] = []
-        for alt in out["alternatives"]:
-            alt_id = alt.get("id") if isinstance(alt, dict) else alt
-            alt_when = alt.get("when") if isinstance(alt, dict) else None
-            alt_hit = lookup("chart-forms", alt_id, conn=conn)
-            if alt_hit is None:
-                resolved_alts.append({"id": alt_id, "when": alt_when, "_missing": True})
-                continue
-            alt_details = alt_hit.details or {}
-            resolved_alts.append({
-                "id": alt_id,
-                "title": alt_hit.title,
-                "when": alt_when,
-                "capsule": (alt_details.get("capsule") or "").strip(),
-                "purpose_families": alt_details.get("purpose_families") or [],
-            })
-        out["alternatives"] = resolved_alts
-
-        # Resolve canonical_examples (key = "source/item_id")
-        resolved_ex: list[dict] = []
-        for key in out["canonical_examples"]:
-            parts = str(key).split("/", 1)
-            if len(parts) != 2:
-                continue
-            h = lookup(parts[0], parts[1], conn=conn)
-            if h:
-                resolved_ex.append({
-                    "key": f"{h.source}/{h.item_id}",
-                    "title": h.title,
-                    "url": h.url,
-                })
-        out["canonical_examples"] = resolved_ex
-
-        resolved_anti: list[dict] = []
-        for key in out["antipattern_examples"]:
-            parts = str(key).split("/", 1)
-            if len(parts) != 2:
-                continue
-            h = lookup(parts[0], parts[1], conn=conn)
-            if h:
-                resolved_anti.append({
-                    "key": f"{h.source}/{h.item_id}",
-                    "title": h.title,
-                    "url": h.url,
-                })
-        out["antipattern_examples"] = resolved_anti
-
+    if not transclude:
         return out
-    finally:
-        if own:
-            conn.close()
+
+    # Resolve alternatives
+    resolved_alts: list[dict] = []
+    for alt in out["alternatives"]:
+        alt_id = alt.get("id") if isinstance(alt, dict) else alt
+        alt_when = alt.get("when") if isinstance(alt, dict) else None
+        alt_hit = lookup(
+            "chart-forms",
+            alt_id,
+            conn=conn,
+            include_extensions=include_lookup_extensions,
+        )
+        if alt_hit is None:
+            resolved_alts.append({"id": alt_id, "when": alt_when, "_missing": True})
+            continue
+        alt_details = alt_hit.details or {}
+        resolved_alts.append({
+            "id": alt_id,
+            "title": alt_hit.title,
+            "when": alt_when,
+            "capsule": (alt_details.get("capsule") or "").strip(),
+            "purpose_families": alt_details.get("purpose_families") or [],
+        })
+    out["alternatives"] = resolved_alts
+
+    # Resolve canonical_examples (key = "source/item_id")
+    resolved_ex: list[dict] = []
+    for key in out["canonical_examples"]:
+        parts = str(key).split("/", 1)
+        if len(parts) != 2:
+            continue
+        h = lookup(
+            parts[0],
+            parts[1],
+            conn=conn,
+            include_extensions=include_lookup_extensions,
+        )
+        if h:
+            resolved_ex.append({
+                "key": f"{h.source}/{h.item_id}",
+                "title": h.title,
+                "url": h.url,
+            })
+    out["canonical_examples"] = resolved_ex
+
+    resolved_anti: list[dict] = []
+    for key in out["antipattern_examples"]:
+        parts = str(key).split("/", 1)
+        if len(parts) != 2:
+            continue
+        h = lookup(
+            parts[0],
+            parts[1],
+            conn=conn,
+            include_extensions=include_lookup_extensions,
+        )
+        if h:
+            resolved_anti.append({
+                "key": f"{h.source}/{h.item_id}",
+                "title": h.title,
+                "url": h.url,
+            })
+    out["antipattern_examples"] = resolved_anti
+
+    return out
 
 
 def list_patterns(
     *,
     purpose_family: str | None = None,
     conn: sqlite3.Connection | None = None,
+    include_extensions: bool = True,
 ) -> list[dict]:
     """Return a compact list of chart_pattern items.
 
@@ -508,46 +639,72 @@ def list_patterns(
     an agent to narrow down. Pass `purpose_family` (e.g. 'Flow',
     'Part-to-whole') to filter.
     """
-    own = conn is None
-    conn = conn or connect()
+    refs = _query_conns(conn, include_extensions=include_extensions)
     try:
-        rows = conn.execute(
-            "SELECT * FROM items WHERE source = 'chart-forms' "
-            "AND type = 'chart_pattern' ORDER BY title"
-        ).fetchall()
-        out: list[dict] = []
-        for r in rows:
-            details = json.loads(r["details_json"] or "{}")
-            families = details.get("purpose_families") or []
-            if purpose_family and purpose_family not in families:
-                continue
-            out.append({
-                "id": r["item_id"],
-                "title": r["title"],
-                "capsule": (details.get("capsule") or "").strip(),
-                "purpose_families": families,
-            })
-        return out
+        by_id: dict[str, dict] = {}
+        for ref in refs:
+            rows = ref.conn.execute(
+                "SELECT * FROM items WHERE source = 'chart-forms' "
+                "AND type = 'chart_pattern' ORDER BY title"
+            ).fetchall()
+            for r in rows:
+                if r["item_id"] in by_id:
+                    continue
+                details = json.loads(r["details_json"] or "{}")
+                families = details.get("purpose_families") or []
+                if purpose_family and purpose_family not in families:
+                    continue
+                by_id[r["item_id"]] = {
+                    "id": r["item_id"],
+                    "title": r["title"],
+                    "capsule": (details.get("capsule") or "").strip(),
+                    "purpose_families": families,
+                }
+        return sorted(by_id.values(), key=lambda p: (p["title"], p["id"]))
     finally:
-        if own:
-            conn.close()
+        _close_query_conns(refs)
 
 
-def stats(*, conn: sqlite3.Connection | None = None) -> dict:
-    own = conn is None
-    conn = conn or connect()
+def _extension_db_status() -> list[dict]:
+    out: list[dict] = []
+    for path in extension_db_paths():
+        try:
+            conn = connect_readonly(path)
+            try:
+                n_items = conn.execute("SELECT COUNT(*) AS n FROM items").fetchone()["n"]
+                n_emb = conn.execute(
+                    "SELECT COUNT(*) AS n FROM embeddings WHERE model = ?", (EMBED_MODEL,)
+                ).fetchone()["n"]
+                out.append({"path": str(path), "items": n_items, "embeddings": n_emb})
+            finally:
+                conn.close()
+        except sqlite3.Error as e:
+            out.append({"path": str(path), "error": str(e)})
+    return out
+
+
+def stats(
+    *,
+    conn: sqlite3.Connection | None = None,
+    include_extensions: bool = True,
+) -> dict:
+    refs = _query_conns(conn, include_extensions=include_extensions)
     try:
-        n_items = conn.execute("SELECT COUNT(*) AS n FROM items").fetchone()["n"]
-        n_emb = conn.execute(
-            "SELECT COUNT(*) AS n FROM embeddings WHERE model = ?", (EMBED_MODEL,)
-        ).fetchone()["n"]
-        by_source = list_sources(conn=conn)
-        return {
+        n_items = 0
+        n_emb = 0
+        for ref in refs:
+            n_items += ref.conn.execute("SELECT COUNT(*) AS n FROM items").fetchone()["n"]
+            n_emb += ref.conn.execute(
+                "SELECT COUNT(*) AS n FROM embeddings WHERE model = ?", (EMBED_MODEL,)
+            ).fetchone()["n"]
+        payload = {
             "items": n_items,
             "embeddings": n_emb,
             "embedding_model": EMBED_MODEL,
-            "sources": by_source,
+            "sources": _source_counts(refs),
         }
+        if conn is None and include_extensions:
+            payload["extension_dbs"] = _extension_db_status()
+        return payload
     finally:
-        if own:
-            conn.close()
+        _close_query_conns(refs)

@@ -40,6 +40,7 @@ The core has no proprietary and no heavyweight dependencies — `validate`, `sug
 
 ```bash
 # generation — give me one that's right
+vizier guide "district budget module with per-pupil trend and revenue mix" --n-series 5
 vizier recommend-form "composition of a total over time" --n-series 5
 vizier suggest-palette 6                 # a CVD-safe categorical palette, validated
 vizier suggest-ramp 5 --hue navy         # a one-hue ordinal ramp, validated
@@ -65,7 +66,8 @@ claude mcp add vizier -- vizier mcp
 ```
 
 Tools: `validate_palette`, `suggest_palette`, `suggest_ramp`, `ink_on`,
-`analyze_artifact`, `check_contrast`, `recommend_form`, plus corpus query
+`analyze_artifact`, `check_contrast`, `recommend_form`, `implementation_guide`,
+plus corpus query
 (`search`, `find_similar`, `list_patterns`, `get_pattern`, `list_rubrics`, …).
 Setup + troubleshooting: [docs/mcp-setup.md](docs/mcp-setup.md).
 
@@ -113,6 +115,19 @@ per-source ingest notes are in [docs/process-notes-sources.md](docs/process-note
 Fetching is pluggable (`src/vizier/ingest/_common.py`): the bundled default is httpx;
 point `$VIZIER_FETCHER` at a richer fetcher, or set your own `FETCHER`.
 
+If you keep a private/local corpus DB with the same schema, keep it out of the
+distributed package and point Vizier at it at runtime:
+
+```bash
+VIZIER_EXTENSION_DBS=/absolute/path/to/private/.vizier.db vizier db search "reader decision"
+VIZIER_EXTENSION_DBS="/path/one.db:/path/two.db" vizier mcp
+```
+
+Extension DBs are opened read-only and merged into the read-side corpus APIs:
+`search`, `find_similar`, `lookup`, `list_sources`, `list_principles`,
+`list_rubrics`, `list_patterns`, `get_pattern`, and `stats`.
+`VIZIER_EXTRA_DB_PATHS` is accepted as an alias for the same path-list.
+
 ## Critique + evaluation (optional)
 
 `vizier critique <image>` and the `vizier eval` harness use an LLM. vizier routes calls
@@ -131,7 +146,7 @@ colors, and judges the result. The same thresholds serve both directions — see
 
 ```bash
 uv sync
-uv run pytest -q            # 17 tests (also runnable per-file: python tests/test_color.py)
+uv run pytest -q            # also runnable per-file: python tests/test_color.py
 uv run ruff check src/ tests/
 ```
 

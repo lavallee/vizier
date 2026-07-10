@@ -28,4 +28,5 @@ from .generate import (  # noqa: F401
     ink_on,
 )
 from .forms import recommend_form  # noqa: F401
+from .guidance import implementation_guide  # noqa: F401
 from .structure import lint_svg  # noqa: F401

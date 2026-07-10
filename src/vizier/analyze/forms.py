@@ -22,9 +22,14 @@ FAMILIES = [
 # purpose — a job can hit several families, and we merge with the BM25 hits.
 _FAMILY_HINTS: dict[str, tuple[str, ...]] = {
     "Part-to-whole": ("part-to-whole", "part to whole", "composition", "share of", "proportion",
-                      "breakdown", "makeup", "percent of", "% of", "made up of", "out of 100"),
+                      "breakdown", "makeup", "percent of", "% of", "made up of", "out of 100",
+                      "split into", "split by", "parts of", "one total", "single total",
+                      "revenue mix", "source mix", "funding mix", "by source", "by category",
+                      "sources of", "funding sources"),
     "Change over time": ("over time", "trend", "time series", "change over", "across years",
-                         "timeline", "growth", "before and after", "before/after", "year over year"),
+                         "timeline", "growth", "before and after", "before/after", "year over year",
+                         "annual", "annually", "by year", "per year", "school years",
+                         "budget years", "over years"),
     "Ranking": ("rank", "ranking", "top ", "largest", "biggest", "order by", "sorted", "leaderboard"),
     "Distribution": ("distribution", "spread", "histogram", "frequency", "density", "variation", "outliers"),
     "Correlation": ("correlation", "relationship", " vs ", "versus", "against", "scatter", "x and y"),
@@ -34,6 +39,59 @@ _FAMILY_HINTS: dict[str, tuple[str, ...]] = {
     "Flow": ("flow", "sankey", "from-to", "pathway", "transition", "funnel", "conserved"),
     "Spatial": ("map", "geographic", "by state", "by county", "by region", "spatial", "location", "where"),
 }
+
+
+_PART_TO_WHOLE_FORM_HINTS = (
+    "split into", "split by", "parts of", "one total", "single total",
+    "revenue mix", "source mix", "funding mix", "operating revenue",
+    "by source", "by category", "non-hierarchical categories",
+)
+_TIME_FORM_HINTS = (
+    "annual", "annually", "by year", "per year", "school years",
+    "budget years", "over years", "across years", "time series", "trend",
+)
+_CALENDAR_HINTS = ("day", "daily", "week", "weekly", "calendar", "date", "month", "monthly")
+_SCHEDULE_HINTS = ("task", "project", "schedule", "duration", "start date", "end date", "milestone")
+_HIERARCHY_HINTS = ("hierarchy", "hierarchical", "tree", "nested", "taxonomy", "cluster")
+_HIERARCHY_FORMS = {"dendrogram", "icicle-plot", "sunburst"}
+
+
+def _has_any(job: str, hints: tuple[str, ...]) -> bool:
+    jl = " " + job.lower() + " "
+    return any(h in jl for h in hints)
+
+
+def _form_boosts(job: str | None, target: list[str]) -> dict[str, int]:
+    if not job:
+        return {}
+    boosts: dict[str, int] = {}
+    has_part = "Part-to-whole" in target or _has_any(job, _PART_TO_WHOLE_FORM_HINTS)
+    has_time = "Change over time" in target or _has_any(job, _TIME_FORM_HINTS)
+    if has_part:
+        boosts["stacked-bar"] = boosts.get("stacked-bar", 0) + 5
+        if _has_any(job, ("out of 100", "percent", "%", "share")):
+            boosts["waffle-chart"] = boosts.get("waffle-chart", 0) + 1
+    if has_part and has_time:
+        boosts["stacked-area"] = boosts.get("stacked-area", 0) + 4
+    if has_time:
+        boosts["line-chart"] = boosts.get("line-chart", 0) + 5
+    return boosts
+
+
+def _suppress_form(pattern_id: str, job: str | None) -> bool:
+    if not job:
+        return False
+    if pattern_id == "calendar-heatmap" and not _has_any(job, _CALENDAR_HINTS):
+        return True
+    if pattern_id == "gantt-chart" and not _has_any(job, _SCHEDULE_HINTS):
+        return True
+    if pattern_id in _HIERARCHY_FORMS and (
+        "non-hierarchical" in job.lower() or (
+            _has_any(job, _PART_TO_WHOLE_FORM_HINTS) and not _has_any(job, _HIERARCHY_HINTS)
+        )
+    ):
+        return True
+    return False
 
 
 def _infer_families(job: str) -> list[str]:
@@ -67,14 +125,19 @@ def recommend_form(
         raise ValueError("give a `job` (free-text data-question) or a `family`")
 
     notes: list[str] = []
+    target: list[str] = [_match_family(family)] if family else []
+    if job:
+        target += [f for f in _infer_families(job) if f not in target]
+
     # "Is it even a chart?" guards, straight from the form heuristic.
     if isinstance(n_series, int):
         if n_series <= 1:
-            notes.append(
-                "A single current value is a stat tile / hero figure, not a chart "
-                "(a single ratio against a limit is a meter) — don't reach for a "
-                "one-bar bar chart or a 2-slice pie."
-            )
+            if "Change over time" not in target:
+                notes.append(
+                    "A single current value is a stat tile / hero figure, not a chart "
+                    "(a single ratio against a limit is a meter) — don't reach for a "
+                    "one-bar bar chart or a 2-slice pie."
+                )
         elif n_series > 7:
             notes.append(
                 f"{n_series} classes all carrying meaning is usually a table (or "
@@ -82,10 +145,6 @@ def recommend_form(
                 "blurs. If a chart is still right, fold the tail into 'Other' or "
                 "facet into small multiples."
             )
-
-    target: list[str] = [_match_family(family)] if family else []
-    if job:
-        target += [f for f in _infer_families(job) if f not in target]
 
     # BM25 relevance rank over the pattern text (used as a tiebreak / for job words
     # the families miss).
@@ -106,6 +165,11 @@ def recommend_form(
             score[p["id"]] = max(score.get(p["id"], 0), s)
     for pid in bm25_rank:            # job matched a pattern no family caught → keep it
         score.setdefault(pid, 0)
+    for pid, boost in _form_boosts(job, target).items():
+        score[pid] = score.get(pid, 0) + boost
+    for pid in list(score):
+        if _suppress_form(pid, job):
+            del score[pid]
 
     ids = sorted(score, key=lambda pid: (-score[pid], bm25_rank.get(pid, 999), pid))[:k]
 

@@ -142,7 +142,7 @@ def db_build(embed: bool):
         # Hint only on fresh-ish builds where a meaningful number of items
         # probably don't have embeddings yet.
         from .db.query import stats as _stats
-        s = _stats()
+        s = _stats(include_extensions=False)
         missing = s["items"] - s["embeddings"]
         if missing > 50:
             click.echo(
@@ -345,6 +345,40 @@ def recommend_form_cmd(job: str | None, family: str | None, n_series: int | None
         click.echo(str(e), err=True)
         sys.exit(2)
     click.echo(F.format_recommendation(r))
+
+
+@main.command("guide")
+@click.argument("job")
+@click.option("--context", default=None,
+              help="Surrounding context: headline, caption, data source, or implementation notes.")
+@click.option("--family", default=None, help="FT family, e.g. 'Part-to-whole', 'Flow', 'Ranking'.")
+@click.option("--n-series", type=int, default=None,
+              help="Series/category count for form guards.")
+@click.option("--forms", "k_forms", default=4, type=int, help="How many forms to return.")
+@click.option("--prior", "k_prior", default=5, type=int, help="How many corpus signals to return.")
+@click.option("--semantic/--no-semantic", default=False,
+              help="Also use embedding retrieval when the search extra is installed.")
+def guide_cmd(
+    job: str,
+    context: str | None,
+    family: str | None,
+    n_series: int | None,
+    k_forms: int,
+    k_prior: int,
+    semantic: bool,
+):
+    """Guide a chart implementation: form, journalism checks, and prior art."""
+    from .analyze import guidance as G
+    r = G.implementation_guide(
+        job,
+        context=context,
+        family=family,
+        n_series=n_series,
+        k_forms=k_forms,
+        k_prior=k_prior,
+        semantic=semantic,
+    )
+    click.echo(G.format_guide(r))
 
 
 @main.group()

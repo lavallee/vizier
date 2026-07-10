@@ -11,6 +11,13 @@ as tools, instead of reading `corpus/<source>/*.md` files directly.
 > since v2. If you also want `find_similar` to work, run
 > `vizier db embed` (slower — ~12 min on CPU).
 
+If the consuming project should also see a private/local corpus DB, set
+`VIZIER_EXTENSION_DBS` to one or more SQLite DB paths separated by the platform
+path separator (`:` on macOS/Linux, `;` on Windows). Vizier opens those DBs
+read-only and merges them into `search`, `find_similar`, `lookup`,
+`list_sources`, `list_principles`, `list_rubrics`, `list_patterns`,
+`get_pattern`, and `stats`.
+
 ## Claude Code (from another project)
 
 The fastest path is `claude mcp add`. Run from the project that should
@@ -43,13 +50,17 @@ Support/Claude/claude_desktop_config.json` on macOS) and add:
   "mcpServers": {
     "vizier": {
       "command": "uv",
-      "args": ["--directory", "/absolute/path/to/vizier", "run", "vizier", "mcp"]
+      "args": ["--directory", "/absolute/path/to/vizier", "run", "vizier", "mcp"],
+      "env": {
+        "VIZIER_EXTENSION_DBS": "/absolute/path/to/private/.vizier.db"
+      }
     }
   }
 }
 ```
 
-Restart the client. Vizier's tools appear in the tool list.
+Omit `env` if you only want Vizier's bundled corpus. Restart the client.
+Vizier's tools appear in the tool list.
 
 ## What the tools expose
 
@@ -62,7 +73,8 @@ Restart the client. Vizier's tools appear in the tool list.
 | `list_patterns`     | Chart-pattern index, optionally filtered by family|
 | `get_pattern`       | One chart pattern with alternatives/examples resolved |
 | `list_rubrics`      | All rubric items                                  |
-| `list_principles`   | All weaver principles, optionally filtered by stage|
+| `list_principles`   | All corpus principles, optionally filtered by stage|
+| `implementation_guide` | Form recommendation + journalism checks + prior-art signals |
 | `stats`             | DB row counts                                     |
 
 ## Troubleshooting
@@ -75,9 +87,13 @@ next to vizier. Run `uv run vizier ingest weaver`, then `uv run vizier db build`
 (or the DB is otherwise missing embeddings). `vizier db stats` will show
 `items` > `embeddings`. See note at the top of this file.
 
-**`search` errors on queries with punctuation.** FTS5 treats hyphens
-and apostrophes as tokens. Quote compound terms (`"forecast-cone"`) or
-strip punctuation before querying. See `db_search` in `vizier/db/query.py`.
+**Private/local corpus items do not appear.** Check that the MCP config passes
+`VIZIER_EXTENSION_DBS` into the server process and that `vizier db stats` reports
+the extension DB under `extension_dbs`.
+
+**`search` errors on queries with punctuation.** Bare hyphens, apostrophes,
+commas, semicolons, and slashes are normalized before FTS5 runs. If a query
+still errors, quote the exact phrase and check `vizier/db/query.py`.
 
 **MCP client can't find `uv`.** The command runs in the client's
 environment, not your shell. Use the absolute path to uv:
