@@ -132,9 +132,9 @@ splices the caption into the user prompt. Cache is keyed on
 `sha256(image) + model + prompt_version` — same image cost-free on
 re-runs.
 
-- Default captioner: `qwen2.5vl:7b` via local ollama. ~20s–17min per
-  image on M1 Pro depending on resolution (cap width around 1024 for
-  ~5 min per image at reasonable accuracy).
+- Default captioner: `minimax_mcp` via the configured MiniMax MCP. Set
+  `VIZIER_VISION_BACKEND=ollama` to opt into the local `qwen2.5vl:7b`
+  fallback; local runtimes vary widely by image size and hardware.
 - Cache: `evals/captions/<sha>.<model>.<version>.md`. Each run's
   per-case output records `vision_caption` metadata (sha, model,
   duration, cached-or-fresh) so runs are provenance-complete.
