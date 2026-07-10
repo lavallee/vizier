@@ -128,6 +128,8 @@ Extension DBs are opened read-only and merged into the read-side corpus APIs:
 `list_rubrics`, `list_patterns`, `get_pattern`, and `stats`.
 `VIZIER_EXTRA_DB_PATHS` is accepted as an alias for the same path-list.
 
+For predecessor replacement work, see [docs/predecessor-parity.md](docs/predecessor-parity.md).
+
 ## Critique + evaluation (optional)
 
 `vizier critique <image>` and the `vizier eval` harness use an LLM. vizier routes calls
