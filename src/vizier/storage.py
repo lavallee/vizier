@@ -6,16 +6,21 @@ low-thousands of items; swap for sqlite if we outgrow it.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Iterator
 
 from .schema import Item
 
-CORPUS_ROOT = Path(__file__).resolve().parents[2] / "corpus"
+DEFAULT_CORPUS_ROOT = Path(__file__).resolve().parents[2] / "corpus"
+CORPUS_ROOT_ENV = "VIZIER_CORPUS_ROOT"
 
 
 def corpus_root() -> Path:
-    return CORPUS_ROOT
+    override = os.getenv(CORPUS_ROOT_ENV)
+    if override:
+        return Path(override).expanduser().resolve()
+    return DEFAULT_CORPUS_ROOT
 
 
 def iter_items(source: str | None = None, root: Path | None = None) -> Iterator[Item]:

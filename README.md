@@ -110,6 +110,11 @@ vizier ingest all        # fetch + parse into corpus/<source>/
 vizier db build --embed  # index for search + retrieval
 ```
 
+Set `VIZIER_CORPUS_ROOT=/absolute/path/to/corpus-root` before running
+`vizier ingest` or `vizier db build` to write/read a corpus outside the installed
+package tree. This is how the private corpus artifact is rebuilt without copying
+private source material into the public package.
+
 What the corpus draws on and why is described in [INFLUENCES.md](INFLUENCES.md); the
 per-source ingest notes are in [docs/process-notes-sources.md](docs/process-notes-sources.md).
 Fetching is pluggable (`src/vizier/ingest/_common.py`): the bundled default is httpx;
