@@ -75,24 +75,85 @@ class _ConnRef:
     path: Path | None = None
 
 
+_PRIVATE_DB_ENV_VARS = ("VIZIER_PRIVATE_DB", "VIZIER_PRIVATE_CORPUS_DB")
+_PRIVATE_ROOT_ENV = "VIZIER_PRIVATE_ROOT"
 _EXTENSION_DB_ENV_VARS = ("VIZIER_EXTENSION_DBS", "VIZIER_EXTRA_DB_PATHS")
+_AUTO_PRIVATE_ENV = "VIZIER_AUTO_PRIVATE"
+_AUTO_PRIVATE_OFF = {"0", "false", "no", "off"}
+_PRIVATE_DB_RELATIVE = Path("corpus") / "vizier-private.db"
+
+
+def _auto_private_enabled() -> bool:
+    raw = os.getenv(_AUTO_PRIVATE_ENV)
+    if raw is None:
+        return True
+    return raw.strip().lower() not in _AUTO_PRIVATE_OFF
+
+
+def _add_path(paths: list[Path], seen: set[Path], path: Path) -> None:
+    resolved = path.expanduser().resolve()
+    if resolved in seen:
+        return
+    seen.add(resolved)
+    paths.append(resolved)
+
+
+def _env_path_list(env_name: str) -> list[Path]:
+    raw = os.getenv(env_name, "")
+    if not raw:
+        return []
+    return [Path(part.strip()) for part in raw.split(os.pathsep) if part.strip()]
+
+
+def _explicit_private_db_paths() -> list[Path]:
+    paths: list[Path] = []
+    for env_name in _PRIVATE_DB_ENV_VARS:
+        paths.extend(_env_path_list(env_name))
+    for root in _env_path_list(_PRIVATE_ROOT_ENV):
+        paths.append(root / _PRIVATE_DB_RELATIVE)
+    return paths
+
+
+def _auto_private_db_candidates() -> list[Path]:
+    if not _auto_private_enabled():
+        return []
+
+    roots: list[Path] = []
+    # Source-checkout path: <projects>/vizier/corpus/.vizier.db
+    db_path = DB_PATH.expanduser().resolve()
+    if db_path.parent.name == "corpus":
+        roots.append(db_path.parent.parent.parent / "vizier-private")
+
+    cwd = Path.cwd().resolve()
+    roots.extend([
+        cwd / "vizier-private",
+        cwd.parent / "vizier-private",
+    ])
+
+    candidates: list[Path] = []
+    seen_roots: set[Path] = set()
+    for root in roots:
+        resolved_root = root.expanduser().resolve()
+        if resolved_root in seen_roots:
+            continue
+        seen_roots.add(resolved_root)
+        db = resolved_root / _PRIVATE_DB_RELATIVE
+        if db.exists():
+            candidates.append(db)
+    return candidates
 
 
 def extension_db_paths() -> list[Path]:
-    """Return opt-in read-only extension DBs from pathsep-separated env vars."""
+    """Return read-only extension DBs from explicit env vars and local discovery."""
     paths: list[Path] = []
     seen: set[Path] = {DB_PATH.expanduser().resolve()}
+    for path in _explicit_private_db_paths():
+        _add_path(paths, seen, path)
     for env_name in _EXTENSION_DB_ENV_VARS:
-        raw = os.getenv(env_name, "")
-        for part in raw.split(os.pathsep):
-            part = part.strip()
-            if not part:
-                continue
-            path = Path(part).expanduser().resolve()
-            if path in seen:
-                continue
-            seen.add(path)
-            paths.append(path)
+        for path in _env_path_list(env_name):
+            _add_path(paths, seen, path)
+    for path in _auto_private_db_candidates():
+        _add_path(paths, seen, path)
     return paths
 
 

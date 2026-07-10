@@ -121,9 +121,19 @@ Fetching is pluggable (`src/vizier/ingest/_common.py`): the bundled default is h
 point `$VIZIER_FETCHER` at a richer fetcher, or set your own `FETCHER`.
 
 If you keep a private/local corpus DB with the same schema, keep it out of the
-distributed package and point Vizier at it at runtime:
+distributed package. In the local source-checkout layout, Vizier auto-discovers
+an unpacked sibling private artifact at `../vizier-private/corpus/vizier-private.db`:
 
 ```bash
+cd ../vizier-private
+./scripts/unpack.sh
+uv --directory ../vizier run vizier db stats
+```
+
+For a custom path, point Vizier at it explicitly at runtime:
+
+```bash
+VIZIER_PRIVATE_DB=/absolute/path/to/private/.vizier.db vizier db search "reader decision"
 VIZIER_EXTENSION_DBS=/absolute/path/to/private/.vizier.db vizier db search "reader decision"
 VIZIER_EXTENSION_DBS="/path/one.db:/path/two.db" vizier mcp
 ```
@@ -131,7 +141,9 @@ VIZIER_EXTENSION_DBS="/path/one.db:/path/two.db" vizier mcp
 Extension DBs are opened read-only and merged into the read-side corpus APIs:
 `search`, `find_similar`, `lookup`, `list_sources`, `list_principles`,
 `list_rubrics`, `list_patterns`, `get_pattern`, and `stats`.
-`VIZIER_EXTRA_DB_PATHS` is accepted as an alias for the same path-list.
+`VIZIER_EXTRA_DB_PATHS` is accepted as an alias for the same path-list. Set
+`VIZIER_AUTO_PRIVATE=0` for a public-only run that ignores the sibling
+`vizier-private` repo.
 
 For predecessor replacement work, see [docs/predecessor-parity.md](docs/predecessor-parity.md).
 

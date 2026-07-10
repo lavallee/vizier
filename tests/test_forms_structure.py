@@ -17,6 +17,15 @@ from vizier.db import query as Q
 from vizier.db.build import EMBED_DIMS, EMBED_MODEL
 from vizier.db.connect import connect
 
+_EXTENSION_ENV_NAMES = (
+    "VIZIER_PRIVATE_DB",
+    "VIZIER_PRIVATE_CORPUS_DB",
+    "VIZIER_PRIVATE_ROOT",
+    "VIZIER_EXTENSION_DBS",
+    "VIZIER_EXTRA_DB_PATHS",
+    "VIZIER_AUTO_PRIVATE",
+)
+
 
 def _raises(fn, *a, **k) -> bool:
     try:
@@ -168,16 +177,21 @@ def _insert_extension_items(db_path: Path, *, with_embedding: bool = False) -> N
         conn.close()
 
 
+def _save_extension_env() -> dict[str, str | None]:
+    return {name: os.environ.get(name) for name in _EXTENSION_ENV_NAMES}
+
+
 def _with_extension_env(db_path: Path | None):
-    saved = {
-        "VIZIER_EXTENSION_DBS": os.environ.get("VIZIER_EXTENSION_DBS"),
-        "VIZIER_EXTRA_DB_PATHS": os.environ.get("VIZIER_EXTRA_DB_PATHS"),
-    }
+    saved = _save_extension_env()
+    os.environ.pop("VIZIER_PRIVATE_DB", None)
+    os.environ.pop("VIZIER_PRIVATE_CORPUS_DB", None)
+    os.environ.pop("VIZIER_PRIVATE_ROOT", None)
     if db_path is None:
         os.environ.pop("VIZIER_EXTENSION_DBS", None)
     else:
         os.environ["VIZIER_EXTENSION_DBS"] = str(db_path)
     os.environ.pop("VIZIER_EXTRA_DB_PATHS", None)
+    os.environ["VIZIER_AUTO_PRIVATE"] = "0"
     return saved
 
 
@@ -230,6 +244,57 @@ def test_search_and_lookup_read_extension_db():
     finally:
         if saved is not None:
             _restore_env(saved)
+
+
+def test_extension_db_paths_auto_discovers_sibling_vizier_private():
+    saved = _save_extension_env()
+    old_db_path = Q.DB_PATH
+    old_cwd = Path.cwd()
+    try:
+        for name in _EXTENSION_ENV_NAMES:
+            os.environ.pop(name, None)
+        os.environ["VIZIER_AUTO_PRIVATE"] = "1"
+        with tempfile.TemporaryDirectory() as td:
+            projects = Path(td)
+            repo_corpus = projects / "vizier" / "corpus"
+            repo_corpus.mkdir(parents=True)
+            private_corpus = projects / "vizier-private" / "corpus"
+            private_corpus.mkdir(parents=True)
+            private_db = private_corpus / "vizier-private.db"
+            private_db.write_bytes(b"not-a-real-db")
+
+            Q.DB_PATH = repo_corpus / ".vizier.db"
+            os.chdir(repo_corpus.parent)
+            assert Q.extension_db_paths() == [private_db.resolve()]
+    finally:
+        os.chdir(old_cwd)
+        Q.DB_PATH = old_db_path
+        _restore_env(saved)
+
+
+def test_extension_db_paths_can_disable_auto_private():
+    saved = _save_extension_env()
+    old_db_path = Q.DB_PATH
+    old_cwd = Path.cwd()
+    try:
+        for name in _EXTENSION_ENV_NAMES:
+            os.environ.pop(name, None)
+        os.environ["VIZIER_AUTO_PRIVATE"] = "0"
+        with tempfile.TemporaryDirectory() as td:
+            projects = Path(td)
+            repo_corpus = projects / "vizier" / "corpus"
+            repo_corpus.mkdir(parents=True)
+            private_corpus = projects / "vizier-private" / "corpus"
+            private_corpus.mkdir(parents=True)
+            (private_corpus / "vizier-private.db").write_bytes(b"not-a-real-db")
+
+            Q.DB_PATH = repo_corpus / ".vizier.db"
+            os.chdir(repo_corpus.parent)
+            assert Q.extension_db_paths() == []
+    finally:
+        os.chdir(old_cwd)
+        Q.DB_PATH = old_db_path
+        _restore_env(saved)
 
 
 def test_find_similar_reads_extension_db():
