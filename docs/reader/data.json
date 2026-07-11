@@ -211,8 +211,35 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "visualising-data/five-ways-to-present-bar-charts",
+          "title": "Five ways to… present bar charts",
+          "url": "https://visualisingdata.com/2019/07/five-ways-to-present-bar-charts/"
+        },
+        {
+          "key": "eagereyes/evaluation-of-the-impact-of-visual-embellishments-in-bar-charts",
+          "title": "Paper: An Evaluation of the Impact of Visual Embellishments in Bar Charts",
+          "url": "https://eagereyes.org/blog/2015/evaluation-of-the-impact-of-visual-embellishments-in-bar-charts"
+        },
+        {
+          "key": "junkcharts/when-should-we-use-bar-charts",
+          "title": "When should we use bar charts?",
+          "url": "https://www.junkcharts.com/when-should-we-use-bar-charts"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "eagereyes/stacked-bars-are-the-worst",
+          "title": "Stacked Bars Are the Worst",
+          "url": "https://eagereyes.org/blog/2016/stacked-bars-are-the-worst"
+        },
+        {
+          "key": "cairo-blog/was-this-done-on-purpose-html",
+          "title": "No, no, no...",
+          "url": "https://thefunctionalart.blogspot.com/2015/03/was-this-done-on-purpose.html"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -409,8 +436,25 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "junkcharts/what-is-this-stacked-range-chart",
+          "title": "What is this \"stacked range chart\"?",
+          "url": "https://www.junkcharts.com/what-is-this-stacked-range-chart"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "nightingale/ive-stopped-using-box-plots-should-you",
+          "title": "I’ve Stopped Using Box Plots. Should You?",
+          "url": "https://nightingaledvs.com/ive-stopped-using-box-plots-should-you/"
+        },
+        {
+          "key": "nightingale/i-stopped-using-box-plots-the-aftermath",
+          "title": "I Stopped Using Box Plots: The Aftermath",
+          "url": "https://nightingaledvs.com/i-stopped-using-box-plots-the-aftermath/"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -507,7 +551,23 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "junkcharts/hammock-plots",
+          "title": "Hammock plots",
+          "url": "https://www.junkcharts.com/hammock-plots"
+        },
+        {
+          "key": "nightingale/step-charts",
+          "title": "Step Aside Line Graphs And Bar Charts! This Is a Job For Me.",
+          "url": "https://nightingaledvs.com/step-charts/"
+        },
+        {
+          "key": "kantar/2015-job-market-tracker",
+          "title": "Job Market Tracker",
+          "url": "https://www.informationisbeautifulawards.com/showcase/923-job-market-tracker"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -701,7 +761,23 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "observable/joewdavies-grid-cartogram-of-europe",
+          "title": "Grid Cartogram of Europe",
+          "url": "https://observablehq.com/@joewdavies/grid-cartogram-of-europe"
+        },
+        {
+          "key": "cairo-blog/elegant-maps-reveal-grim-reality-html",
+          "title": "Elegant maps reveal a grim reality",
+          "url": "https://thefunctionalart.blogspot.com/2014/01/elegant-maps-reveal-grim-reality.html"
+        },
+        {
+          "key": "cairo-blog/multiple-shapes-multiple-projections-html",
+          "title": "Multiple shapes, multiple projections",
+          "url": "https://thefunctionalart.blogspot.com/2012/08/multiple-shapes-multiple-projections.html"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -803,8 +879,30 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "nightingale/endless-river-an-overview-of-dataviz-for-categorical-data",
+          "title": "Endless River: An Overview of Dataviz for Categorical Data",
+          "url": "https://nightingaledvs.com/endless-river-an-overview-of-dataviz-for-categorical-data/"
+        },
+        {
+          "key": "observable/tomlarkworthy-spectral-layout",
+          "title": "Minimize Crossings: Spectral Circular Graph for Layout",
+          "url": "https://observablehq.com/@tomlarkworthy/spectral-layout"
+        },
+        {
+          "key": "eagereyes/graphs-hairball",
+          "title": "Graphs Beyond the Hairball",
+          "url": "https://eagereyes.org/blog/2012/graphs-hairball"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "junkcharts/some-chart-types-are-not-scalable",
+          "title": "Some chart types are not scalable",
+          "url": "https://www.junkcharts.com/some-chart-types-are-not-scalable"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -901,8 +999,45 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "visualising-data/experimental-isarithmic-maps-visualise-electoral-data",
+          "title": "Experimental isarithmic maps visualise electoral data",
+          "url": "https://visualisingdata.com/2011/10/experimental-isarithmic-maps-visualise-electoral-data/"
+        },
+        {
+          "key": "eagereyes/a-smart-take-on-election-maps",
+          "title": "A Smart Take on Election Maps",
+          "url": "https://eagereyes.org/blog/2018/a-smart-take-on-election-maps"
+        },
+        {
+          "key": "cairo-blog/when-choropleth-maps-deceive-html",
+          "title": "When choropleth maps deceive",
+          "url": "https://thefunctionalart.blogspot.com/2012/11/when-choropleth-maps-deceive.html"
+        },
+        {
+          "key": "visualising-data/bivariate-choropleth-maps",
+          "title": "Bivariate choropleth maps",
+          "url": "https://visualisingdata.com/2017/06/bivariate-choropleth-maps/"
+        },
+        {
+          "key": "cairo-blog/classes-in-choropleth-maps-html",
+          "title": "The challenges of classification in choropleth maps",
+          "url": "https://thefunctionalart.blogspot.com/2014/07/classes-in-choropleth-maps.html"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "junkcharts/canonical-us-political-map",
+          "title": "The canonical U.S. political map",
+          "url": "https://www.junkcharts.com/canonical-us-political-map"
+        },
+        {
+          "key": "junkcharts/gaining-precision-by-deleting-data",
+          "title": "Gaining precision by deleting data",
+          "url": "https://www.junkcharts.com/gaining-precision-by-deleting-data"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -989,8 +1124,35 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "eagereyes/the-connected-scatterplot-for-presenting-paired-time-series",
+          "title": "Paper: The Connected Scatterplot for Presenting Paired Time Series",
+          "url": "https://eagereyes.org/blog/2015/the-connected-scatterplot-for-presenting-paired-time-series"
+        },
+        {
+          "key": "cairo-blog/in-praise-of-connected-scatter-plots-html",
+          "title": "In praise of connected scatter plots",
+          "url": "https://thefunctionalart.blogspot.com/2012/09/in-praise-of-connected-scatter-plots.html"
+        },
+        {
+          "key": "cairo-blog/more-connected-scatter-plot-fun-html",
+          "title": "More connected scatter plot fun",
+          "url": "https://thefunctionalart.blogspot.com/2013/10/more-connected-scatter-plot-fun.html"
+        },
+        {
+          "key": "cairo-blog/bloomberg-visual-datas-connected-html",
+          "title": "Bloomberg Visual Data's connected scatter plot",
+          "url": "https://thefunctionalart.blogspot.com/2014/02/bloomberg-visual-datas-connected.html"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "nightingale/connected-scatterplots-make-me-feel-dumb",
+          "title": "Connected Scatterplots Make Me Feel Dumb",
+          "url": "https://nightingaledvs.com/connected-scatterplots-make-me-feel-dumb/"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -1186,8 +1348,30 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "eagereyes/when-bars-point-down",
+          "title": "When Bars Point Down",
+          "url": "https://eagereyes.org/blog/2014/when-bars-point-down"
+        },
+        {
+          "key": "nightingale/tear-up-your-baseline",
+          "title": "Tear Up Your Baseline",
+          "url": "https://nightingaledvs.com/tear-up-your-baseline/"
+        },
+        {
+          "key": "eagereyes/baselines",
+          "title": "Continuous Values and Baselines",
+          "url": "https://eagereyes.org/blog/2013/baselines"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "eagereyes/the-possible-stratagem-behind-the-biden-bar",
+          "title": "The (Possible) Stratagem Behind the Biden Bar",
+          "url": "https://eagereyes.org/blog/2022/the-possible-stratagem-behind-the-biden-bar"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -1373,7 +1557,23 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "nightingale/beyond-the-bar-alternative-methods-for-visualizing-two-points-of-change",
+          "title": "Beyond the Bar: Alternative Methods for Visualizing Two Points of Change",
+          "url": "https://nightingaledvs.com/beyond-the-bar-alternative-methods-for-visualizing-two-points-of-change/"
+        },
+        {
+          "key": "junkcharts/dot-plots-with-varying-dot-sizes",
+          "title": "Dot plots with varying dot sizes",
+          "url": "https://www.junkcharts.com/dot-plots-with-varying-dot-sizes"
+        },
+        {
+          "key": "eagereyes/eagereyestv-episode-2-unit-charts-dot-plots-and-isotype-and-what-makes-them-spec",
+          "title": "eagereyesTV Episode 2: Unit Charts, Dot Plots, ISOTYPE, and What Makes Them Special",
+          "url": "https://eagereyes.org/blog/2019/eagereyestv-episode-2-unit-charts-dot-plots-and-isotype-and-what-makes-them-special"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -1461,7 +1661,38 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "cairo-blog/the-guardian-puts-flow-charts-on-map-html",
+          "title": "The Guardian puts flow charts on a map",
+          "url": "https://thefunctionalart.blogspot.com/2016/05/the-guardian-puts-flow-charts-on-map.html"
+        },
+        {
+          "key": "cairo-blog/bloomberg-visualizes-shrinking-html",
+          "title": "Bloomberg visualizes the shrinking Mississippi river",
+          "url": "https://thefunctionalart.blogspot.com/2022/11/bloomberg-visualizes-shrinking.html"
+        },
+        {
+          "key": "cairo-blog/echoes-of-minard-axios-maps-flow-of-html",
+          "title": "Echoes of Minard: Axios maps the flow of goods between states",
+          "url": "https://thefunctionalart.blogspot.com/2017/08/echoes-of-minard-axios-maps-flow-of.html"
+        },
+        {
+          "key": "cairo-blog/migration-flows-within-europe-html",
+          "title": "Migration flows in the European Union",
+          "url": "https://thefunctionalart.blogspot.com/2019/05/migration-flows-within-europe.html"
+        },
+        {
+          "key": "kantar/2019-flowmap-blue",
+          "title": "Flowmap.blue",
+          "url": "https://www.informationisbeautifulawards.com/showcase/3815-flowmap-blue"
+        },
+        {
+          "key": "kantar/2017-on-their-way-the-journey-of-foreign-fighters",
+          "title": "On Their Way: the Journey of Foreign Fighters",
+          "url": "https://www.informationisbeautifulawards.com/showcase/2323-on-their-way-the-journey-of-foreign-fighters"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -1688,7 +1919,23 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "nightingale/how-to-choose-colors-for-your-data-visualizations",
+          "title": "How to Choose Colors for Your Data Visualizations",
+          "url": "https://nightingaledvs.com/how-to-choose-colors-for-your-data-visualizations/"
+        },
+        {
+          "key": "nightingale/five-steps-to-a-diverging-and-contrasting-color-scheme-for-data-visualization",
+          "title": "Five Steps to a Diverging and Contrasting Color Scheme  for Data Visualization",
+          "url": "https://nightingaledvs.com/five-steps-to-a-diverging-and-contrasting-color-scheme-for-data-visualization/"
+        },
+        {
+          "key": "nightingale/perceptual-uniformity-with-hcl-wizard",
+          "title": "Perceptual Uniformity with HCL Wizard",
+          "url": "https://nightingaledvs.com/perceptual-uniformity-with-hcl-wizard/"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -1786,7 +2033,18 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "visualising-data/experimental-isarithmic-maps-visualise-electoral-data",
+          "title": "Experimental isarithmic maps visualise electoral data",
+          "url": "https://visualisingdata.com/2011/10/experimental-isarithmic-maps-visualise-electoral-data/"
+        },
+        {
+          "key": "junkcharts/brexit-bremain-the-world-did-not-end-so-dataviz-people-can-throw-shade-and-color",
+          "title": "Brexit, Bremain, the world did not end so dataviz people can throw shade and color",
+          "url": "https://www.junkcharts.com/brexit-bremain-the-world-did-not-end-so-dataviz-people-can-throw-shade-and-color"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -1878,7 +2136,23 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "junkcharts/whats-a-histogram",
+          "title": "What's a histogram?",
+          "url": "https://www.junkcharts.com/whats-a-histogram"
+        },
+        {
+          "key": "junkcharts/equal-area-histograms",
+          "title": "Equal-area histograms",
+          "url": "https://www.junkcharts.com/equal-area-histograms"
+        },
+        {
+          "key": "visualising-data/using-containers-house-skewed-data-values",
+          "title": "Using containers to house skewed data values",
+          "url": "https://visualisingdata.com/2018/06/using-containers-house-skewed-data-values/"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -2073,8 +2347,40 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "cairo-blog/lines-arent-just-for-time-series-html",
+          "title": "Lines aren't just for time-series",
+          "url": "https://thefunctionalart.blogspot.com/2019/06/lines-arent-just-for-time-series.html"
+        },
+        {
+          "key": "cairo-blog/line-charts-arent-just-for-time-series-html",
+          "title": "Line charts aren't just for time series data",
+          "url": "https://thefunctionalart.blogspot.com/2015/04/line-charts-arent-just-for-time-series.html"
+        },
+        {
+          "key": "cairo-blog/defying-conventions-in-visualization-html",
+          "title": "Defying conventions in visualization: Should time always be on the horizontal axis?",
+          "url": "https://thefunctionalart.blogspot.com/2016/06/defying-conventions-in-visualization.html"
+        },
+        {
+          "key": "eagereyes/baselines",
+          "title": "Continuous Values and Baselines",
+          "url": "https://eagereyes.org/blog/2013/baselines"
+        },
+        {
+          "key": "nightingale/tear-up-your-baseline",
+          "title": "Tear Up Your Baseline",
+          "url": "https://nightingaledvs.com/tear-up-your-baseline/"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "eagereyes/all-line-charts-are-wrong-but-some-are-useful",
+          "title": "All (Line) Charts are Wrong, But Some Are Useful",
+          "url": "https://eagereyes.org/blog/2020/all-line-charts-are-wrong-but-some-are-useful"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -2682,8 +2988,40 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "eagereyes/parallel-sets-released",
+          "title": "Parallel Sets Released!",
+          "url": "https://eagereyes.org/blog/2009/parallel-sets-released"
+        },
+        {
+          "key": "eagereyes/a-spike-of-interest-in-parallel-sets",
+          "title": "A Spike of Interest in Parallel Sets",
+          "url": "https://eagereyes.org/blog/2009/a-spike-of-interest-in-parallel-sets"
+        },
+        {
+          "key": "eagereyes/parallel-sets-implemented-by-third-party",
+          "title": "Parallel Sets Implemented By Third Party",
+          "url": "https://eagereyes.org/blog/2010/parallel-sets-implemented-by-third-party"
+        },
+        {
+          "key": "nightingale/endless-river-an-overview-of-dataviz-for-categorical-data",
+          "title": "Endless River: An Overview of Dataviz for Categorical Data",
+          "url": "https://nightingaledvs.com/endless-river-an-overview-of-dataviz-for-categorical-data/"
+        },
+        {
+          "key": "eagereyes/two-short-papers-on-part-to-whole-charts-at-eurovis",
+          "title": "Two Short Papers on Part-to-Whole Charts at EuroVis",
+          "url": "https://eagereyes.org/blog/2019/two-short-papers-on-part-to-whole-charts-at-eurovis"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "cairo-blog/the-guardian-puts-flow-charts-on-map-html",
+          "title": "The Guardian puts flow charts on a map",
+          "url": "https://thefunctionalart.blogspot.com/2016/05/the-guardian-puts-flow-charts-on-map.html"
+        }
+      ],
       "related_principles": [
         "weaver/principle-order-stage-categories-meaningfully",
         "weaver/principle-reading-guide-directly-above-each-novel-diagram"
@@ -2782,8 +3120,40 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "eagereyes/in-defense-of-pie-charts",
+          "title": "In Defense of Pie Charts",
+          "url": "https://eagereyes.org/blog/2011/in-defense-of-pie-charts"
+        },
+        {
+          "key": "eagereyes/a-pair-of-pie-chart-papers",
+          "title": "A Pair of Pie Chart Papers",
+          "url": "https://eagereyes.org/blog/2016/a-pair-of-pie-chart-papers"
+        },
+        {
+          "key": "eagereyes/pie-charts",
+          "title": "Understanding Pie Charts",
+          "url": "https://eagereyes.org/blog/2010/pie-charts"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "junkcharts/ten-pie-charts-are-you-worried-yet",
+          "title": "Ten pie charts. Are you worried yet?",
+          "url": "https://www.junkcharts.com/ten-pie-charts-are-you-worried-yet"
+        },
+        {
+          "key": "cairo-blog/fun-note-on-pie-charts-html",
+          "title": "A fun pie chart about pie charts",
+          "url": "https://thefunctionalart.blogspot.com/2012/06/fun-note-on-pie-charts.html"
+        },
+        {
+          "key": "eagereyes/stacked-bars-are-the-worst",
+          "title": "Stacked Bars Are the Worst",
+          "url": "https://eagereyes.org/blog/2016/stacked-bars-are-the-worst"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -2880,7 +3250,23 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "cairo-blog/elegant-maps-reveal-grim-reality-html",
+          "title": "Elegant maps reveal a grim reality",
+          "url": "https://thefunctionalart.blogspot.com/2014/01/elegant-maps-reveal-grim-reality.html"
+        },
+        {
+          "key": "cairo-blog/classes-in-choropleth-maps-html",
+          "title": "The challenges of classification in choropleth maps",
+          "url": "https://thefunctionalart.blogspot.com/2014/07/classes-in-choropleth-maps.html"
+        },
+        {
+          "key": "cairo-blog/multiple-shapes-multiple-projections-html",
+          "title": "Multiple shapes, multiple projections",
+          "url": "https://thefunctionalart.blogspot.com/2012/08/multiple-shapes-multiple-projections.html"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -2995,8 +3381,20 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "nightingale/the-stellar-chart-an-elegant-alternative-to-radar-charts",
+          "title": "The Stellar Chart: An Elegant Alternative to Radar Charts",
+          "url": "https://nightingaledvs.com/the-stellar-chart-an-elegant-alternative-to-radar-charts/"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "junkcharts/an-overused-chart-why-it-fails-and-how-to-fix-it",
+          "title": "An overused chart, why it fails, and how to fix it",
+          "url": "https://www.junkcharts.com/an-overused-chart-why-it-fails-and-how-to-fix-it"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -3240,8 +3638,40 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "observable/d3-sankey-component",
+          "title": "Sankey diagram component",
+          "url": "https://observablehq.com/@d3/sankey-component"
+        },
+        {
+          "key": "visualising-data/energy-technologies-visualisation-for-the-iea",
+          "title": "Energy technologies visualisation for the IEA",
+          "url": "https://visualisingdata.com/2012/06/energy-technologies-visualisation-for-the-iea/"
+        },
+        {
+          "key": "cairo-blog/bloomberg-visualizes-shrinking-html",
+          "title": "Bloomberg visualizes the shrinking Mississippi river",
+          "url": "https://thefunctionalart.blogspot.com/2022/11/bloomberg-visualizes-shrinking.html"
+        },
+        {
+          "key": "cairo-blog/the-guardian-puts-flow-charts-on-map-html",
+          "title": "The Guardian puts flow charts on a map",
+          "url": "https://thefunctionalart.blogspot.com/2016/05/the-guardian-puts-flow-charts-on-map.html"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "junkcharts/clear-and-confused-states",
+          "title": "Clear and confused states",
+          "url": "https://www.junkcharts.com/clear-and-confused-states"
+        },
+        {
+          "key": "visualising-data/google-analytics-introduces-visitor-flow-visualisation",
+          "title": "Google Analytics introduces ‘visitor flow’ visualisation",
+          "url": "https://visualisingdata.com/2011/10/google-analytics-introduces-visitor-flow-visualisation/"
+        }
+      ],
       "related_principles": [
         "weaver/principle-order-stage-categories-meaningfully",
         "weaver/principle-reading-guide-directly-above-each-novel-diagram",
@@ -3340,8 +3770,30 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "observable/d3-splom",
+          "title": "Scatterplot Matrix",
+          "url": "https://observablehq.com/@d3/splom"
+        },
+        {
+          "key": "junkcharts/the-scatterplot-matrix-a-great-tool",
+          "title": "The scatter-plot matrix: a great tool",
+          "url": "https://www.junkcharts.com/the-scatterplot-matrix-a-great-tool"
+        },
+        {
+          "key": "eagereyes/the-explanatory-power-of-data-points",
+          "title": "The Explanatory Power of Data Points",
+          "url": "https://eagereyes.org/blog/2012/the-explanatory-power-of-data-points"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "cairo-blog/trend-lines-in-scatter-plots-html",
+          "title": "Making your message visible: Trend lines in scatter plots",
+          "url": "https://thefunctionalart.blogspot.com/2013/04/trend-lines-in-scatter-plots.html"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -3428,7 +3880,28 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "observable/d3-cancer-survival-rates",
+          "title": "Cancer Survival Rates",
+          "url": "https://observablehq.com/@d3/cancer-survival-rates"
+        },
+        {
+          "key": "visualising-data/simplified-slope-graphs",
+          "title": "Simplified slope graphs",
+          "url": "https://visualisingdata.com/2020/06/simplified-slope-graphs/"
+        },
+        {
+          "key": "cairo-blog/from-scatter-plot-to-slope-chart-html",
+          "title": "From scatter plot to slope chart",
+          "url": "https://thefunctionalart.blogspot.com/2016/04/from-scatter-plot-to-slope-chart.html"
+        },
+        {
+          "key": "nightingale/beyond-the-bar-alternative-methods-for-visualizing-two-points-of-change",
+          "title": "Beyond the Bar: Alternative Methods for Visualizing Two Points of Change",
+          "url": "https://nightingaledvs.com/beyond-the-bar-alternative-methods-for-visualizing-two-points-of-change/"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -3516,7 +3989,28 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "junkcharts/small-multiples-with-simple-axes",
+          "title": "Small multiples with simple axes",
+          "url": "https://www.junkcharts.com/small-multiples-with-simple-axes"
+        },
+        {
+          "key": "junkcharts/small-multiples",
+          "title": "Small multiples re-imagineered",
+          "url": "https://www.junkcharts.com/small-multiples"
+        },
+        {
+          "key": "cairo-blog/stacked-bar-graphs-and-small-multiples-html",
+          "title": "Stacked bar graphs and small multiples",
+          "url": "https://thefunctionalart.blogspot.com/2016/05/stacked-bar-graphs-and-small-multiples.html"
+        },
+        {
+          "key": "visualising-data/little-visualisation-design-part-18",
+          "title": "The little of visualisation design: Part 18",
+          "url": "https://visualisingdata.com/2016/07/little-visualisation-design-part-18/"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -3615,7 +4109,23 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "cairo-blog/googles-music-timeline-some-thoughts-html",
+          "title": "Google's 'Music Timeline' visualization: Some thoughts",
+          "url": "https://thefunctionalart.blogspot.com/2014/01/googles-music-timeline-some-thoughts.html"
+        },
+        {
+          "key": "visualising-data/last-fm-listening-clocks",
+          "title": "Last.fm listening clocks",
+          "url": "https://visualisingdata.com/2010/09/last-fm-listening-clocks/"
+        },
+        {
+          "key": "cairo-blog/the-problem-with-unlabeled-scales-html",
+          "title": "The problem with inconsistent and unlabeled scales",
+          "url": "https://thefunctionalart.blogspot.com/2020/05/the-problem-with-unlabeled-scales.html"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -3743,8 +4253,35 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "junkcharts/small-multiples-with-simple-axes",
+          "title": "Small multiples with simple axes",
+          "url": "https://www.junkcharts.com/small-multiples-with-simple-axes"
+        },
+        {
+          "key": "cairo-blog/stacked-bar-graphs-and-small-multiples-html",
+          "title": "Stacked bar graphs and small multiples",
+          "url": "https://thefunctionalart.blogspot.com/2016/05/stacked-bar-graphs-and-small-multiples.html"
+        },
+        {
+          "key": "eagereyes/two-short-papers-on-part-to-whole-charts-at-eurovis",
+          "title": "Two Short Papers on Part-to-Whole Charts at EuroVis",
+          "url": "https://eagereyes.org/blog/2019/two-short-papers-on-part-to-whole-charts-at-eurovis"
+        },
+        {
+          "key": "cairo-blog/nprs-college-majors-visualization-html",
+          "title": "NPR's College Majors visualization: A critique",
+          "url": "https://thefunctionalart.blogspot.com/2014/12/nprs-college-majors-visualization.html"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "eagereyes/stacked-bars-are-the-worst",
+          "title": "Stacked Bars Are the Worst",
+          "url": "https://eagereyes.org/blog/2016/stacked-bars-are-the-worst"
+        }
+      ],
       "related_principles": [
         "weaver/principle-put-percentages-next-to-labels"
       ],
@@ -3842,8 +4379,30 @@
           ]
         }
       ],
-      "canonical_examples": [],
-      "antipattern_examples": [],
+      "canonical_examples": [
+        {
+          "key": "visualising-data/making-sense-of-streamgraphs",
+          "title": "Making sense of streamgraphs",
+          "url": "https://visualisingdata.com/2010/08/making-sense-of-streamgraphs/"
+        },
+        {
+          "key": "cairo-blog/googles-music-timeline-some-thoughts-html",
+          "title": "Google's 'Music Timeline' visualization: Some thoughts",
+          "url": "https://thefunctionalart.blogspot.com/2014/01/googles-music-timeline-some-thoughts.html"
+        },
+        {
+          "key": "nightingale/endless-river-an-overview-of-dataviz-for-categorical-data",
+          "title": "Endless River: An Overview of Dataviz for Categorical Data",
+          "url": "https://nightingaledvs.com/endless-river-an-overview-of-dataviz-for-categorical-data/"
+        }
+      ],
+      "antipattern_examples": [
+        {
+          "key": "junkcharts/leave-good-alone",
+          "title": "Leave good alone",
+          "url": "https://www.junkcharts.com/leave-good-alone"
+        }
+      ],
       "related_principles": [],
       "related_projects": []
     },
@@ -4117,7 +4676,33 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "observable/d3-treemap",
+          "title": "Treemap component",
+          "url": "https://observablehq.com/@d3/treemap"
+        },
+        {
+          "key": "eagereyes/treemaps",
+          "title": "Treemaps",
+          "url": "https://eagereyes.org/blog/2008/treemaps"
+        },
+        {
+          "key": "junkcharts/visualizing-hierarchies",
+          "title": "Visualizing hierarchies",
+          "url": "https://www.junkcharts.com/visualizing-hierarchies"
+        },
+        {
+          "key": "observable/enjalot-treemap-of-sequences",
+          "title": "Treemap of Sequences",
+          "url": "https://observablehq.com/@enjalot/treemap-of-sequences"
+        },
+        {
+          "key": "visualising-data/treemap-data-art",
+          "title": "Treemap data art",
+          "url": "https://visualisingdata.com/2013/10/treemap-data-art/"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []
@@ -4306,7 +4891,23 @@
           ]
         }
       ],
-      "canonical_examples": [],
+      "canonical_examples": [
+        {
+          "key": "eagereyes/engaging-readers-with-square-pie-waffle-charts",
+          "title": "Engaging Readers with Square Pie/Waffle Charts",
+          "url": "https://eagereyes.org/blog/2008/engaging-readers-with-square-pie-waffle-charts"
+        },
+        {
+          "key": "observable/observablehq-plot-survey-waffle",
+          "title": "Plot: Survey waffle",
+          "url": "https://observablehq.com/@observablehq/plot-survey-waffle"
+        },
+        {
+          "key": "eagereyes/charts-and-metaphors",
+          "title": "Charts and Metaphors",
+          "url": "https://eagereyes.org/blog/2008/charts-and-metaphors"
+        }
+      ],
       "antipattern_examples": [],
       "related_principles": [],
       "related_projects": []

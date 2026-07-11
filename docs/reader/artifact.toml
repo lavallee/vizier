@@ -1,0 +1,17 @@
+[artifact]
+slug = "chart-forms"
+title = "Chart forms — when, how, and when not"
+description = "A guide to 43 chart-form patterns: purpose families, reading checklists, live examples, and when not to use each form."
+kind = "reference-guide"
+status = "live"
+created = "2026-07-10"
+
+[build]
+commands = ["cd ../.. && uv run vizier db build", "cd ../.. && uv run vizier patterns export -o docs/reader/data.json"]
+site = "."
+
+[deploy]
+target = "github-pages"
+
+[deploy.github-pages]
+subpath = "reader"
