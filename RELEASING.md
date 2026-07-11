@@ -92,21 +92,28 @@ changelog.
    )"
    ```
 
-9. **Publish to PyPI.**
+9. **Publish to PyPI** (distribution name: `datavizier`; import + CLI stay
+   `vizier`). Publishing is automated: creating the GitHub Release in step 8
+   triggers `.github/workflows/publish.yml`, which builds and uploads via PyPI
+   trusted publishing (OIDC — no stored token). The trusted publisher is
+   configured on PyPI for project `datavizier` with owner `lavallee`, repo
+   `vizier`, workflow `publish.yml`, environment `pypi-datavizier`.
+
+   Watch the run under the repo's **Actions** tab; re-dispatch it
+   (`workflow_dispatch`) if it fails — `skip-existing` makes re-runs safe.
+   Manual fallback if the workflow is unavailable:
    ```bash
    uv build
    uv publish            # needs a PyPI token (UV_PUBLISH_TOKEN) or ~/.pypirc
    ```
-   Verify the new version at <https://pypi.org/project/vizier/>. When PyPI
-   trusted publishing is configured for this project, this step can move to a
-   `publish.yml` workflow triggered by the GitHub release (as `somm` does).
+   Verify the new version at <https://pypi.org/project/datavizier/>.
 
 ## Post-release
 
 - Confirm the release at <https://github.com/lavallee/vizier/releases>.
 - If `docs/` changed, wait ~1 minute for GitHub Pages to deploy, then verify
   the site version badge and the guide at `/reader/`.
-- `pip install "vizier[critique]"` resolves `somm`/`somm-core` from PyPI; if you
+- `pip install "datavizier[critique]"` resolves `somm`/`somm-core` from PyPI; if you
   bumped the `somm` pin, sanity-check the resolve.
 
 ## Conventions worth keeping (the family template)

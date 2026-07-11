@@ -44,7 +44,7 @@
         one set of thresholds.
       </p>
 
-<pre class="code"><span class="prompt">$</span> pip install vizier
+<pre class="code"><span class="prompt">$</span> pip install datavizier
 <span class="prompt">$</span> vizier recommend-form <span class="str">"composition of a total over time"</span> --n-series 5
 <span class="c">→ stacked-area   (Part-to-whole · Change over time)</span>
 <span class="prompt">$</span> vizier validate <span class="str">"#e69f00,#0072b2,#009e73"</span> --pairs all
@@ -154,7 +154,7 @@
           <p>
             <code>validate</code>, <code>suggest</code>, <code>recommend</code>,
             <code>analyze</code>, <code>ink</code>, and the pattern query all
-            work from <code>pip install vizier</code> alone. Retrieval and LLM
+            work from <code>pip install datavizier</code> alone. Retrieval and LLM
             critique are opt-in extras.
           </p>
         </div>
@@ -166,10 +166,10 @@
     <div class="wrap">
       <h2>Install</h2>
 
-<pre class="code"><span class="prompt">$</span> pip install vizier                 <span class="c"># computable toolkit + pattern query + MCP server</span>
-<span class="prompt">$</span> pip install <span class="str">"vizier[search]"</span>       <span class="c"># + semantic retrieval (find_similar)</span>
-<span class="prompt">$</span> pip install <span class="str">"vizier[critique]"</span>     <span class="c"># + LLM critique/eval (routes through somm)</span>
-<span class="prompt">$</span> pip install <span class="str">"vizier[ingest]"</span>       <span class="c"># + rebuild the corpus from source</span></pre>
+<pre class="code"><span class="prompt">$</span> pip install datavizier                 <span class="c"># computable toolkit + pattern query + MCP server</span>
+<span class="prompt">$</span> pip install <span class="str">"datavizier[search]"</span>       <span class="c"># + semantic retrieval (find_similar)</span>
+<span class="prompt">$</span> pip install <span class="str">"datavizier[critique]"</span>     <span class="c"># + LLM critique/eval (routes through somm)</span>
+<span class="prompt">$</span> pip install <span class="str">"datavizier[ingest]"</span>       <span class="c"># + rebuild the corpus from source</span></pre>
 
       <p class="section-lede">
         Python 3.12+. The core has no proprietary and no heavyweight
