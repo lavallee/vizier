@@ -3,7 +3,7 @@ from __future__ import annotations
 from vizier.cli import main
 
 
-def test_cli_keeps_legacy_malo_successor_surface():
+def test_cli_exposes_expected_command_surface():
     expected_top_level = {
         "analyze",
         "caption",
@@ -32,5 +32,5 @@ def test_cli_keeps_legacy_malo_successor_surface():
     )
 
 
-def test_cli_exceeds_malo_with_pre_render_journalism_guide():
+def test_cli_exposes_pre_render_journalism_guide():
     assert "guide" in main.commands

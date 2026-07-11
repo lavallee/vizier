@@ -5,10 +5,10 @@ All notable changes to vizier are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See
 [RELEASING.md](RELEASING.md) for the release process.
 
-## [0.1.0] — unreleased
+## [0.1.0] — 2026-07-11
 
-First public release. Replace "unreleased" with the date when the `v0.1.0` tag
-is cut.
+First public release. Published to PyPI as **`datavizier`** (the bare `vizier`
+name was already taken); the import package and CLI are both `vizier`.
 
 ### Added
 - **Computable toolkit** (deterministic, no LLM, no keys): `validate`,

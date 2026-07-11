@@ -265,6 +265,68 @@ wheels = [
 ]
 
 [[package]]
+name = "datavizier"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "click" },
+    { name = "httpx" },
+    { name = "mcp" },
+    { name = "numpy" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "python-frontmatter" },
+]
+
+[package.optional-dependencies]
+browser = [
+    { name = "patchright" },
+]
+critique = [
+    { name = "fastembed" },
+    { name = "somm" },
+    { name = "somm-core" },
+]
+ingest = [
+    { name = "beautifulsoup4" },
+    { name = "lxml" },
+]
+search = [
+    { name = "fastembed" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", marker = "extra == 'ingest'", specifier = ">=4.12" },
+    { name = "click", specifier = ">=8.1" },
+    { name = "fastembed", marker = "extra == 'critique'", specifier = ">=0.4" },
+    { name = "fastembed", marker = "extra == 'search'", specifier = ">=0.4" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "lxml", marker = "extra == 'ingest'", specifier = ">=5.0" },
+    { name = "mcp", specifier = ">=1.27.0" },
+    { name = "numpy", specifier = ">=1.26" },
+    { name = "patchright", marker = "extra == 'browser'" },
+    { name = "pydantic", specifier = ">=2.7" },
+    { name = "python-dotenv", specifier = ">=1.0" },
+    { name = "python-frontmatter", specifier = ">=1.1" },
+    { name = "somm", marker = "extra == 'critique'", specifier = ">=0.7" },
+    { name = "somm-core", marker = "extra == 'critique'", specifier = ">=0.7" },
+]
+provides-extras = ["search", "critique", "ingest", "browser"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "ruff", specifier = ">=0.6" },
+]
+
+[[package]]
 name = "fastembed"
 version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1511,68 +1573,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/2e/41/06cce5dbb9f77591512957710ac709e60b12e6216a2f2d0d607fd49706e8/uvicorn-0.50.0.tar.gz", hash = "sha256:0c92e1bc2259cb7faa4fcef774a5966588f2e88542744550b66799fba10b76f1", size = 93257, upload-time = "2026-07-04T05:03:26.33Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/3a/eb70620ca2bf8213603d5c731460687c49fee38b0072f0b4a637781f0a53/uvicorn-0.50.0-py3-none-any.whl", hash = "sha256:05f0eb19edf38208f79f43df8a63081b48df31b0cd1e5997be957a4dc97d1b19", size = 72716, upload-time = "2026-07-04T05:03:24.848Z" },
-]
-
-[[package]]
-name = "vizier"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "click" },
-    { name = "httpx" },
-    { name = "mcp" },
-    { name = "numpy" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-    { name = "python-frontmatter" },
-]
-
-[package.optional-dependencies]
-browser = [
-    { name = "patchright" },
-]
-critique = [
-    { name = "fastembed" },
-    { name = "somm" },
-    { name = "somm-core" },
-]
-ingest = [
-    { name = "beautifulsoup4" },
-    { name = "lxml" },
-]
-search = [
-    { name = "fastembed" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "beautifulsoup4", marker = "extra == 'ingest'", specifier = ">=4.12" },
-    { name = "click", specifier = ">=8.1" },
-    { name = "fastembed", marker = "extra == 'critique'", specifier = ">=0.4" },
-    { name = "fastembed", marker = "extra == 'search'", specifier = ">=0.4" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "lxml", marker = "extra == 'ingest'", specifier = ">=5.0" },
-    { name = "mcp", specifier = ">=1.27.0" },
-    { name = "numpy", specifier = ">=1.26" },
-    { name = "patchright", marker = "extra == 'browser'" },
-    { name = "pydantic", specifier = ">=2.7" },
-    { name = "python-dotenv", specifier = ">=1.0" },
-    { name = "python-frontmatter", specifier = ">=1.1" },
-    { name = "somm", marker = "extra == 'critique'", specifier = ">=0.7" },
-    { name = "somm-core", marker = "extra == 'critique'", specifier = ">=0.7" },
-]
-provides-extras = ["search", "critique", "ingest", "browser"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=8.0" },
-    { name = "ruff", specifier = ">=0.6" },
 ]
 
 [[package]]

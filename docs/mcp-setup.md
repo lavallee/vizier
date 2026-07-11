@@ -11,22 +11,14 @@ as tools, instead of reading `corpus/<source>/*.md` files directly.
 > since v2. If you also want `find_similar` to work, run
 > `vizier db embed` (slower — ~12 min on CPU).
 
-If the consuming project should also see the private/local corpus DB, the
-default local layout is enough:
-
-```text
-Projects/
-  vizier/
-  vizier-private/corpus/vizier-private.db
-```
-
-After `vizier-private/scripts/unpack.sh` has produced the DB, Vizier
-auto-discovers it. For a custom location, set `VIZIER_PRIVATE_DB` or
-`VIZIER_EXTENSION_DBS` to one or more SQLite DB paths separated by the platform
-path separator (`:` on macOS/Linux, `;` on Windows). Vizier opens those DBs
-read-only and merges them into `search`, `find_similar`, `lookup`,
-`list_sources`, `list_principles`, `list_rubrics`, `list_patterns`,
-`get_pattern`, and `stats`.
+If the consuming project should also see a private or local corpus DB, point
+Vizier at it with `VIZIER_PRIVATE_DB` or `VIZIER_EXTENSION_DBS` — one or more
+SQLite DB paths separated by the platform path separator (`:` on macOS/Linux,
+`;` on Windows). Vizier opens those DBs read-only and merges them into `search`,
+`find_similar`, `lookup`, `list_sources`, `list_principles`, `list_rubrics`,
+`list_patterns`, `get_pattern`, and `stats`. As a convenience, a DB placed in a
+sibling `vizier-private/corpus/vizier-private.db` is auto-discovered without any
+env var.
 
 ## Claude Code (from another project)
 
@@ -69,7 +61,7 @@ Support/Claude/claude_desktop_config.json` on macOS) and add:
 }
 ```
 
-Omit `env` if `vizier-private` is next to `vizier` and should be used
+Omit `env` if an auto-discovered sibling `vizier-private` DB should be used
 automatically. Use `"VIZIER_AUTO_PRIVATE": "0"` for a forced public-only run.
 Restart the client.
 Vizier's tools appear in the tool list.
@@ -99,11 +91,10 @@ next to vizier. Run `uv run vizier ingest weaver`, then `uv run vizier db build`
 (or the DB is otherwise missing embeddings). `vizier db stats` will show
 `items` > `embeddings`. See note at the top of this file.
 
-**Private/local corpus items do not appear.** Run
-`../vizier-private/scripts/unpack.sh` if the DB is missing. Then check that
-`vizier db stats` reports the extension DB under `extension_dbs`. If the DB is
-not in a sibling `vizier-private` repo, pass `VIZIER_PRIVATE_DB` or
-`VIZIER_EXTENSION_DBS` into the server process.
+**Private/local corpus items do not appear.** Check that `vizier db stats`
+reports the extension DB under `extension_dbs`. If the DB is not in an
+auto-discovered sibling `vizier-private/corpus/` location, pass
+`VIZIER_PRIVATE_DB` or `VIZIER_EXTENSION_DBS` into the server process.
 
 **`search` errors on queries with punctuation.** Bare hyphens, apostrophes,
 commas, semicolons, and slashes are normalized before FTS5 runs. If a query

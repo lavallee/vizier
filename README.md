@@ -27,14 +27,16 @@ graphics.
 ## Install
 
 ```bash
-pip install vizier                 # the computable toolkit + pattern query + MCP server
-pip install "vizier[search]"       # + semantic retrieval (find_similar); pulls onnxruntime
-pip install "vizier[critique]"     # + LLM critique/eval (needs an LLM gateway; see below)
-pip install "vizier[ingest]"       # + rebuild the corpus from source
+pip install datavizier                 # the computable toolkit + pattern query + MCP server
+pip install "datavizier[search]"       # + semantic retrieval (find_similar); pulls onnxruntime
+pip install "datavizier[critique]"     # + LLM critique/eval (needs an LLM gateway; see below)
+pip install "datavizier[ingest]"       # + rebuild the corpus from source
 ```
 
-The core has no proprietary and no heavyweight dependencies — `validate`, `suggest`,
-`recommend`, `analyze`, and `ink` work from `pip install vizier` alone.
+The distribution is `datavizier` on PyPI; the import package and CLI are both `vizier`
+(`import vizier`, `vizier …`). The core has no proprietary and no heavyweight
+dependencies — `validate`, `suggest`, `recommend`, `analyze`, and `ink` work from
+`pip install datavizier` alone.
 
 ## Quickstart — the computable toolkit (no keys)
 
@@ -120,17 +122,9 @@ per-source ingest notes are in [docs/process-notes-sources.md](docs/process-note
 Fetching is pluggable (`src/vizier/ingest/_common.py`): the bundled default is httpx;
 point `$VIZIER_FETCHER` at a richer fetcher, or set your own `FETCHER`.
 
-If you keep a private/local corpus DB with the same schema, keep it out of the
-distributed package. In the local source-checkout layout, Vizier auto-discovers
-an unpacked sibling private artifact at `../vizier-private/corpus/vizier-private.db`:
-
-```bash
-cd ../vizier-private
-./scripts/unpack.sh
-uv --directory ../vizier run vizier db stats
-```
-
-For a custom path, point Vizier at it explicitly at runtime:
+If you keep a private or local corpus DB with the same schema, keep it out of the
+distributed package and point Vizier at it at runtime — this is the plug point for
+proprietary prior art, so nothing private ever ships in the public package:
 
 ```bash
 VIZIER_PRIVATE_DB=/absolute/path/to/private/.vizier.db vizier db search "reader decision"
@@ -141,11 +135,10 @@ VIZIER_EXTENSION_DBS="/path/one.db:/path/two.db" vizier mcp
 Extension DBs are opened read-only and merged into the read-side corpus APIs:
 `search`, `find_similar`, `lookup`, `list_sources`, `list_principles`,
 `list_rubrics`, `list_patterns`, `get_pattern`, and `stats`.
-`VIZIER_EXTRA_DB_PATHS` is accepted as an alias for the same path-list. Set
-`VIZIER_AUTO_PRIVATE=0` for a public-only run that ignores the sibling
-`vizier-private` repo.
-
-For predecessor replacement work, see [docs/predecessor-parity.md](docs/predecessor-parity.md).
+`VIZIER_EXTRA_DB_PATHS` is accepted as an alias for the same path-list. As a
+convenience, Vizier also auto-discovers an extension DB in a sibling
+`vizier-private/corpus/vizier-private.db`; set `VIZIER_AUTO_PRIVATE=0` to disable
+that and run against the public corpus only.
 
 ## Critique + evaluation (optional)
 

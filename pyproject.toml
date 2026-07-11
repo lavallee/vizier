@@ -3,7 +3,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "vizier"
+# Distribution name on PyPI. The import package and CLI are both `vizier`
+# (the bare `vizier` project name was already taken on PyPI): install
+# `datavizier`, then `import vizier` / run `vizier`.
+name = "datavizier"
 version = "0.1.0"
 description = "Generate and critique journalistic data visualizations — chart-form choice, encoding, and a corpus-backed critic"
 readme = "README.md"
