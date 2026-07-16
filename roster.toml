@@ -1,0 +1,204 @@
+# vizier roster — capabilities published to fab.roster
+
+[app]
+name = "vizier"
+version = "0.1.0"
+description = "Generation + critique for journalistic data visualizations: chart-form recommendation, colorblind-safe palette/ramp generation, computable color checks, corpus-backed chart critique, and the adaptive needs-charts gate. Supersedes `malo` (deprecated 2026-07-10) — malo's roster forwards its needs_charts and critique_chart capabilities here. PyPI dist is `datavizier`; the import package and CLI are both `vizier`. Reachable as a CLI, a 14-tool MCP server (stdio), and direct Python entry points."
+
+[[capabilities]]
+id = "recommend_form"
+description = "Recommend chart form(s) for a free-text data-job or FT family — deterministic, no LLM. Returns ranked patterns (capsule, when-to/when-not, alternatives, common mistakes) and form-heuristic guards (e.g. a single value is a stat tile, not a chart)."
+entry_cli = "vizier recommend-form \"{job}\" --family {family} --n-series {n_series}"
+entry_python = "vizier.analyze.forms:recommend_form"
+entry_mcp = "vizier mcp → recommend_form"
+inputs = [
+  { name = "job", type = "str", schema = "text", optional = true },
+  { name = "family", type = "str", schema = "vizier/ft-family", optional = true },
+  { name = "n_series", type = "int", schema = "count", optional = true },
+]
+outputs = [
+  { name = "recommendation", type = "object", schema = "vizier/form-recommendation/v1" },
+]
+tags = ["chart-form", "recommendation", "computable", "no-llm"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/cli.py:329-347 (recommend-form); src/vizier/mcp_server.py:342-352. Core dependency, no extras required."
+
+[[capabilities]]
+id = "implementation_guide"
+description = "Guide a chart implementation before building it: combines the deterministic form recommendation with a journalism checklist (reader decision, headline claim, fair comparison, denominator, counter-reading, accessibility) and corpus prior-art signals."
+entry_cli = "vizier guide \"{job}\" --context {context} --family {family} --n-series {n_series}"
+entry_python = "vizier.analyze.guidance:implementation_guide"
+entry_mcp = "vizier mcp → implementation_guide"
+inputs = [
+  { name = "job", type = "str", schema = "text" },
+  { name = "context", type = "str", schema = "text", optional = true },
+  { name = "family", type = "str", schema = "vizier/ft-family", optional = true },
+  { name = "n_series", type = "int", schema = "count", optional = true },
+]
+outputs = [
+  { name = "guide", type = "object", schema = "vizier/implementation-guide/v1" },
+]
+tags = ["chart-form", "guidance", "journalism-checklist", "prior-art"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/cli.py:350-381; src/vizier/mcp_server.py:355-385. Set --semantic to also use embedding retrieval (needs the `search` extra)."
+
+[[capabilities]]
+id = "suggest_palette"
+description = "Generate a CVD-safe categorical palette of N colors, validated before it's returned (Machado-2009 colorblind ΔE, WCAG contrast, OKLCH band/chroma). Refuses infeasible requests (n>8) rather than returning something that fails."
+entry_cli = "vizier suggest-palette {n} --mode {mode} --theme {theme} --pairs {pairs}"
+entry_python = "vizier.analyze.generate:suggest_palette"
+entry_mcp = "vizier mcp → suggest_palette"
+inputs = [
+  { name = "n", type = "int", schema = "count" },
+  { name = "mode", type = "str", schema = "vizier/color-mode", optional = true },
+  { name = "theme", type = "str", schema = "vizier/palette-theme", optional = true },
+  { name = "pairs", type = "str", schema = "vizier/pair-mode", optional = true },
+]
+outputs = [
+  { name = "palette", type = "object", schema = "vizier/palette/v1" },
+]
+tags = ["color", "palette", "colorblind-safe", "computable", "no-llm"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/cli.py:275-296; src/vizier/mcp_server.py:279-291. Core dependency, no extras required."
+
+[[capabilities]]
+id = "suggest_ramp"
+description = "Generate a one-hue ordinal/sequential ramp of STEPS, validated (monotone lightness, visible ΔL, light end clears the surface). Errors clearly when a hue can't hold the requested step count."
+entry_cli = "vizier suggest-ramp {steps} --hue {hue} --mode {mode}"
+entry_python = "vizier.analyze.generate:suggest_ramp"
+entry_mcp = "vizier mcp → suggest_ramp"
+inputs = [
+  { name = "steps", type = "int", schema = "count" },
+  { name = "hue", type = "str", schema = "vizier/ramp-hue", optional = true },
+]
+outputs = [
+  { name = "ramp", type = "object", schema = "vizier/ramp/v1" },
+]
+tags = ["color", "ramp", "ordinal", "computable", "no-llm"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/cli.py:298-317; src/vizier/mcp_server.py:293-314."
+
+[[capabilities]]
+id = "ink_on"
+description = "The legible text/ink color (dark or light) that best clears WCAG contrast on a given background fill."
+entry_cli = "vizier ink \"{background}\""
+entry_python = "vizier.analyze.generate:ink_on"
+entry_mcp = "vizier mcp → ink_on"
+inputs = [
+  { name = "background", type = "str", schema = "vizier/hex-color" },
+]
+outputs = [
+  { name = "ink", type = "object", schema = "vizier/ink/v1" },
+]
+tags = ["color", "contrast", "wcag", "computable", "no-llm"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/cli.py:320-326; src/vizier/mcp_server.py:324-328."
+
+[[capabilities]]
+id = "validate_palette"
+description = "Run the computable color checks on a palette (Machado-2009 colorblind ΔE, WCAG contrast, OKLCH lightness-band/chroma-floor), categorical or one-hue ordinal. Deterministic — same thresholds the `dataviz` skill's validator uses."
+entry_cli = "vizier validate \"{colors}\" --pairs {pairs}"
+entry_python = "vizier.analyze.color:validate_categorical"
+entry_mcp = "vizier mcp → validate_palette"
+inputs = [
+  { name = "colors", type = "str", schema = "vizier/hex-color-list" },
+  { name = "pairs", type = "str", schema = "vizier/pair-mode", optional = true },
+  { name = "ordinal", type = "bool", schema = "flag", optional = true },
+]
+outputs = [
+  { name = "report", type = "object", schema = "vizier/color-report/v1" },
+]
+tags = ["color", "validation", "colorblind", "wcag", "computable", "no-llm"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/cli.py:218-242; src/vizier/mcp_server.py:204-217. Exits 1 on any hard FAIL when run as CLI."
+
+[[capabilities]]
+id = "analyze_artifact"
+description = "Extract the color palette from SVG/HTML chart source and run the color + structural checks on it — the one path where vizier reads *exact* swatches instead of an approximation."
+entry_cli = "vizier analyze {artifact_path} --pairs {pairs}"
+entry_python = "vizier.analyze.extract:extract"
+entry_mcp = "vizier mcp → analyze_artifact"
+inputs = [
+  { name = "artifact", type = "path", schema = "vizier/chart-svg-or-html" },
+]
+outputs = [
+  { name = "analysis", type = "object", schema = "vizier/artifact-analysis/v1" },
+]
+tags = ["color", "structure", "svg", "html", "computable", "no-llm"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/cli.py:245-272; src/vizier/mcp_server.py:251-265."
+
+[[capabilities]]
+id = "check_contrast"
+description = "WCAG contrast ratio between two colors, with AA/AAA pass flags for normal and large text. MCP-only — no dedicated CLI subcommand (the same math backs `vizier validate` and `vizier ink`)."
+entry_python = "vizier.analyze.color:contrast"
+entry_mcp = "vizier mcp → check_contrast"
+inputs = [
+  { name = "foreground", type = "str", schema = "vizier/hex-color" },
+  { name = "background", type = "str", schema = "vizier/hex-color" },
+]
+outputs = [
+  { name = "contrast", type = "object", schema = "vizier/contrast/v1" },
+]
+tags = ["color", "contrast", "wcag", "computable", "no-llm"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/mcp_server.py:220-239."
+
+[[capabilities]]
+id = "critique_chart"
+description = "LLM-backed critique of a chart image: retrieves relevant patterns + prior art from the corpus, then synthesizes a review (Cairo five-pillar framework, optional house-style lens). Successor to malo's `critique_chart` alias, but the input shape changed: malo's roster documented a `malo/chart-spec/v1` JSON input (`malo eval {chart_spec_json}`) — vizier's actual CLI takes an IMAGE_PATH (png/jpg/webp, or a direct image URL), not a chart-spec JSON. There is no vizier subcommand that accepts a bare chart-spec file; callers following malo's old contract will need to render or point at an image first."
+entry_cli = "vizier critique {image_path} --pattern {pattern_id} --context {context}"
+entry_python = "vizier.critique.adhoc:critique"
+inputs = [
+  { name = "image_path", type = "path", schema = "vizier/chart-image" },
+  { name = "pattern_id", type = "str", schema = "vizier/pattern-id", optional = true },
+  { name = "context", type = "str", schema = "text", optional = true },
+]
+outputs = [
+  { name = "critique", type = "object", schema = "vizier/critique/v1" },
+]
+tags = ["critique", "llm", "corpus", "prior-art"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/cli.py:465-509; src/vizier/critique/adhoc.py:246. Needs the `critique` extra (somm gateway + key in .env). Input schema diverges from malo's malo/chart-spec/v1 — see description."
+
+[[capabilities]]
+id = "needs_charts"
+description = "Adaptive gate: decide whether a reporting bundle warrants chart authoring at all, given the compositor's candidate chart proposals. Returns a decision (yes/no) plus per-candidate verdicts (keep/drop + reason), and a chart_spec for each kept candidate. Direct successor to malo's `needs_charts` alias."
+entry_cli = "python -m vizier.gate {bundle_dir}"
+entry_python = "vizier.gate:needs_charts"
+inputs = [
+  { name = "bundle_dir", type = "path", schema = "frank/reporting-bundle/v1" },
+]
+outputs = [
+  { name = "decision", type = "object", schema = "vizier/gate-decision/v1" },
+]
+tags = ["gate", "llm", "editorial-judgment"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/gate.py:108-218; src/vizier/__main__gate.py. IMPORTANT mismatch: malo's roster.toml advertises `malo decide {bundle_dir}` forwarding to \"vizier.gate\", implying a `vizier decide`/`vizier gate` subcommand — but `vizier.gate` is NOT wired into src/vizier/cli.py's click group at all. The only real invocation is `python -m vizier.gate <bundle_dir> [<bundle_dir> ...]` (argparse entry in __main__gate.py), which writes draft/vizier-decision.json into each bundle. Needs the `critique` extra (somm gateway)."
+
+[[capabilities]]
+id = "corpus_query"
+description = "Query the compiled corpus of data-viz writing and reference material: BM25 keyword search, semantic (embedding) similarity, direct lookup, and browsing the 43-pattern chart-form taxonomy, canonical rubrics (Cairo, FT Vocab), and weaver principles by workflow stage."
+entry_cli = "vizier db search \"{query}\" -k {k}"
+entry_python = "vizier.db.query:search"
+entry_mcp = "vizier mcp → search | find_similar | lookup | list_patterns | get_pattern | list_principles | list_rubrics | list_sources | stats"
+inputs = [
+  { name = "query", type = "str", schema = "text" },
+]
+outputs = [
+  { name = "hits", type = "list", schema = "vizier/corpus-hit/v1" },
+]
+tags = ["corpus", "rag", "search", "prior-art", "patterns"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/cli.py:177-208 (db search/similar); src/vizier/mcp_server.py:53-190. `find_similar` / db similar need the `search` extra (fastembed) or a prebuilt embed pass (`vizier db embed`)."
