@@ -1,0 +1,33 @@
+#!/bin/sh
+# (absolute shebang on purpose: `/usr/bin/env sh` can't resolve `sh` when PATH
+# is empty, which is exactly the situation this script has to report on.)
+# Launch vizier's MCP server for the Claude Code plugin.
+#
+# Three ways this can go, in order of preference:
+#   1. `vizier` is already on PATH (pip / uv tool install, or a dev venv) — use it.
+#   2. `uvx` is available — fetch and run the published package on demand, so
+#      installing the plugin is the only step a user has to take.
+#   3. Neither — say so on stderr and exit, rather than failing silently as a
+#      dead MCP server with no tools.
+set -eu
+
+if command -v vizier >/dev/null 2>&1; then
+  exec vizier mcp
+fi
+
+if command -v uvx >/dev/null 2>&1; then
+  exec uvx --from datavizier vizier mcp
+fi
+
+# `echo` only — this branch runs precisely when PATH is unhelpful, so it can't
+# assume `cat` or any other external command is reachable.
+echo "vizier: no \`vizier\` command and no \`uvx\` on PATH, so the MCP server can't start." >&2
+echo "" >&2
+echo "Install either one:" >&2
+echo "" >&2
+echo "    uv tool install datavizier        # recommended — puts \`vizier\` on PATH" >&2
+echo "    pip install datavizier" >&2
+echo "" >&2
+echo "Then restart Claude Code. The vizier skills drive the same \`vizier\` CLI," >&2
+echo "so they need it too." >&2
+exit 127

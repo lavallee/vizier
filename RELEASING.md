@@ -7,10 +7,12 @@ conventions as the sibling `somm` package so the two release the same way.
 ## Versioning
 
 vizier follows [semantic versioning](https://semver.org). The version lives in
-**two** places that move in lockstep:
+**three** places that move in lockstep (`tests/test_plugin.py` fails if the
+plugin manifest falls behind):
 
 - `pyproject.toml` → `version`
 - `src/vizier/__init__.py` → `__version__`
+- `.claude-plugin/plugin.json` → `version`
 
 Bump rules:
 
@@ -28,20 +30,33 @@ changelog.
 
 ## The checklist
 
-1. **Tests and lint pass locally.**
+1. **Tests, lint, and the install test pass locally.**
    ```bash
-   uv run pytest -q          # 17 tests
+   uv run pytest -q
    uv run ruff check src/ tests/
+   tests/install/run.sh --with-critique
    ```
    Any failure blocks the release. (These are also the CI gate — see
-   `.github/workflows/ci.yml`.)
+   `.github/workflows/ci.yml`.) The install test is the one that matters most
+   at release time: it builds the wheel and checks what a *user* gets — the
+   corpus riding along inside it, the index self-building, the MCP server
+   answering a handshake, the plugin installing from a marketplace, and the
+   optional paths naming their own fix. A source checkout hides every one of
+   those failures.
 
-2. **Bump the version in both places.**
+2. **Bump the version in all three places.**
    ```bash
-   OLD=0.1.0; NEW=0.2.0
+   OLD=0.2.0; NEW=0.3.0
    sed -i "s/^version = \"$OLD\"/version = \"$NEW\"/" pyproject.toml
    sed -i "s/__version__ = \"$OLD\"/__version__ = \"$NEW\"/" src/vizier/__init__.py
+   sed -i "s/\"version\": \"$OLD\"/\"version\": \"$NEW\"/" .claude-plugin/plugin.json
    ```
+
+   Then update the plugin's entry in the
+   [marketplace](https://github.com/lyra-forge/marketplace) —
+   `.claude-plugin/marketplace.json` (`version`) and the README's plugin
+   section — so `/plugin install vizier@lyra-forge` resolves to the release
+   you just cut. Validate it there with `claude plugin validate . --strict`.
 
 3. **Refresh the bundled chart-pattern data** if any pattern, rubric, or the
    taxonomy changed. The guide ships a snapshot that goes stale otherwise:

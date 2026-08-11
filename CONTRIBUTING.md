@@ -6,9 +6,20 @@ Thanks for your interest. A few things keep the project coherent.
 
 ```bash
 uv sync
-uv run python tests/test_color.py      # + test_generate.py, test_forms_structure.py
-# or with pip:  pip install -e ".[search]" && python tests/test_color.py
+uv run pytest -q
+uv run ruff check src/ tests/
+tests/install/run.sh                   # what a user's install does — see tests/install/README.md
 ```
+
+Run the install test before anything that touches packaging, the corpus layout,
+the MCP server, or the plugin. It's the only thing that exercises a wheel
+install, and the failures it catches are invisible from a source checkout.
+
+Opening this repo in Claude Code warns that `CLAUDE_PLUGIN_ROOT` is unset for
+the `vizier` MCP server. That's expected: the repo root doubles as the plugin
+root, so its `.mcp.json` is written for the plugin's environment. Ignore the
+warning, or register the server yourself with
+`claude mcp add vizier -- uv --directory . run vizier mcp`.
 
 ## The two halves — keep them distinct
 

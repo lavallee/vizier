@@ -31,3 +31,22 @@ jobs:
         run: uv run vizier db build
       - name: Run tests
         run: uv run pytest -q
+
+  # What the unit suite structurally can't cover: whether a *wheel* install
+  # works for someone who has never seen the repo. The corpus travelling in
+  # the wheel, the index self-building into a cache dir, the MCP server
+  # starting, and the critique path explaining what it's missing are all
+  # invisible from inside a source checkout.
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      # No `claude` CLI on the runner, so the plugin section self-skips; the
+      # package-install half is the part CI can hold the line on.
+      - name: Install test (fresh wheel, sandboxed)
+        run: tests/install/run.sh --with-critique

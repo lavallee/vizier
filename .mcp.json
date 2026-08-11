@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "vizier": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/vizier-mcp",
+      "args": []
+    }
+  }
+}
