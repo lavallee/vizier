@@ -32,6 +32,29 @@ def test_corpus_root_falls_back_to_the_packaged_corpus(monkeypatch, tmp_path):
     assert storage.is_packaged_corpus()
 
 
+def test_an_empty_corpus_dir_is_not_mistaken_for_a_checkout(monkeypatch, tmp_path):
+    """The 0.1.0 → 0.2.0 upgrade trap.
+
+    0.1.0 created an empty `corpus/` beside site-packages as a side effect of
+    opening its index. It survives the upgrade, and an existence check alone
+    reads it as a source checkout — leaving the user with a corpus of nothing
+    and the packaged one untouched.
+    """
+    monkeypatch.delenv("VIZIER_CORPUS_ROOT", raising=False)
+    leftover = tmp_path / "corpus"
+    leftover.mkdir()
+    (leftover / ".vizier.db").write_bytes(b"")
+    monkeypatch.setattr(storage, "REPO_CORPUS_ROOT", leftover)
+
+    assert storage.corpus_root() == storage.PACKAGED_CORPUS_ROOT
+    assert storage.is_packaged_corpus()
+
+    # …but the same path with real items in it is a checkout.
+    (leftover / "chart-forms").mkdir()
+    (leftover / "chart-forms" / "bar-chart.md").write_text("---\n---\n")
+    assert storage.corpus_root() == leftover
+
+
 def test_packaged_corpus_ships_the_authored_sources():
     """The wheel's force-include allowlist, asserted from the source side."""
     authored = {"chart-forms", "ft-vocab", "rubrics", "weaver"}

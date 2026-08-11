@@ -5,6 +5,21 @@ All notable changes to vizier are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See
 [RELEASING.md](RELEASING.md) for the release process.
 
+## [0.2.1] — 2026-08-11
+
+### Fixed
+- **Upgrading from 0.1.0 left vizier reading an empty corpus.** 0.1.0 created
+  an empty `corpus/` directory next to site-packages as a side effect of
+  opening its index; that directory survives an upgrade, and 0.2.0's
+  source-checkout detection accepted any directory that merely *existed*. An
+  upgraded install therefore served nothing while the packaged corpus sat
+  unused a directory away. Detection now asks whether the directory actually
+  holds corpus items. An explicit `VIZIER_CORPUS_ROOT` is still honored even
+  when empty, so `vizier ingest` can fill a fresh one.
+
+  Fresh installs of 0.2.0 were unaffected; anyone who had run 0.1.0 was not.
+  The install test now simulates the leftover directory.
+
 ## [0.2.0] — 2026-08-11
 
 Ships vizier as a Claude Code plugin, and fixes the three defects that made a

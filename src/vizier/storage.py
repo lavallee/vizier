@@ -42,11 +42,25 @@ DB_PATH_ENV = "VIZIER_DB_PATH"
 DB_FILENAME = ".vizier.db"
 
 
+def has_corpus_content(path: Path) -> bool:
+    """True if `path` holds corpus items, not just an empty directory.
+
+    Existence alone is not enough. vizier 0.1.0 created an empty `corpus/`
+    next to site-packages as a side effect of opening its index, and that
+    directory survives an upgrade — so an installed 0.2.0 mistook it for a
+    source checkout and read a corpus of nothing while the real packaged one
+    sat unused. Ask what's inside instead.
+    """
+    return path.is_dir() and any(path.glob("*/*.md"))
+
+
 def corpus_root() -> Path:
     override = os.getenv(CORPUS_ROOT_ENV)
     if override:
+        # An explicit path is the caller's business — honored even if empty,
+        # since `vizier ingest` has to be able to fill a fresh one.
         return Path(override).expanduser().resolve()
-    if REPO_CORPUS_ROOT.is_dir():
+    if has_corpus_content(REPO_CORPUS_ROOT):
         return REPO_CORPUS_ROOT
     return PACKAGED_CORPUS_ROOT
 

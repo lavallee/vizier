@@ -138,6 +138,19 @@ check_exit "validate fails a known-bad palette" 1 \
   "$VZ" validate "#ff0000,#00ff00" --pairs all
 check "ink picks a legible label color" "#" "$VZ" ink "#0072b2"
 
+# The 0.1.0 → 0.2.0 upgrade trap: 0.1.0 left an empty `corpus/` beside
+# site-packages, and an existence-only check reads that as a source checkout,
+# so the upgraded install serves an empty corpus while the packaged one sits
+# unused. Simulate the leftover directory and confirm it's ignored.
+PKG_DIR="$("$VENV/bin/python" -c 'import os, vizier; print(os.path.dirname(vizier.__file__))')"
+STALE_CORPUS="$(dirname "$(dirname "$PKG_DIR")")/corpus"   # the parents[2]/corpus 0.1.0 created
+mkdir -p "$STALE_CORPUS" && : > "$STALE_CORPUS/.vizier.db"
+check "a leftover empty corpus dir is not read as a checkout" '"corpus_packaged": true' \
+  "$VZ" doctor --json
+check "the packaged corpus still answers after the upgrade trap" "stacked-area" \
+  "$VZ" recommend-form "composition of a total over time" --n-series 5
+rm -rf "$STALE_CORPUS"
+
 check "doctor reports a healthy core" "corpus" "$VZ" doctor
 check_exit "doctor exits 0 on a core-only install" 0 "$VZ" doctor
 check "doctor sees the packaged corpus" '"corpus_packaged": true' "$VZ" doctor --json
