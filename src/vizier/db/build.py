@@ -196,6 +196,38 @@ def _embed_and_store(
     return n_written
 
 
+BUILD_VERSION_KEY = "built_by_vizier_version"
+
+
+def _stamp_build_version(conn: sqlite3.Connection) -> None:
+    """Record which vizier built this index.
+
+    The index is a cache, and for a packaged install it outlives the package
+    that filled it — `~/.cache/vizier/corpus.db` survives every upgrade. When
+    the shipped corpus changes underneath it (a renamed source, a dropped
+    item), nothing in the data itself says so. This stamp is what lets the
+    reader notice and rebuild.
+    """
+    from .. import __version__
+
+    conn.execute(
+        "INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+        (BUILD_VERSION_KEY, __version__),
+    )
+    conn.commit()
+
+
+def build_version(conn: sqlite3.Connection) -> str | None:
+    """The vizier version that last populated this index, if it recorded one."""
+    try:
+        row = conn.execute(
+            "SELECT value FROM meta WHERE key = ?", (BUILD_VERSION_KEY,)
+        ).fetchone()
+    except sqlite3.Error:
+        return None
+    return row[0] if row else None
+
+
 def populate(*, embed: bool = False) -> dict:
     """Walk corpus/, upsert items, and (optionally) embed new/changed bodies.
 
@@ -207,6 +239,7 @@ def populate(*, embed: bool = False) -> dict:
     conn = connect()
     try:
         written, new, changed = _upsert_items(conn)
+        _stamp_build_version(conn)
         info: dict = {
             "db_path": str(DB_PATH),
             "items_written": written,

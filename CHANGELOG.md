@@ -5,6 +5,21 @@ All notable changes to vizier are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See
 [RELEASING.md](RELEASING.md) for the release process.
 
+## [0.3.1] — 2026-08-11
+
+### Fixed
+- **An upgraded install kept serving the corpus of the version before it.** The
+  index is a cache, and for a packaged install it lives in
+  `~/.cache/vizier/corpus.db` — which outlives the package that filled it. The
+  auto-build only ran when that index was *empty*, so upgrading to 0.3.0 left
+  the renamed `weaver/*` rows in place, answering `list_principles` and
+  `search` alongside the new `principles/*` ones. `vizier doctor` on a
+  freshly-upgraded install showed the source that no longer exists.
+
+  The index now records which vizier built it, and a read refreshes it whenever
+  that differs from the running version. The rebuild already pruned rows whose
+  files are gone; nothing was ever reaching it.
+
 ## [0.3.0] — 2026-08-11
 
 ### Changed

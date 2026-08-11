@@ -1,7 +1,7 @@
 {
   "name": "vizier",
   "displayName": "vizier — chart judgment",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Steers agents toward good data visualization: pick the chart form from the reader's question rather than from habit, answer the honesty checks a newsroom would ask, and critique a finished chart against 43 documented forms and a corpus of critical writing.",
   "author": { "name": "Marc Lavallee" },
   "homepage": "https://lavallee.github.io/vizier/",

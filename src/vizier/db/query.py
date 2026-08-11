@@ -180,20 +180,30 @@ def ensure_index() -> None:
         return
     _auto_build_attempted = True
     try:
+        from .. import __version__
+        from . import build as B
+
         conn = connect()
         try:
             n = conn.execute("SELECT count(*) FROM items").fetchone()[0]
+            built_by = B.build_version(conn)
         finally:
             conn.close()
-        if n:
-            return
-        from . import build as B
 
-        print(
-            "vizier: building the corpus index (first run, a few seconds)…",
-            file=sys.stderr,
-            flush=True,
+        if n and built_by == __version__:
+            return
+
+        # A packaged install keeps its index in a user cache directory, which
+        # outlives the package that filled it. When an upgrade changes the
+        # shipped corpus — a renamed source, a dropped item — the stale rows
+        # are still sitting there answering queries, so rebuild on any version
+        # change, not only on an empty index. `populate()` prunes what's gone.
+        why = (
+            "building the corpus index (first run, a few seconds)…"
+            if not n
+            else f"refreshing the corpus index for {__version__} (was {built_by or 'unstamped'})…"
         )
+        print(f"vizier: {why}", file=sys.stderr, flush=True)
         B.populate(embed=False)
     except Exception as exc:  # a read-only cache dir, a corrupt DB, …
         print(

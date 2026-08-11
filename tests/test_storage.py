@@ -80,3 +80,57 @@ def test_db_path_moves_to_the_cache_for_a_packaged_corpus(monkeypatch, tmp_path)
 def test_db_path_can_be_overridden(monkeypatch, tmp_path):
     monkeypatch.setenv("VIZIER_DB_PATH", str(tmp_path / "elsewhere.db"))
     assert storage.db_path() == (tmp_path / "elsewhere.db").resolve()
+
+
+def test_a_stale_cached_index_is_rebuilt_after_an_upgrade(monkeypatch, tmp_path):
+    """The index is a cache that outlives the package that filled it.
+
+    `~/.cache/vizier/corpus.db` survives every upgrade, so when a release
+    changes the shipped corpus — 0.3.0 renamed the `weaver` source to
+    `principles` — the old rows keep answering queries. Only an empty index
+    used to trigger a rebuild, which meant an upgraded install served phantom
+    items forever.
+    """
+    import importlib
+    import sqlite3
+
+    from vizier import __version__
+    from vizier.db import build as B
+    from vizier.db import query as Q
+
+    # `vizier.db.connect` is both a module and a re-exported function; reach
+    # for the module explicitly or monkeypatch resolves the function.
+    connect_mod = importlib.import_module("vizier.db.connect")
+
+    db = tmp_path / "cache.db"
+    monkeypatch.setenv("VIZIER_DB_PATH", str(db))
+    monkeypatch.setenv("VIZIER_AUTO_PRIVATE", "0")
+    monkeypatch.setattr(Q, "DB_PATH", db)
+    monkeypatch.setattr(connect_mod, "DB_PATH", db)
+
+    monkeypatch.setattr(Q, "_auto_build_attempted", False)
+    Q.ensure_index()
+
+    conn = sqlite3.connect(db)
+    assert B.build_version(conn) == __version__
+    conn.execute(
+        "INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
+        (B.BUILD_VERSION_KEY, "0.0.1-old"),
+    )
+    conn.execute(
+        "INSERT INTO items (key, source, item_id, type, title, body, body_hash, fetched_at)"
+        " VALUES ('gone/ghost', 'gone', 'ghost', 'principle', 'Ghost', 'x', 'x', '2026-01-01T00:00:00Z')"
+    )
+    conn.commit()
+    assert conn.execute("SELECT count(*) FROM items WHERE source='gone'").fetchone()[0] == 1
+    conn.close()
+
+    monkeypatch.setattr(Q, "_auto_build_attempted", False)
+    Q.ensure_index()
+
+    conn = sqlite3.connect(db)
+    try:
+        assert conn.execute("SELECT count(*) FROM items WHERE source='gone'").fetchone()[0] == 0
+        assert B.build_version(conn) == __version__
+    finally:
+        conn.close()
