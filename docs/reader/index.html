@@ -14,7 +14,10 @@
   #viz { min-height: auto; display: block; max-width: 900px; margin: 0 auto; padding: 2rem 2rem 5rem; }
 
   .hero { padding: 2.5rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-  .hero .kicker { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; font-weight: 500; }
+  /* Plain back-link, not a kicker: it exists to get you home, not to decorate. */
+  .hero .backlink { font-size: 0.85rem; margin-bottom: 1rem; }
+  .hero .backlink a { color: var(--text-dim); text-decoration: none; }
+  .hero .backlink a:hover { color: var(--accent); }
   .hero h1 { font-family: var(--font-serif); font-style: italic; font-size: 2.4rem; font-weight: 400; color: var(--text); line-height: 1.15; margin-bottom: 1rem; letter-spacing: -0.005em; max-width: 780px; }
   .hero .dek { font-size: 1.13rem; color: #d4d4d4; line-height: 1.55; max-width: 720px; margin-bottom: 1rem; }
   .hero .byline { font-size: 0.72rem; color: var(--text-dim); }
@@ -240,7 +243,7 @@
 <div id="viz"><a id="top" style="position:absolute"></a>
 
   <div class="hero">
-    <div class="kicker"><a href="../" style="color:inherit;text-decoration:none;">vizier</a> · chart-forms guide</div>
+    <div class="backlink"><a href="../">← vizier</a></div>
     <h1>Chart forms — when, how, and when not</h1>
     <p class="dek">
       A working reference for picking a chart form. Most chart-type

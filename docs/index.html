@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark light">
 <title>vizier · chart judgment for people and agents</title>
-<meta name="description" content="vizier steers people and agents toward good data visualization: pick the chart form from the reader's question rather than from habit, answer the honesty checks a graphics desk would ask, and critique a finished chart against 43 documented forms and a corpus of critical writing. Install as a Claude Code plugin.">
+<meta name="description" content="Give your coding agent a graphics desk. vizier picks the chart form from the question your reader is asking — out of 43 documented forms — runs the checks a newsroom applies before publishing, and judges the result. A Claude Code plugin and an MCP server.">
 <meta property="og:title" content="vizier">
-<meta property="og:description" content="Chart judgment for people and agents — form choice from the reader's question, the honesty checks a graphics desk would ask, and corpus-backed critique. A Claude Code plugin and an MCP server.">
+<meta property="og:description" content="Give your coding agent a graphics desk — form choice from the reader's question, the checks a newsroom applies before publishing, and corpus-backed critique. A Claude Code plugin and an MCP server.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230a0a0a'/%3E%3Crect x='3' y='8' width='2.4' height='5' fill='%2393c5fd'/%3E%3Crect x='6.8' y='5' width='2.4' height='8' fill='%2386efac'/%3E%3Crect x='10.6' y='3' width='2.4' height='10' fill='%23fca5a5'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="style.css">
@@ -33,22 +33,28 @@
 <main>
   <section class="hero">
     <div class="wrap">
-      <p class="eyebrow">Chart judgment for people and agents</p>
-      <h1>Most bad charts<br>are decided before<br>the code is written.</h1>
+      <h1>Give your coding agent<span class="brk"> </span>a graphics desk.</h1>
       <p class="lede">
-        Not ugly — <em>wrong</em>: a defensible-looking answer to a question
-        nobody asked, or an honest-looking answer the data can't support.
-        vizier moves that decision onto something documented. It picks the
-        chart form from the reader's question, runs the checks a graphics desk
-        would run before publishing, and judges what a finished chart got
-        wrong.
+        vizier picks the chart form from the question your reader is asking —
+        out of 43 documented forms, with the alternatives that fit your case —
+        runs the checks a newsroom applies before publishing, and judges the
+        result. Install it once, and every chart your agent builds starts from
+        a decision it can defend.
       </p>
 
-<pre class="code"><span class="prompt">$</span> vizier recommend-form <span class="str">"how a budget splits, across five districts"</span> --n-series 5
-<span class="c">→ stacked-bar     when NOT to use: reader must compare a middle segment</span>
-<span class="c">                  reach for instead: grouped-bar, small-multiples</span>
-<span class="prompt">$</span> vizier guide <span class="str">"per-pupil spending vs state average"</span>
-<span class="c">→ Fair comparison · Unit and denominator · Counter-reading · Money basis</span></pre>
+      <div class="agent">
+        <p class="turn you">Chart how each of five districts splits its budget across four funds.</p>
+        <p class="turn call">chart-design → vizier <span class="op">recommend_form</span></p>
+<pre class="turn out">stacked-bar          Part-to-whole · Magnitude
+  when NOT to use    reader needs to compare a middle segment
+  reach for instead  grouped-bar, small-multiples</pre>
+        <p class="turn said">
+          Horizontal stacked bars, one per district. Fix the fund order across
+          all five and put the fund the story is about against the baseline —
+          only the first and last segments share one, so those are the
+          comparable ones. Sorted by share, not alphabetically.
+        </p>
+      </div>
 
       <div class="hero-cta">
         <a class="btn" href="#install">Install the plugin</a>
@@ -294,7 +300,6 @@
       <a href="https://github.com/lavallee/vizier/blob/main/INFLUENCES.md">influences</a> ·
       <a href="reader/">chart-forms guide</a>
     </p>
-    <p class="tiny">Pick the form from the reader's question, not from habit.</p>
   </div>
 </footer>
 

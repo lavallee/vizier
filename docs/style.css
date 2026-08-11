@@ -249,10 +249,21 @@ header.site nav a.gh:hover { background: var(--bg-alt); }
   transform: translateY(-1px);
 }
 
+/* The headline breaks where the wide measure wants it. `.brk` holds a real
+ * space, so when it stops being a block at narrow widths the words don't run
+ * together — which is what hiding a <br> does. */
+.hero h1 .brk { display: block; }
+
 @media (max-width: 640px) {
   .hero { padding: var(--sp-7) 0 var(--sp-6); }
   .hero h1 { font-size: 42px; }
+  .hero h1 .brk { display: inline; }
   .hero .lede { font-size: var(--text-md); }
+
+  /* Five nav items in one row are wider than a phone; let them wrap rather
+   * than push the whole page into a horizontal scroll. */
+  header.site .wrap { flex-wrap: wrap; gap: var(--sp-2); }
+  header.site nav { flex-wrap: wrap; gap: var(--sp-4); row-gap: var(--sp-2); }
 }
 
 /* --------------------------------------------------------------------
@@ -428,14 +439,56 @@ footer a:hover { color: var(--fg); }
  * vizier additions (kept small; everything above is shared with the family)
  */
 
-/* hero eyebrow — mono uppercase kicker above the headline */
-.eyebrow {
+/* Agent transcript — the hero demo. vizier's primary surface is a coding
+ * agent, so the above-the-fold example is a session, not a shell. Four turns:
+ * what you ask, what it calls, what comes back, what the agent then says.
+ * Deliberately quieter than a code block — this is prose with evidence in it,
+ * not a command to copy. */
+.agent {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-code);
+  padding: var(--sp-5);
+  margin: var(--sp-6) 0 0;
+  max-width: 660px;
+}
+.agent .turn { margin: 0; }
+.agent .turn + .turn { margin-top: var(--sp-4); }
+
+.agent .you {
+  color: var(--fg);
+  font-weight: 500;
+  padding-left: var(--sp-4);
+  border-left: 2px solid var(--accent);
+  line-height: 1.5;
+}
+.agent .call {
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin: 0 0 var(--sp-4);
+  font-size: var(--text-sm);
+  color: var(--fg-dim);
+}
+.agent .call .op { color: var(--accent-2); }
+.agent pre.out {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--fg-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  margin: var(--sp-3) 0 0;
+  overflow-x: auto;
+}
+.agent .said {
+  color: var(--fg-muted);
+  line-height: 1.55;
+  border-top: 1px solid var(--border);
+  padding-top: var(--sp-4);
+}
+
+@media (max-width: 640px) {
+  .agent { padding: var(--sp-4); }
+  .agent pre.out { font-size: 12px; }
 }
 
 /* decide | critique, shown as a pair so the shared-thresholds framing is
