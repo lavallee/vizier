@@ -5,6 +5,59 @@ All notable changes to vizier are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See
 [RELEASING.md](RELEASING.md) for the release process.
 
+## [0.2.0] — 2026-08-11
+
+Ships vizier as a Claude Code plugin, and fixes the three defects that made a
+plain `pip install datavizier` much less useful than the source checkout.
+
+### Added
+- **Claude Code plugin** (`.claude-plugin/`, `skills/`, `.mcp.json`). Two skills
+  — `chart-design`, which fires before any chart code gets written and decides
+  the form from the reader's question, and `chart-critique`, which judges a
+  chart that already exists — plus vizier's MCP server, bundled and launched by
+  `bin/vizier-mcp` (uses an installed `vizier`, falls back to `uvx`, and
+  explains itself if neither is available). Install with
+  `/plugin install vizier@lyra-forge`.
+- **`vizier doctor`** — reports the corpus index, which optional extras are
+  installed, which provider keys are visible, and what to run to fix each gap.
+  `--json` for scripts; exits non-zero only when something is actually broken.
+- **`vizier patterns show <id>`** — one chart form in full (when to use, when
+  not, alternatives, common mistakes, reading checklist) at the CLI, matching
+  what the `get_pattern` MCP tool already returned.
+- **Install tests** (`tests/install/run.sh`) — provisions a sandboxed wheel
+  install and asserts what a source checkout can't: the corpus travels in the
+  wheel, the index self-builds, the MCP server completes a handshake, the plugin
+  installs from a marketplace, and the optional paths explain themselves. Runs
+  in CI as its own job.
+
+### Fixed
+- **The authored corpus now ships in the wheel.** It never had, so every
+  `recommend-form`, `guide`, and `patterns` call on a `pip install` silently
+  returned nothing — the corpus root resolved to a path outside site-packages.
+  The 43 patterns, rubrics, FT-vocabulary parse, and weaver principles are
+  packaged under `vizier/corpus/`; third-party sources remain unredistributed.
+- **The index builds itself on first use**, into a per-user cache directory when
+  the corpus is the packaged one (site-packages is often read-only, and is never
+  the right home for user state). `VIZIER_DB_PATH` overrides it.
+- **`vizier mcp` works on current MCP SDKs.** SDK 2.0 renamed
+  `mcp.server.fastmcp.FastMCP` to `mcp.server.mcpserver.MCPServer`; the server
+  now imports either, so it no longer dies on any install that didn't have the
+  locked SDK version.
+- **The critique path explains itself instead of tracebacking.** A missing
+  `[critique]` extra, a missing provider key, a missing vision key, and bad
+  image input are now messages naming the command that fixes them (exit 2).
+- **`.env` is read from the working directory upward**, not from a repo-relative
+  path that doesn't exist in an installed package.
+
+### Changed
+- Site and README lead with the plugin, and are rebalanced around the decision
+  that actually matters — which form answers the reader's question, and whether
+  the comparison is fair. Color is presented as what it is: the last five
+  percent, handled in one command.
+- Fixed a button-label contrast bug on the site: a bare `a:visited` rule
+  outranked `.btn` on specificity, repainting button text in the accent color it
+  sat on (1.00:1) once the link had been visited.
+
 ## [0.1.0] — 2026-07-11
 
 First public release. Published to PyPI as **`datavizier`** (the bare `vizier`

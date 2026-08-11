@@ -98,7 +98,12 @@ a:focus-visible {
   border-radius: 2px;
 }
 
-a:visited { color: var(--accent); }          /* dev-tool context — don't fade visited */
+/* Dev-tool context — don't fade visited links. Scoped away from buttons:
+ * `color` is one of the few properties :visited may set, and a bare
+ * `a:visited` rule outranks `.btn` on specificity, which repainted button
+ * label text in the accent color it sits on — invisible, but only after
+ * you'd clicked it once. */
+a:not(.btn):visited { color: var(--accent); }
 
 code {
   font-family: var(--font-mono);
@@ -199,7 +204,15 @@ header.site nav a.gh:hover { background: var(--bg-alt); }
   flex-wrap: wrap;
 }
 
-.btn {
+/* Buttons state their own color in every link state. Label contrast can't be
+ * left to inheritance here: the fill is an accent color, so anything that
+ * repaints the text toward that accent erases the label. */
+.btn,
+.btn:link,
+.btn:visited,
+.btn:hover,
+.btn:focus,
+.btn:active {
   display: inline-block;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
@@ -212,18 +225,28 @@ header.site nav a.gh:hover { background: var(--bg-alt); }
   transition: background var(--motion), transform var(--motion);
 }
 .btn:hover {
-  background: color-mix(in srgb, var(--accent) 85%, white);
-  border-color: transparent;
+  /* Mix toward --fg, not toward white. The label is --bg, so shifting the
+   * fill toward --fg always moves it *away* from the label color — lighter
+   * in dark mode, darker in light mode. Mixing with white only worked in
+   * one of the two. */
+  background: color-mix(in srgb, var(--accent) 88%, var(--fg));
+  border-color: color-mix(in srgb, var(--accent) 88%, var(--fg));
   transform: translateY(-1px);
 }
-.btn-ghost {
+.btn-ghost,
+.btn-ghost:link,
+.btn-ghost:visited,
+.btn-ghost:active {
   background: transparent;
   color: var(--accent);
   border-color: var(--border);
 }
-.btn-ghost:hover {
+.btn-ghost:hover,
+.btn-ghost:focus {
   background: var(--bg-alt);
   color: var(--fg);
+  border-color: var(--border);
+  transform: translateY(-1px);
 }
 
 @media (max-width: 640px) {
@@ -415,8 +438,8 @@ footer a:hover { color: var(--fg); }
   margin: 0 0 var(--sp-4);
 }
 
-/* the two halves — generate | critique — shown as a pair to make the
- * shared-DNA framing legible. Collapses to one column on narrow screens. */
+/* decide | critique, shown as a pair so the shared-thresholds framing is
+ * legible at a glance. Collapses to one column on narrow screens. */
 .duo {
   display: grid;
   grid-template-columns: 1fr 1fr;

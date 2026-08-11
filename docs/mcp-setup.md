@@ -1,15 +1,20 @@
-# MCP setup — calling vizier from another Claude Code project
+# MCP setup — calling vizier from another project
 
-`vizier mcp` exposes the corpus query layer over stdio as an MCP server.
-Once registered, agents in other sessions can call `search`,
-`find_similar`, `get_pattern`, `list_patterns`, `list_principles`, etc.
-as tools, instead of reading `corpus/<source>/*.md` files directly.
+`vizier mcp` exposes the toolkit and the corpus query layer over stdio as
+an MCP server. Once registered, agents in other sessions can call
+`recommend_form`, `implementation_guide`, `get_pattern`, `analyze_artifact`,
+`suggest_palette`, `search`, and the rest as tools.
 
-> **Before you register:** make sure `vizier db build` has run on this
-> machine. The MCP tools all read from `corpus/.vizier.db`; if the DB is
-> empty, every query returns nothing. `db build` is fast (~seconds)
-> since v2. If you also want `find_similar` to work, run
-> `vizier db embed` (slower — ~12 min on CPU).
+> **The plugin does this for you.** `/plugin install vizier@lyra-forge`
+> registers the server as part of the install — nothing below is needed
+> unless you're wiring up a different client, or running against a source
+> checkout. See the [install section](https://lavallee.github.io/vizier/#install).
+
+> **The index is automatic.** vizier builds it from the packaged corpus on
+> first use (a few seconds, no network), so `recommend_form` and the pattern
+> tools work immediately after install. `vizier doctor` reports the item
+> count. Only `find_similar` needs an extra step: `vizier db embed`
+> (slower — ~12 min on CPU, and needs the `[search]` extra).
 
 If the consuming project should also see a private or local corpus DB, point
 Vizier at it with `VIZIER_PRIVATE_DB` or `VIZIER_EXTENSION_DBS` — one or more
@@ -20,13 +25,19 @@ SQLite DB paths separated by the platform path separator (`:` on macOS/Linux,
 sibling `vizier-private/corpus/vizier-private.db` is auto-discovered without any
 env var.
 
-## Claude Code (from another project)
+## Claude Code (without the plugin)
 
-The fastest path is `claude mcp add`. Run from the project that should
-consume vizier:
+With vizier installed (`uv tool install datavizier`), one line from the
+project that should consume it:
 
 ```sh
 cd /path/to/consuming-project
+claude mcp add vizier -- vizier mcp
+```
+
+Against a source checkout instead of an installed package:
+
+```sh
 claude mcp add vizier -- uv --directory /absolute/path/to/vizier run vizier mcp
 ```
 
@@ -51,8 +62,8 @@ Support/Claude/claude_desktop_config.json` on macOS) and add:
 {
   "mcpServers": {
     "vizier": {
-      "command": "uv",
-      "args": ["--directory", "/absolute/path/to/vizier", "run", "vizier", "mcp"],
+      "command": "/absolute/path/to/vizier",
+      "args": ["mcp"],
       "env": {
         "VIZIER_PRIVATE_DB": "/absolute/path/to/private/.vizier.db"
       }
@@ -60,6 +71,11 @@ Support/Claude/claude_desktop_config.json` on macOS) and add:
   }
 }
 ```
+
+`which vizier` gives you the absolute path — MCP clients run the command in
+their own environment, not your shell's, so a bare `vizier` often won't
+resolve. Against a source checkout, use `uv` instead:
+`"command": "uv", "args": ["--directory", "/abs/path/to/vizier", "run", "vizier", "mcp"]`.
 
 Omit `env` if an auto-discovered sibling `vizier-private` DB should be used
 automatically. Use `"VIZIER_AUTO_PRIVATE": "0"` for a forced public-only run.
@@ -83,6 +99,16 @@ Vizier's tools appear in the tool list.
 
 ## Troubleshooting
 
+**Start with `vizier doctor`.** It reports the corpus root, the index and its
+item count, which extras are installed, and which provider keys are visible —
+and names the command that fixes each gap. Most of the cases below show up
+there first.
+
+**Every query returns nothing.** The index is empty. It builds itself on
+first use, so this means the build failed — run `vizier db build` to see the
+error. A read-only cache directory is the usual cause; `VIZIER_DB_PATH` puts
+the index somewhere writable.
+
 **`list_principles` returns empty.** The weaver ingester pulls
 principles from `../weaver/PRINCIPLES.md`, but only if weaver exists
 next to vizier. Run `uv run vizier ingest weaver`, then `uv run vizier db build`.
@@ -104,15 +130,22 @@ still errors, quote the exact phrase and check `vizier/db/query.py`.
 environment, not your shell. Use the absolute path to uv:
 `/Users/you/.local/bin/uv` (check `which uv`).
 
+**The plugin's MCP server won't connect.** The plugin launches
+`bin/vizier-mcp`, which uses an installed `vizier` if there is one, falls back
+to `uvx --from datavizier vizier mcp`, and prints install instructions if
+neither is available. Run the launcher by hand to see which branch it takes —
+`claude mcp list` shows its path.
+
 ## Verifying the server stands up
 
+A real handshake, no client required:
+
 ```sh
-# From vizier/:
-uv run vizier mcp &
-# The server speaks MCP-over-stdio; it logs nothing on success.
-# Kill it: `kill %1`.
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"probe","version":"1"}}}' \
+  | vizier mcp
 ```
 
-For a more thorough check, point any MCP-aware client at it and call
-`stats` — it returns `{items, embeddings, sources}` and is the cheapest
-round-trip.
+A JSON object with a `result` key means the server is healthy. (This is what
+`tests/install/run.sh` asserts.) For a fuller check, point any MCP-aware client
+at it and call `stats` — it returns `{items, embeddings, sources}` and is the
+cheapest round-trip.
