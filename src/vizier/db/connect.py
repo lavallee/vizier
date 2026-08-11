@@ -6,10 +6,12 @@ import sqlite3
 from pathlib import Path
 from urllib.parse import quote
 
-from ..storage import corpus_root
+from ..storage import db_path
 from .schema import SCHEMA_SQL, SCHEMA_VERSION
 
-DB_PATH = corpus_root() / ".vizier.db"
+# Resolved once at import, as it always has been. `storage.db_path()` is the
+# live accessor; this constant stays because callers (and tests) reference it.
+DB_PATH = db_path()
 
 
 def connect(path: Path | None = None) -> sqlite3.Connection:

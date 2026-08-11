@@ -48,6 +48,51 @@ def main():
 
 
 @main.command()
+@click.option("--json", "as_json", is_flag=True, default=False,
+              help="Emit the report as JSON.")
+def doctor(as_json: bool):
+    """Check the install: corpus index, optional extras, provider keys.
+
+    Exits non-zero only if something is actually broken. Missing extras and
+    missing keys are notes, not failures — the computable core is the whole
+    product for most uses and needs neither.
+    """
+    from . import preflight
+    r = preflight.doctor()
+
+    if as_json:
+        import dataclasses
+        import json as _json
+        click.echo(_json.dumps({**dataclasses.asdict(r), "ok": r.ok}, indent=2))
+        sys.exit(0 if r.ok else 1)
+
+    where = "packaged with the install" if r.corpus_packaged else "source checkout"
+    click.echo(f"vizier {r.version}")
+    click.echo(f"  corpus       {r.corpus_root}  ({where})")
+    click.echo(f"  index        {r.db_path}")
+    click.echo(f"  indexed      {r.items} items, {r.embeddings} embedded")
+    click.echo("  extras       " + ", ".join(
+        f"{name}={'yes' if on else 'no'}" for name, on in r.extras.items()))
+    click.echo("  keys         " + (", ".join(r.provider_keys) or "none found"))
+    if r.env_files:
+        click.echo("  .env         " + ", ".join(r.env_files))
+
+    if r.problems:
+        click.echo("\nProblems:", err=True)
+        for p in r.problems:
+            click.echo(f"  ✗ {p}", err=True)
+    if r.notes:
+        click.echo("\nOptional, not installed or not configured:")
+        for n in r.notes:
+            click.echo(f"  · {n}")
+    if r.ok and not r.notes:
+        click.echo("\nEverything checks out.")
+    elif r.ok:
+        click.echo("\nThe computable core is ready — no keys needed.")
+    sys.exit(0 if r.ok else 1)
+
+
+@main.command()
 def stats():
     """Print corpus counts by source, type, and tier."""
     counts = storage.count_by_source()
@@ -397,6 +442,55 @@ def patterns_list(family: str | None):
         click.echo(f"    {p['capsule'][:100]}")
 
 
+@patterns.command("show")
+@click.argument("pattern_id")
+@click.option("--json", "as_json", is_flag=True, default=False,
+              help="Emit the full pattern record as JSON.")
+def patterns_show(pattern_id: str, as_json: bool):
+    """One chart form in full: when to use it, when not, mistakes, checklist.
+
+    The reference an agent should read before implementing a form, and the
+    one to answer against when critiquing a chart that already exists.
+    """
+    from . import db as D
+    pat = D.query.get_pattern(pattern_id, transclude=True)
+    if pat is None:
+        click.echo(
+            f"unknown pattern: {pattern_id!r}. `vizier patterns list` shows all of them.",
+            err=True,
+        )
+        sys.exit(2)
+
+    if as_json:
+        import json as _json
+        click.echo(_json.dumps(pat, indent=2, ensure_ascii=False))
+        return
+
+    def _section(heading: str, values) -> None:
+        if not values:
+            return
+        click.echo(f"\n{heading}")
+        for v in values:
+            click.echo(f"  - {v}")
+
+    fams = ", ".join(pat.get("purpose_families") or [])
+    click.echo(f"{pat['title']}  ({pat['id']})" + (f"  [{fams}]" if fams else ""))
+    if pat.get("capsule"):
+        click.echo(f"\n{pat['capsule'].strip()}")
+    _section("When to use", pat.get("when_to_use"))
+    _section("When NOT to use", pat.get("when_not_to_use"))
+    alts = pat.get("alternatives") or []
+    if alts:
+        click.echo("\nReach for instead")
+        for a in alts:
+            if isinstance(a, dict):
+                click.echo(f"  - {a.get('id', '?')} — {a.get('when', '')}")
+            else:
+                click.echo(f"  - {a}")
+    _section("Common mistakes", pat.get("common_mistakes"))
+    _section("Reading checklist", pat.get("reading_checklist"))
+
+
 @patterns.command("export")
 @click.option("-o", "--out", type=click.Path(dir_okay=False, writable=True),
               default="-", help="Output JSON path; '-' for stdout.")
@@ -492,6 +586,13 @@ def critique(image_path: str, pattern_id: str | None, context: str | None,
     manually for those). Convert SVGs with `rsvg-convert` or `cairosvg`
     first.
     """
+    from . import preflight
+    try:
+        preflight.require_critique(vision_backend=vision_backend)
+    except preflight.CritiqueUnavailable as exc:
+        click.echo(str(exc), err=True)
+        sys.exit(2)
+
     from . import vision as V
     from .critique import adhoc
     kwargs: dict = {
@@ -502,7 +603,20 @@ def critique(image_path: str, pattern_id: str | None, context: str | None,
     }
     if model:
         kwargs["model"] = model
-    r = adhoc.critique(image_path, **kwargs)
+    try:
+        r = adhoc.critique(image_path, **kwargs)
+    except FileNotFoundError as exc:
+        click.echo(
+            f"No such image: {exc}\n"
+            "`vizier critique` takes a raster chart image (.png/.jpg/.jpeg/.webp) "
+            "or a direct image URL.",
+            err=True,
+        )
+        sys.exit(2)
+    except ValueError as exc:
+        # Unsupported suffix, or a URL that served a page instead of an image.
+        click.echo(str(exc), err=True)
+        sys.exit(2)
     if as_json_out:
         click.echo(adhoc.as_json(r))
     else:

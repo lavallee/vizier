@@ -20,13 +20,13 @@ from pathlib import Path
 from typing import Any
 
 import somm
-from dotenv import load_dotenv
 
+from .. import preflight
 from .. import vision as V
 from ..analyze.findings import computed_color_findings
 from ..db import query as Q
 
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+preflight.load_env()
 
 
 MODEL = "gemini-2.5-pro"

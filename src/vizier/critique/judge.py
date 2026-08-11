@@ -36,14 +36,14 @@ from pathlib import Path
 
 import frontmatter
 import somm
-from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
+from .. import preflight
 from .. import manifest as manifest_mod
 from ..ingest._common import slugify
 from ..storage import iter_items
 
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+preflight.load_env()
 
 CASES_DIR = Path(__file__).resolve().parents[3] / "evals" / "cases"
 RUNS_DIR = Path(__file__).resolve().parents[3] / "evals" / "runs"

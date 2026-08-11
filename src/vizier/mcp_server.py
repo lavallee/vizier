@@ -17,13 +17,21 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
-from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 
 from .db import query as Q
 
+# The server class was renamed in the MCP SDK 2.0: `mcp.server.fastmcp.FastMCP`
+# became `mcp.server.mcpserver.MCPServer`. The surface vizier uses — the
+# constructor kwargs, `.tool(description=...)`, `.run()` — is the same in both,
+# so support either rather than pinning users to one SDK generation.
+try:
+    from mcp.server.mcpserver import MCPServer as _Server  # SDK >= 2.0
+except ModuleNotFoundError:  # pragma: no cover - exercised by the older SDK
+    from mcp.server.fastmcp import FastMCP as _Server  # SDK 1.x
 
-mcp = FastMCP(
+
+mcp = _Server(
     "vizier",
     instructions=(
         "vizier is data-visualization expertise — generation and critique. "

@@ -22,15 +22,15 @@ from pathlib import Path
 
 import frontmatter
 import somm
-from dotenv import load_dotenv
 
+from .. import preflight
 from .. import manifest as manifest_mod
 from .. import vision as V
 from ..llm import generate_resilient
 from . import retrieve as R
 from . import styles as S
 
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+preflight.load_env()
 
 CASES_DIR = Path(__file__).resolve().parents[3] / "evals" / "cases"
 RUNS_DIR = Path(__file__).resolve().parents[3] / "evals" / "runs"

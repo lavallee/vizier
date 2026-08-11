@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 # (the bare `vizier` project name was already taken on PyPI): install
 # `datavizier`, then `import vizier` / run `vizier`.
 name = "datavizier"
-version = "0.1.0"
+version = "0.2.0"
 description = "Generate and critique journalistic data visualizations — chart-form choice, encoding, and a corpus-backed critic"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -50,6 +50,18 @@ vizier = "vizier.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/vizier"]
+
+# vizier's OWN authored corpus ships inside the package, so a plain
+# `pip install datavizier` can answer `recommend-form` / `guide` /
+# `patterns` without a checkout. The index is built from these on first use.
+# Third-party sources are NOT redistributed — they're rebuilt locally by
+# `vizier ingest`. This is an allowlist on purpose: adding a directory here
+# is a redistribution decision.
+[tool.hatch.build.targets.wheel.force-include]
+"corpus/chart-forms" = "vizier/corpus/chart-forms"
+"corpus/ft-vocab" = "vizier/corpus/ft-vocab"
+"corpus/rubrics" = "vizier/corpus/rubrics"
+"corpus/weaver" = "vizier/corpus/weaver"
 
 [tool.ruff]
 target-version = "py312"

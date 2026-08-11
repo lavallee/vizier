@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
@@ -157,6 +158,52 @@ def extension_db_paths() -> list[Path]:
     return paths
 
 
+_AUTO_BUILD_ENV = "VIZIER_AUTO_BUILD"
+_auto_build_attempted = False
+
+
+def _auto_build_enabled() -> bool:
+    return os.getenv(_AUTO_BUILD_ENV, "1").strip().lower() not in {"0", "false", "no"}
+
+
+def ensure_index() -> None:
+    """Populate the index from the corpus on first use if it's empty.
+
+    A fresh `pip install datavizier` has the authored corpus on disk but no
+    index yet, and every read path funnels through here. Building it is a
+    few seconds of local file walking — no network, no model, no keys — so
+    the first `recommend-form` pays for it once instead of silently
+    answering "no matching form" forever. `VIZIER_AUTO_BUILD=0` opts out.
+    """
+    global _auto_build_attempted
+    if _auto_build_attempted or not _auto_build_enabled():
+        return
+    _auto_build_attempted = True
+    try:
+        conn = connect()
+        try:
+            n = conn.execute("SELECT count(*) FROM items").fetchone()[0]
+        finally:
+            conn.close()
+        if n:
+            return
+        from . import build as B
+
+        print(
+            "vizier: building the corpus index (first run, a few seconds)…",
+            file=sys.stderr,
+            flush=True,
+        )
+        B.populate(embed=False)
+    except Exception as exc:  # a read-only cache dir, a corrupt DB, …
+        print(
+            f"vizier: could not build the corpus index ({exc}). "
+            "Run `vizier db build` to see the full error.",
+            file=sys.stderr,
+            flush=True,
+        )
+
+
 def _query_conns(
     conn: sqlite3.Connection | None,
     *,
@@ -165,6 +212,7 @@ def _query_conns(
     if conn is not None:
         return [_ConnRef(conn=conn, label="primary", close=False)]
 
+    ensure_index()
     refs = [_ConnRef(conn=connect(), label="primary", close=True, path=DB_PATH)]
     if not include_extensions:
         return refs
