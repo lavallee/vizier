@@ -40,7 +40,7 @@ class Item(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     id: str = Field(..., description="source-local stable slug")
-    source: str = Field(..., description="sigma, kantar, pudding, junkcharts, weaver, ft-vocab, cairo, ...")
+    source: str = Field(..., description="sigma, kantar, pudding, junkcharts, principles, ft-vocab, cairo, ...")
     type: ItemType
     title: str
     url: str | None = Field(None, description="canonical source URL this item was extracted from")

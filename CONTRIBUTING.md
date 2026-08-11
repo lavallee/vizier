@@ -34,7 +34,7 @@ warning, or register the server yourself with
 ## Never commit third-party corpus
 
 Only vizier's **own authored** corpus ships:
-`corpus/{chart-forms,rubrics,ft-vocab,weaver}`. The scraped sources (kantar,
+`corpus/{chart-forms,rubrics,ft-vocab,principles}`. The scraped sources (kantar,
 junkcharts, cairo-blog, nightingale, …) are gitignored and rebuilt with
 `vizier ingest` — they're copyrighted and must not be committed.
 

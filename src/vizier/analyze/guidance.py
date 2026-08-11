@@ -181,7 +181,7 @@ def _prior_art(job: str, context: str | None, *, k: int, semantic: bool) -> tupl
 
 def _prior_score(hit: Q.Hit) -> float:
     score = hit.score
-    if hit.source == "weaver":
+    if hit.source == "principles":
         score += 4.0
     elif hit.source in {"rubrics", "ft-vocab"}:
         score += 2.0

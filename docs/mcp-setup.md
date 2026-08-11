@@ -109,9 +109,10 @@ first use, so this means the build failed — run `vizier db build` to see the
 error. A read-only cache directory is the usual cause; `VIZIER_DB_PATH` puts
 the index somewhere writable.
 
-**`list_principles` returns empty.** The weaver ingester pulls
-principles from `../weaver/PRINCIPLES.md`, but only if weaver exists
-next to vizier. Run `uv run vizier ingest weaver`, then `uv run vizier db build`.
+**`list_principles` returns empty.** The house principles ship inside the
+package, so an empty result means the index didn't build rather than that
+content is missing. Run `vizier db build` to see the error, and `vizier
+doctor` to confirm the item count (88 on a stock install).
 
 **`find_similar` returns empty.** You haven't run `vizier db embed` yet
 (or the DB is otherwise missing embeddings). `vizier db stats` will show

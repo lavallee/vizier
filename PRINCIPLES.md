@@ -1,14 +1,15 @@
 # Vizier principles
 
-Working practices for evaluation and judgment — the critique companion
-to `weaver`. Weaver is about **execution**; vizier is about
-**evaluation**. Shared vision (information-design tradition,
-chart-form rigor, audience-first framing), distinct roles.
+Working practices for evaluation and judgment. Making a graphic is
+**execution**; vizier is about **evaluation**. The two share a vision
+(information-design tradition, chart-form rigor, audience-first framing)
+and divide the roles.
 
 The file is organized by workflow stage (Collect → Retrieve →
 Evaluate → Deliver → Measure) with cross-cutting meta-principles
-first, the same shape `weaver/PRINCIPLES.md` uses. Stages are messy
-and iterative in practice — moving between them is expected.
+first — the same shape as the house principles it grew alongside, which
+now live in the corpus. Stages are messy and iterative in practice —
+moving between them is expected.
 
 ---
 
@@ -16,31 +17,32 @@ and iterative in practice — moving between them is expected.
 
 ### Evaluation is not execution
 
-Weaver makes, vizier judges. The disciplines overlap but diverge in
+The maker makes, vizier judges. The disciplines overlap but diverge in
 method:
 
-- **Weaver's discipline** is generative: "I have a blank canvas;
+- **The maker's discipline** is generative: "I have a blank canvas;
   what's the right move?"
 - **Vizier's discipline** is forensic: "I have an artifact; what did
   the maker catch, miss, or not yet see?"
 
 Principles that work for both (match chart form to licit comparisons;
-name the audience; declare the headline claim) live in both books.
+name the audience; declare the headline claim) live in both books —
+vizier's judgment principles here, the making principles in the corpus.
 Principles uniquely about judgment (constraint-difficulty accounting;
 ground-truth exclusion in retrieval; prior-art citation) live here.
 
 When a principle appears in both, the wording matches — the cross-
-reference is explicit so the two books stay consistent as they grow.
+reference is explicit so the two stay consistent as they grow.
 
 ### Generation and critique are one expertise
 
 vizier's knowledge is bidirectional. The checks that *judge* a palette
 also *generate* a passing one; the pattern library that critiques a
 form also recommends it. So vizier is not only the critic — it is the
-dataviz **expertise**, and the split with weaver is sharpening
+dataviz **expertise**, and the split with whatever renders is sharpening
 accordingly:
 
-- **weaver renders** — the SVG/DOM, layout, motion, the actual pixels.
+- **the renderer renders** — the SVG/DOM, layout, motion, the actual pixels.
 - **vizier decides** — which form, which colors, does the palette clear
   colorblind + contrast, what did a finished artifact get wrong.
 
@@ -49,7 +51,7 @@ accordingly:
 legible ink, form-fit — now live in vizier as callable primitives
 (`src/vizier/analyze`, exposed over the MCP tools `suggest_palette` /
 `suggest_ramp` / `ink_on` / `validate_palette` / `analyze_artifact` /
-`check_contrast`). weaver, and any generator, should *ask vizier* at
+`check_contrast`). Any renderer or generator should *ask vizier* at
 generation time rather than duplicate the color math or re-derive the
 form taxonomy. What vizier suggests is what vizier would pass — the same
 thresholds serve both directions.
@@ -78,7 +80,7 @@ failure-mode archetypes and success-under-constraint archetypes.
 
 Implication: corpus investments should prioritize *more examples of
 the same failure modes* (more Junk Charts posts, more Sigma jury
-commentary, more weaver retrospectives) over more frameworks or
+commentary, more first-party retrospectives) over more frameworks or
 rubrics. The marginal principle-book adds little; the marginal 50
 well-chosen case studies add a lot.
 
@@ -102,7 +104,7 @@ methodology iteration.
 ### Keep the corpus on
 
 Corpus-building is ongoing discipline, not a one-time ingest. Every
-annual Sigma cycle, every new Junk Charts post, every weaver
+annual Sigma cycle, every new Junk Charts post, every in-house
 retrospective adds coverage. Rerun `vizier ingest all` periodically;
 the `corpus_hash` is the anchor.
 
@@ -138,7 +140,7 @@ state-1 comparables (easy + good).
 
 No single source captures the full shape of critique: Junk Charts is
 strong on chart-form rigor but decontextualized; Sigma/Kantar juries
-weigh journalism impact and methodology over chart craft; weaver
+weigh journalism impact and methodology over chart craft; first-party
 retrospectives capture execution under specific constraints but are
 self-critiques (inherent investment in defending choices).
 
@@ -182,9 +184,9 @@ judgment.
 
 ### Always-include the rubric scaffold
 
-Weaver principles, Cairo's five pillars, and the FT Visual Vocabulary
+The house principles, Cairo's five pillars, and the FT Visual Vocabulary
 are always included in full (not top-K retrieved). They're small
-enough to fit in context (~40 weaver principles + 67 FT chart types +
+enough to fit in context (~40 house principles + 67 FT chart types +
 5 Cairo pillars ≈ 15K tokens) and load-bearing enough that partial
 inclusion would degrade critique structure.
 
@@ -198,7 +200,7 @@ quality matters — that's the pattern library.
 ### Name the critique lens
 
 Before producing a critique, decide which lens applies. Four useful
-ones (matching the weaver Frame-stage principle):
+ones (matching the Frame-stage house principle):
 
 1. **Representation** — is what's shown the best encoding of the
    material?
@@ -260,7 +262,7 @@ observations.
 
 ### Cite comparable prior work
 
-Same principle as weaver's Critique-stage addition. A critique that
+Same principle as the Critique-stage house principle. A critique that
 names a specific comparable piece is sharper than one citing only
 principles. Practitioners talk this way. Vizier's retrieval surfaces
 candidates; the critique prompt instructs the model to cite them by

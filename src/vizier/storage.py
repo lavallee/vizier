@@ -10,7 +10,7 @@ low-thousands of items; swap for sqlite if we outgrow it.
    including any third-party sources rebuilt by `vizier ingest`.
 3. `vizier/corpus/` inside the installed package — what ships in the
    wheel: vizier's own authored content only (the 43 chart-form
-   patterns, the rubrics, the FT-vocabulary parse, the weaver
+   patterns, the rubrics, the FT-vocabulary parse, the house
    principles). This is what a `pip install datavizier` reads.
 
 **Where the index lives.** The SQLite index is a rebuildable artifact,

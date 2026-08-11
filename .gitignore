@@ -31,7 +31,7 @@ corpus/.vizier.db-*
 corpus/.embeddings/
 # Third-party corpus — rebuilt by `vizier ingest`, NOT redistributed. These are
 # scrapes of copyrighted posts / award commentary and must never be committed.
-# Only vizier's OWN authored corpus ships: chart-forms/, rubrics/, ft-vocab/, weaver/.
+# Only vizier's OWN authored corpus ships: chart-forms/, rubrics/, ft-vocab/, principles/.
 corpus/kantar/
 corpus/sigma/
 corpus/junkcharts/

@@ -8,7 +8,7 @@ rubric scaffolding grow.
 - `cases/` — reference cases. Each is a markdown file with YAML
   frontmatter naming: the artifact being critiqued, a short target
   critique (what a human expert judged), which axes are load-bearing,
-  and provenance. Start small (3–5 cases drawn from weaver
+  and provenance. Start small (3–5 cases drawn from first-party
   retrospectives), grow when the signal is proven.
 - `runs/<timestamp>.jsonl` — per-run output. Each line pairs a case ID
   with vizier's emitted critique, the `corpus_hash` it was evaluated
@@ -22,7 +22,7 @@ Not gradient-descent learning. Vizier is a prompt/retrieval system with
 a growing corpus. It "learns" in the sense that a richer corpus and
 sharper rubrics should yield critiques that:
 
-1. Agree with weaver's lived retrospectives (we have these already).
+1. Agree with our own lived retrospectives (we have these already).
 2. Agree with external judgments we trust (Sigma juries, Kantar
    special-award commentary where it exists).
 3. Produce structured, axis-addressed critiques (not prose-mush).

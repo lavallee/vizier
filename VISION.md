@@ -23,7 +23,7 @@ burden measured.
 
 ## Non-goals
 
-- Rendering charts or replacing Weaver and project-specific graphics code.
+- Rendering charts or replacing project-specific graphics code.
 - Automating editorial judgment, story framing, or ethical tradeoffs.
 - Shipping copyrighted critique corpora in the public package.
 - Returning a recommendation when constraints make an honest answer impossible.
@@ -36,5 +36,5 @@ burden measured.
 - The public corpus interface, optional search/critique extras, and Somm model
   routing provide evidence-backed judgment.
 - MCP and CLI surfaces let agents and generators call the same decision layer.
-- Weaver renders the artifact; Vizier and specialist review judge it before
-  publication.
+- The renderer and the artifact toolchain produce the graphic; Vizier and
+  specialist review judge it before publication.

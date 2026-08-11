@@ -55,7 +55,7 @@ details:
     - Labels inside narrow segments that get clipped; put them outside when the segment is too small
     - Using 100%-stacked (composition only) when the reader also needs the total magnitude; use the absolute variant
   related_principles:
-    - weaver/principle-put-percentages-next-to-labels
+    - principles/principle-put-percentages-next-to-labels
 ---
 The stacked bar is the workhorse of part-to-whole visualization: a
 rectangle representing a total, split horizontally or vertically into

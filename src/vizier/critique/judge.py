@@ -12,8 +12,10 @@ specificity, actionability, structural-risk identification; plus a
 short rationale and a winner (A / B / tie).
 
 Ground truth resolution:
-- `weaver-notes` → reads the sibling project's `notes.md` from the
-  weaver repo (unseen by the critiquing model by design).
+- `house-notes` → reads a project's `notes.md` from a local notes
+  tree (unseen by the critiquing model by design). Point
+  `$VIZIER_EVAL_NOTES_ROOT` at it; these are first-party retrospectives
+  that don't ship with the package.
 - `sigma-jury` → reads the jury commentary from the matching corpus
   item (by slugified artifact title + year).
 - `junkcharts-critique` → reads the matching Junk Charts corpus
@@ -29,6 +31,7 @@ deltas.
 from __future__ import annotations
 
 import json
+import os
 import random
 import re
 from datetime import datetime, timezone
@@ -48,7 +51,12 @@ preflight.load_env()
 CASES_DIR = Path(__file__).resolve().parents[3] / "evals" / "cases"
 RUNS_DIR = Path(__file__).resolve().parents[3] / "evals" / "runs"
 JUDGE_DIR = Path(__file__).resolve().parents[3] / "evals" / "judge"
-WEAVER_PROJECTS = Path(__file__).resolve().parents[4] / "weaver" / "projects"
+# First-party retrospective notes used as eval ground truth. They are not
+# redistributed, so the location is configurable and simply absent by default.
+HOUSE_NOTES_ROOT = Path(
+    os.getenv("VIZIER_EVAL_NOTES_ROOT")
+    or Path(__file__).resolve().parents[3] / "evals" / "notes"
+)
 
 # Default judge on free tier (Gemini 2.5 Pro). Gemini emits JSON
 # cleanly and in the one Opus-vs-Gemini-critique measurement the
@@ -131,14 +139,16 @@ def _load_run_outputs(run_dir: Path) -> dict[str, dict]:
     return out
 
 
-def _ground_truth_weaver(case: dict) -> str | None:
-    # Case id looks like "weaver-<slug>". Try exact, then prefix match
-    # (e.g., case "weaver-new-bern" → dir "new-bern-profile").
-    project = re.sub(r"^weaver-", "", case["id"])
-    path = WEAVER_PROJECTS / project / "notes.md"
+def _ground_truth_house(case: dict) -> str | None:
+    # Case id looks like "house-<slug>". Try exact, then prefix match
+    # (e.g., case "house-new-bern" → dir "new-bern-profile").
+    project = re.sub(r"^house-", "", case["id"])
+    if not HOUSE_NOTES_ROOT.is_dir():
+        return None
+    path = HOUSE_NOTES_ROOT / project / "notes.md"
     if path.exists():
         return path.read_text(encoding="utf-8")
-    for p in WEAVER_PROJECTS.iterdir():
+    for p in HOUSE_NOTES_ROOT.iterdir():
         if not p.is_dir():
             continue
         if (p.name == project or p.name.startswith(project + "-") or project.startswith(p.name + "-")) \
@@ -167,8 +177,10 @@ def _ground_truth_corpus(case: dict, source: str) -> str | None:
 
 def _resolve_ground_truth(case: dict) -> str:
     src = case.get("ground_truth_source", "")
-    if src == "weaver-notes":
-        return _ground_truth_weaver(case) or "(weaver notes not found for this case)"
+    if src == "house-notes":
+        return _ground_truth_house(case) or (
+            "(no notes found for this case — set VIZIER_EVAL_NOTES_ROOT)"
+        )
     if src == "sigma-jury":
         return _ground_truth_corpus(case, "sigma") or "(no matching Sigma corpus item)"
     if src == "junkcharts-critique":

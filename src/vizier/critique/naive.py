@@ -1,7 +1,7 @@
 """Naive critique — plain LLM, no corpus, no rubric.
 
 Baseline for tracking whether vizier's informed critiques add value. The
-prompt deliberately avoids weaver/FT/Cairo language — we want to see
+prompt deliberately avoids house/FT/Cairo language — we want to see
 what the base model produces without any of vizier's specific insights.
 
 Uses `somm` as the LLM substrate:

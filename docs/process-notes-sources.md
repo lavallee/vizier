@@ -22,7 +22,7 @@ A walkthrough tells us:
 
 Compared to jury commentary ("these three won because X"), walkthroughs
 teach the underlying reasoning. Vizier's corpus item type for these is
-`process_note` (already used for Pudding + weaver). This is the highest-
+`process_note` (already used for Pudding + the house notes). This is the highest-
 leverage type to grow for the "1000 graphics → seasoned editor" goal.
 
 ## Malofiej-adjacent (the specific ask)

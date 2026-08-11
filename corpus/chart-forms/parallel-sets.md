@@ -52,8 +52,8 @@ details:
     - Rendering as a three-stage sankey with d3-sankey — visually plausible but smuggles in a left-to-right causal claim the data doesn't support
     - No reading guide above the diagram explaining that ribbons are co-occurrence, not flow
   related_principles:
-    - weaver/principle-order-stage-categories-meaningfully
-    - weaver/principle-reading-guide-directly-above-each-novel-diagram
+    - principles/principle-order-stage-categories-meaningfully
+    - principles/principle-reading-guide-directly-above-each-novel-diagram
 ---
 Parallel sets (also called alluvial diagrams in some contexts) show the
 **joint frequency structure** of several categorical attributes. Each

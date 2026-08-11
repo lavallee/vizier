@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 # (the bare `vizier` project name was already taken on PyPI): install
 # `datavizier`, then `import vizier` / run `vizier`.
 name = "datavizier"
-version = "0.2.1"
+version = "0.3.0"
 description = "Generate and critique journalistic data visualizations — chart-form choice, encoding, and a corpus-backed critic"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -61,7 +61,7 @@ packages = ["src/vizier"]
 "corpus/chart-forms" = "vizier/corpus/chart-forms"
 "corpus/ft-vocab" = "vizier/corpus/ft-vocab"
 "corpus/rubrics" = "vizier/corpus/rubrics"
-"corpus/weaver" = "vizier/corpus/weaver"
+"corpus/principles" = "vizier/corpus/principles"
 
 [tool.ruff]
 target-version = "py312"

@@ -1,7 +1,7 @@
 # Chart forms guide — schema + taxonomy plan
 
 *Build plan for a comprehensive patterns/antipatterns collection, readable
-by humans via a weaver project and queryable by agents via MCP. Internal
+by humans via a published artifact and queryable by agents via MCP. Internal
 reference; not a public doc.*
 
 ## Goals
@@ -25,7 +25,7 @@ reference; not a public doc.*
 - Surfaced by:
   - `vizier.db.query.get_pattern(id)` — pattern with optional transclusion
   - MCP tools `get_pattern` / `list_patterns`
-  - A weaver `chart-forms-guide` project that renders the full graph
+  - A `chart-forms-guide` artifact that renders the full graph
 
 ## Item shape
 
@@ -76,8 +76,8 @@ details:
     # corpus items whose critique illustrates "this shouldn't be a sankey"
     - junkcharts/clear-and-confused-states
   related_principles:
-    - weaver/principle-order-stage-categories-meaningfully
-    - weaver/principle-reading-guide-directly-above-each-novel-diagram
+    - principles/principle-order-stage-categories-meaningfully
+    - principles/principle-reading-guide-directly-above-each-novel-diagram
 ---
 A sankey is a diagram of conservation under flow...
 
@@ -152,7 +152,7 @@ marimekko, connected scatter, chord, network, dendrogram.
 
 ## Transclusion mechanics
 
-### In the weaver reader
+### In the artifact reader
 
 The renderer walks each pattern's `alternatives[]` and, per entry,
 fetches the referenced pattern's `capsule` and inlines it below the
@@ -219,7 +219,7 @@ What's the question the reader is asking?
   ├─ ... (remaining 5 families)
 ```
 
-This is a tree; the weaver renderer draws it as a radial or a
+This is a tree; the renderer draws it as a radial or a
 left-to-right tree. Each terminal form links to its pattern page.
 
 ## Build order
@@ -228,7 +228,7 @@ left-to-right tree. Each terminal form links to its pattern page.
    stacked-bar, bump-chart). Confirm schema stands up before going wide.
 2. **Next**: MCP tools `get_pattern` / `list_patterns` with transclusion.
 3. **Then**: fill out the remaining 8 seed patterns.
-4. **Finally**: weaver reader with the generalized decision diagram.
+4. **Finally**: artifact reader with the generalized decision diagram.
 
 Each stage ships independently — corpus items are useful the moment
 they're written; MCP works as soon as the items are present; the reader

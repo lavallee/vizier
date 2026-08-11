@@ -5,6 +5,39 @@ All notable changes to vizier are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See
 [RELEASING.md](RELEASING.md) for the release process.
 
+## [0.3.0] — 2026-08-11
+
+### Changed
+- **The `weaver` corpus source is now `principles`.** vizier's 41 house
+  principles kept the name of the tool they were first written for; that tool
+  is deprecated and its repo is private, so the public package, the site, and
+  every `list_principles` / `lookup` response were naming something nobody
+  outside could see — and the two public links to it 404'd.
+
+  **Breaking for anyone addressing items by key:** `weaver/principle-x` is now
+  `principles/principle-x`, `source="weaver"` filters become
+  `source="principles"`, and the ingest module is `vizier.ingest.principles`.
+  The principle bodies themselves are unchanged.
+
+- **The companion project on the site and in the README is now
+  [artoo](https://github.com/lavallee/artoo)**, which is public and current:
+  artoo builds and ships the artifact — a self-contained HTML mini-site
+  carrying the research behind the presentation — and vizier decides and judges
+  the chart on it. This repo's own chart-forms guide is an artoo artifact.
+  Where the old text described a renderer specifically, it now describes *any*
+  renderer, which is what vizier actually supports.
+
+- Eval ground-truth notes moved behind `$VIZIER_EVAL_NOTES_ROOT`
+  (`ground_truth_source: house-notes`) instead of a hardcoded sibling repo, and
+  `vizier ingest principles` reads `$VIZIER_PRINCIPLES_ROOT`. Neither ships;
+  the already-ingested items are committed under `corpus/principles/`.
+
+### Added
+- `vizier patterns export` now warns when example links fail to resolve. The
+  guide's example titles and URLs are transcluded from the *third-party* corpus,
+  which isn't redistributed — so exporting from a machine that hasn't run
+  `vizier ingest` silently stripped 112 of 117 links and still reported success.
+
 ## [0.2.1] — 2026-08-11
 
 ### Fixed
@@ -49,7 +82,7 @@ plain `pip install datavizier` much less useful than the source checkout.
 - **The authored corpus now ships in the wheel.** It never had, so every
   `recommend-form`, `guide`, and `patterns` call on a `pip install` silently
   returned nothing — the corpus root resolved to a path outside site-packages.
-  The 43 patterns, rubrics, FT-vocabulary parse, and weaver principles are
+  The 43 patterns, rubrics, FT-vocabulary parse, and house principles are
   packaged under `vizier/corpus/`; third-party sources remain unredistributed.
 - **The index builds itself on first use**, into a per-user cache directory when
   the corpus is the packaged one (site-packages is often read-only, and is never

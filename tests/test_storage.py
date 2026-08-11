@@ -57,7 +57,7 @@ def test_an_empty_corpus_dir_is_not_mistaken_for_a_checkout(monkeypatch, tmp_pat
 
 def test_packaged_corpus_ships_the_authored_sources():
     """The wheel's force-include allowlist, asserted from the source side."""
-    authored = {"chart-forms", "ft-vocab", "rubrics", "weaver"}
+    authored = {"chart-forms", "ft-vocab", "rubrics", "principles"}
     present = {p.name for p in storage.REPO_CORPUS_ROOT.iterdir() if p.is_dir()}
     assert authored <= present
     assert len(list((storage.REPO_CORPUS_ROOT / "chart-forms").glob("*.md"))) == 43

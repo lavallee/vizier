@@ -4,7 +4,7 @@ Difference from `naive`:
 
 - System prompt names the rubrics and tells the critic to work axis-
   by-axis (Cairo 5-pillars).
-- User message includes: the artifact description, the full weaver
+- User message includes: the artifact description, the full house
   principles + rubrics (always), and tag-matched items from sigma,
   kantar, junkcharts, pudding.
 - Output stamps `rubric_set`, `retrieval_summary`, and `corpus_hash`
@@ -42,7 +42,7 @@ MODEL = "gemini-2.5-pro"
 DEFAULT_PROVIDER: str | None = "gemini"
 WORKLOAD = "critique_informed"
 PROJECT = "vizier"
-BASE_RUBRIC_SET = ("weaver", "cairo-5-pillars", "ft-visual-vocabulary")
+BASE_RUBRIC_SET = ("principles", "cairo-5-pillars", "ft-visual-vocabulary")
 DEFAULT_STYLE = "multi"
 
 SYSTEM = """\

@@ -15,7 +15,7 @@ current consumer receive a dated removal path rather than permanent shims.
 
 ## Outcome 2 — Prove the decision-and-critique loop on real graphics
 
-- Integrate Vizier into at least two Weaver/njschooldata production workflows
+- Integrate Vizier into at least two production graphics workflows
   from form selection through artifact analysis and specialist critique.
 - Record rule findings, overrides, human critique, and final artifact outcomes
   as evaluation cases.

@@ -110,7 +110,7 @@ and design tokens — no build step, no external dependencies.
 
 vizier's critique is sharpened by a corpus of data-viz writing (award commentary,
 critique blogs, practitioner walkthroughs). **Only vizier's own authored content ships**
-— the 43 patterns, the rubrics, the FT-vocabulary parse, and the weaver principles.
+— the 43 patterns, the rubrics, the FT-vocabulary parse, and the house principles.
 The third-party sources are **not redistributed** (they're copyrighted); rebuild them
 locally:
 
@@ -157,12 +157,20 @@ through [`somm`](https://github.com/lavallee/somm) (an LLM gateway); provide a k
 demonstrates the measured lift from the computable findings — see
 `docs/computed-color-checks.md`.
 
-## The vizier ↔ weaver split
+## vizier & artoo
 
-vizier is the **critique + decision** companion to [`weaver`](https://github.com/lavallee/weaver),
-which **renders** graphics. weaver draws the pixels; vizier decides which form and which
-colors, and judges the result. The same thresholds serve both directions — see
-[`PRINCIPLES.md`](PRINCIPLES.md).
+vizier decides and judges the chart. [`artoo`](https://github.com/lavallee/artoo)
+builds and ships the page it lives on — a self-contained HTML mini-site that carries
+the research behind the presentation, with provenance, a private-file firewall, and
+deployment (`uv tool install artoo-artifacts`).
+
+They meet at the artifact: artoo owns packaging and publication, vizier owns whether
+the graphic on the page earns its place. This repo's own chart-forms guide is an artoo
+artifact — see [`docs/reader/artifact.toml`](docs/reader/artifact.toml).
+
+More generally, vizier is built to be *asked*: any renderer or generator can call it
+for the form and the color instead of re-deriving them, and the same thresholds serve
+both directions. See [`PRINCIPLES.md`](PRINCIPLES.md).
 
 ## Development
 

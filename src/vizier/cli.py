@@ -25,7 +25,7 @@ INGEST_MODULES = (
     "ft_vocab",
     "pudding",
     "junkcharts",
-    "weaver",
+    "principles",
     "rubrics",
     # Practitioner-walkthrough blogs (Tier 1+2 from docs/process-notes-sources.md)
     "source_opennews",
@@ -499,6 +499,11 @@ def patterns_export(out: str):
 
     Intended as input to the bundled chart-forms guide (docs/reader/data.json).
     Emits one JSON object: { patterns: {id: {...resolved...}}, families: [...] }.
+
+    Note: a pattern's `canonical_examples` / `antipattern_examples` are keys
+    into the *third-party* corpus, which isn't redistributed. Resolving them to
+    titles and links needs a machine that has run `vizier ingest`. Export from
+    one, or the guide ships with its example links silently stripped.
     """
     from . import db as D
     import json as _json
@@ -517,6 +522,27 @@ def patterns_export(out: str):
         "families": sorted(families),
         "count": len(patterns_obj),
     }
+    # Transclusion silently drops example keys it can't resolve, so an export
+    # from a machine without the third-party corpus looks successful and ships
+    # a guide with its example links quietly stripped. Compare what the pattern
+    # files ask for against what came back.
+    def _n_examples(p: dict) -> int:
+        return len(p.get("canonical_examples") or []) + len(p.get("antipattern_examples") or [])
+
+    declared = sum(
+        _n_examples(D.query.get_pattern(pid, transclude=False) or {})
+        for pid in patterns_obj
+    )
+    resolved = sum(_n_examples(p) for p in patterns_obj.values())
+    if resolved < declared:
+        click.echo(
+            f"warning: {declared - resolved} of {declared} example links did not "
+            "resolve — this machine is missing part of the third-party corpus, and "
+            "committing this export would drop those links from the guide. "
+            "Run `vizier ingest all && vizier db build` first.",
+            err=True,
+        )
+
     text = _json.dumps(payload, indent=2, ensure_ascii=False)
     if out == "-":
         click.echo(text)
@@ -679,7 +705,7 @@ def eval_informed(
 ):
     """Run the informed critique against every case in evals/cases/.
 
-    Retrieves corpus context (weaver principles, FT vocab, Cairo rubric,
+    Retrieves corpus context (house principles, FT vocab, Cairo rubric,
     tag-matched prior art) and applies Cairo's five-pillar framework
     explicitly. With --style, layers a publication's house-style lens
     on top (ft, nyt, pudding, junkcharts). Stamped with the same

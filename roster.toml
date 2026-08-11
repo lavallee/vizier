@@ -188,7 +188,7 @@ notes = "src/vizier/gate.py:108-218; src/vizier/__main__gate.py. IMPORTANT misma
 
 [[capabilities]]
 id = "corpus_query"
-description = "Query the compiled corpus of data-viz writing and reference material: BM25 keyword search, semantic (embedding) similarity, direct lookup, and browsing the 43-pattern chart-form taxonomy, canonical rubrics (Cairo, FT Vocab), and weaver principles by workflow stage."
+description = "Query the compiled corpus of data-viz writing and reference material: BM25 keyword search, semantic (embedding) similarity, direct lookup, and browsing the 43-pattern chart-form taxonomy, canonical rubrics (Cairo, FT Vocab), and the house principles by workflow stage."
 entry_cli = "vizier db search \"{query}\" -k {k}"
 entry_python = "vizier.db.query:search"
 entry_mcp = "vizier mcp → search | find_similar | lookup | list_patterns | get_pattern | list_principles | list_rubrics | list_sources | stats"

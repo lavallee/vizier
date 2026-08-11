@@ -1,6 +1,6 @@
 # Chart-forms guide — roadmap + progress
 
-*Handoff doc. Captures the state of the vizier + weaver effort as of
+*Handoff doc. Captures the state of the vizier + artifact-guide effort as of
 2026-04-23 (end-of-day refresh) and what's still open. Written so a
 future session can pick up cold.*
 
@@ -12,7 +12,7 @@ future session can pick up cold.*
 **Goal:** so vizier's critique can cite prior art, ingest practitioner-walkthrough content from the open web. **State: done.**
 
 - **6,657 non-pattern items** across 14 sources:
-  `kantar`, `sigma`, `junkcharts`, `pudding`, `weaver` (internal
+  `kantar`, `sigma`, `junkcharts`, `pudding`, `principles` (internal
   principles), `rubrics`, `ft-vocab`, `source-opennews`, `eagereyes`,
   `visualising-data`, `cairo-blog`, `nightingale`, `snd`, `observable`.
 - **Shared scaffolding:** `_sitemap_blog.py` (sitemap + optional
@@ -42,7 +42,7 @@ future session can pick up cold.*
 - **36 `chart_pattern` corpus items** across all 9 FT Visual
   Vocabulary families. Each pattern carries structured fields
   (see schema below) and a prose body.
-- **Weaver reader** (`reader/`)
+- **Artifact reader** (`reader/`)
   renders the 36 patterns as a hash-routed guide:
   - Root TOC: "Decide by question" ladder + full family grid
   - Per-family pages at `#/family/<slug>` (primary-first pattern order)
@@ -69,7 +69,7 @@ future session can pick up cold.*
 
 ```
 vizier: 36 chart_pattern items + 6,657 other corpus items = 6,693 total
-weaver: chart-forms-guide project, 36/36 demo coverage, 0 flagged issues
+guide: chart-forms-guide project, 36/36 demo coverage, 0 flagged issues
 ```
 
 | Axis | Count / state |
@@ -116,7 +116,7 @@ details:
       when: "Branching co-occurrence..."
   canonical_examples:      [<source>/<id>, ...]
   antipattern_examples:    [<source>/<id>, ...]
-  related_principles:      [weaver/principle-*]
+  related_principles:      [principles/principle-*]
 ---
 Prose body (a few hundred words on the form, variants, cosmetic details).
 ```
@@ -131,11 +131,11 @@ to full objects.
 
 1. **Markdown source of truth vs SQLite index** — we picked markdown
    + regenerable DB. Snapshot via `vizier patterns export` to JSON for
-   weaver consumption. Costs: the weaver reader is a snapshot of a
+   artifact consumption. Costs: the artifact reader is a snapshot of a
    moment. Fine at this scale (~36 patterns); revisit if live-updating
    the reader becomes interesting.
 
-2. **Hash router vs real SPA** — weaver's chart-forms-guide uses a
+2. **Hash router vs real SPA** — the chart-forms-guide artifact uses a
    hash router to stay a single-vite-build project. Scales to maybe
    100 patterns before the all-at-once render becomes heavy. Beyond
    that, lazy-load demo modules.
@@ -151,7 +151,7 @@ to full objects.
    file becomes painful.
 
 5. **No per-family decision diagrams** — we shipped one decision
-   diagram (sankey-when-and-how, a sibling weaver project). Could
+   diagram (sankey-when-and-how, a sibling artifact). Could
    generalize that pattern to each family, but each one is hand-
    authored. See Tier-2 items below.
 
@@ -262,7 +262,7 @@ files (this is also what GitHub Pages serves out of `docs/`).
 | `vizier/docs/reader/data.json` | Exported snapshot from vizier |
 | `vizier/docs/reader/live-examples.js` | 36 demo renderers + comparison triads |
 | `vizier/docs/reader/main.js` | Hash router + pattern-section renderer |
-| `weaver/projects/sankey-when-and-how/` | Earlier sibling project — specific-form essay |
+| `projects/sankey-when-and-how/` | Earlier sibling project — specific-form essay |
 
 ---
 
@@ -291,7 +291,7 @@ Family slugs: `flow`, `part-to-whole`, `ranking`, `change-over-time`,
 - `b974d1d` — reading_checklist field
 - `f222188` — sankey YAML fix (fill:none was parsed as dict)
 
-**weaver:**
+**guide:**
 - `15822cb` — #/review harness + 24 layout fixes
 - `1a41c83` — interactive parameter sliders
 - `1bdf4b4` — #/compare route

@@ -2,7 +2,7 @@
 
 Exposes a small, purpose-built toolset for visualization-critique
 workflows. Clients can ask: "show me prior art like this", "how did
-anyone tackle a racing bar chart", "list the weaver principles for the
+anyone tackle a racing bar chart", "list the house principles for the
 Narrate stage", or "fetch that specific kantar 2019 shortlist item."
 
 Transport: stdio (the usual MCP wiring for local clients like Claude
@@ -47,7 +47,7 @@ mcp = _Server(
         "(source, item_id); `list_principles` / `list_rubrics` for canonical "
         "frameworks (Cairo, FT Vocab, the dataviz method); `list_patterns` / "
         "`get_pattern` for the 43-form chart taxonomy. Sources include kantar and "
-        "sigma (awards), junkcharts (critiques), weaver (internal principles), and "
+        "sigma (awards), junkcharts (critiques), the house principles, and "
         "seven practitioner blogs (source-opennews, eagereyes, visualising-data, "
         "cairo-blog, nightingale, snd, observable)."
     ),
@@ -122,7 +122,7 @@ def lookup(
 
 @mcp.tool(
     description=(
-        "Return weaver principles (vizier's internal rubric). Pass `stage` "
+        "Return vizier's house principles (its own working rubric). Pass `stage` "
         "to filter by workflow stage (Explore, Frame, Ingest, Sketch, "
         "Build, Narrate, Critique, Ship, Retrospect, or "
         "'Cross-cutting meta-principles')."

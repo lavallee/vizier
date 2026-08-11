@@ -2,7 +2,7 @@
 
 First-pass retrieval is intentionally simple:
 
-- Always include *all* weaver principles (38 items, ~10K tokens) —
+- Always include *all* house principles (38 items, ~10K tokens) —
   they are vizier's lived-through rubric; excluding any would mean vizier
   can't recall its own principles.
 - Always include named rubrics (Cairo 5-pillars, FT Visual Vocabulary).
@@ -35,9 +35,9 @@ TOP_K = {
 }
 
 # Sources always included in full
-ALWAYS_INCLUDE = ("weaver", "ft-vocab", "rubrics")
+ALWAYS_INCLUDE = ("principles", "ft-vocab", "rubrics")
 
-# Minimum score a non-weaver item must clear to be included. Tuned so that
+# Minimum score a non-principle item must clear to be included. Tuned so that
 # pure-body keyword matches (which accumulate fractional scores) don't
 # qualify — an item must have a tag overlap, a title hit, or a tier bonus
 # combined with body signal.
@@ -301,7 +301,7 @@ def retrieve(case: dict, *, root: Path | None = None, strategy: str = "hybrid") 
                     and tier bonuses. Requires OPENAI_API_KEY.
 
     Returns a dict with:
-      - `always`: list[Item] — weaver + rubrics, in full
+      - `always`: list[Item] — house principles + rubrics, in full
       - `scored`: dict[str, list[ScoredItem]] — top-K per other source
       - `retrieval_summary`: dict for logging
     """
@@ -373,11 +373,11 @@ def format_for_prompt(retrieval: dict) -> str:
                     parts.append("Sub-types: " + ", ".join(types))
                 parts.append("")
 
-    if "weaver" in always_by_src:
-        parts.append("## Internal weaver principles (lived rubric)\n")
+    if "principles" in always_by_src:
+        parts.append("## House principles (lived rubric)\n")
         # Group by stage to keep it scannable
         by_stage: dict[str, list[Item]] = {}
-        for it in always_by_src["weaver"]:
+        for it in always_by_src["principles"]:
             stage = (it.details or {}).get("stage") or it.type
             by_stage.setdefault(stage, []).append(it)
         for stage in [

@@ -3,7 +3,7 @@ pattern. Given a data-job, route to the right chart form(s) over the 43-pattern
 library, guarded by the form heuristic's "is it even a chart?" checks.
 
 Where `suggest_palette` answers "which colors," `recommend_form` answers "which
-form" — the other half of a generation-time decision a renderer (weaver) would
+form" — the other half of a generation-time decision a renderer would
 otherwise make on its own.
 """
 

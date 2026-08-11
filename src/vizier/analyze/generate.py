@@ -2,8 +2,8 @@
 
 Critique answers "is this palette right?"; generation answers "give me one that
 is." Same thresholds, so what vizier *suggests* is what vizier would *pass*. This is
-what lets a renderer (weaver, or any agent) ask vizier for correct colors instead
-of rolling its own palette and hoping — vizier owns the decision, weaver draws it.
+what lets a renderer or agent ask vizier for correct colors instead of rolling
+its own palette and hoping — vizier owns the decision, the renderer draws it.
 
 Everything here is deterministic and validated before it's returned.
 """

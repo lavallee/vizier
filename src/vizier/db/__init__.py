@@ -18,7 +18,7 @@ Public entrypoints:
     db.build.populate()              # walk corpus/ and upsert
     db.query.search("bar chart", k=10)
     db.query.find_similar(text, k=8, source="junkcharts")
-    db.query.lookup("weaver", "principle-show-the-evidence")
+    db.query.lookup("principles", "principle-show-the-evidence")
 """
 
 from __future__ import annotations

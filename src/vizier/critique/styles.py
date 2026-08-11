@@ -13,7 +13,7 @@ even if the latter might be 5% better." Styles let vizier critique
 whether an artifact fits *within* a publication's house system, not
 just against a generic rubric.
 
-Styles aren't mutually exclusive from the default Cairo/FT/weaver
+Styles aren't mutually exclusive from the default Cairo/FT/house
 framework — they layer on top. The default informed critique uses the
 `multi` style (all lenses weighted equally).
 """
@@ -98,7 +98,7 @@ inline, not at the end.
 Judge the artifact on: "would this open the Upshot's daily lineup and \
 make a civic decision clearer for a general NYT reader?"\
 """,
-        retrieval_weights={"weaver": 1.3},
+        retrieval_weights={"principles": 1.3},
         rubric_tags=("style-nyt",),
     ),
     "pudding": Style(

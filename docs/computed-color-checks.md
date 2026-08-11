@@ -37,8 +37,8 @@ construction, so the LLM can't fake or soften it.
 
 The checks run in reverse: the thresholds that *judge* a palette also *generate*
 one that passes. `src/vizier/analyze/generate.py` adds the generation primitives,
-so a renderer (weaver, or any agent) asks vizier for correct colors instead of
-rolling its own:
+so a renderer or agent asks vizier for correct colors instead of rolling its
+own:
 
 | Primitive | CLI | MCP | Returns |
 |---|---|---|---|
@@ -51,8 +51,8 @@ is validated by the same `color` checks first (`tests/test_generate.py`, 6/6). A
 request that can't be satisfied (a 9th categorical hue, too many ordinal steps for
 a warm hue) raises rather than returning something that fails.
 
-This is the surface **weaver calls at generation time**, over MCP, rather than
-duplicating the color math — see `PRINCIPLES.md` → "Generation and critique are one
+This is the surface a generator **calls at generation time**, over MCP, rather
+than duplicating the color math — see `PRINCIPLES.md` → "Generation and critique are one
 expertise." The corpus-backed judgment stays critique-side and LLM-mediated; only
 the computed part crosses into generation.
 

@@ -1,6 +1,6 @@
 """vizier.gate — adaptive "does this need data visuals?" gate.
 
-Sits in front of the weaver chart-authoring pipeline: an upstream
+Sits in front of a chart-authoring pipeline: an upstream
 orchestrator asks vizier whether a piece warrants chart authoring before
 committing to the cost of producing charts.
 

@@ -35,22 +35,22 @@ One markdown file per case in `evals/cases/<id>.md`. Frontmatter:
 ```yaml
 ---
 id: <slug>                          # unique, stable
-source_kind: weaver | wild
+source_kind: first-party | wild
 artifact_title: "…"
 artifact_url: https://…
-ground_truth_source: weaver-notes | sigma-jury | junkcharts-critique | kantar-jury
+ground_truth_source: house-notes | sigma-jury | junkcharts-critique | kantar-jury
 tags: [chart-type, topic, audience, …]
 ---
 ```
 
 Body: prose describing the artifact. Keep descriptions *truthful*
-and *specific* but *pre-retrospective* — don't leak weaver's learned
-lessons into the description for weaver cases. The description is
+and *specific* but *pre-retrospective* — don't leak the retrospective's
+learned lessons into the description for first-party cases. The description is
 what the critic sees; the ground truth is what we compare against.
 
 ### Ground-truth resolution (automatic)
 
-- `weaver-notes` → `weaver/projects/<slug>/notes.md` (looser match on
+- `house-notes` → `$VIZIER_EVAL_NOTES_ROOT/<slug>/notes.md` (looser match on
   directory name suffix, e.g., `new-bern` ↔ `new-bern-profile`).
 - `sigma-jury` / `kantar-jury` / `junkcharts-critique` → corpus item
   matched by URL or slugified title. That item is also *excluded*
@@ -218,7 +218,7 @@ is recoverable from the run directory alone.
 
 ## Adding a case
 
-1. Pick an artifact with a resolvable ground truth (weaver
+1. Pick an artifact with a resolvable ground truth (first-party
    retrospective, Sigma jury commentary, Kantar special-award quote,
    Junk Charts post that critiques a specific chart, etc.).
 2. Write a description that's specific about form, encoding, audience,
@@ -236,7 +236,7 @@ is recoverable from the run directory alone.
 - **Case description thinness** — if a description omits the encoding
   the ground truth flags, neither critique can catch it. Review the
   retrieval summary and the critique body after adding a case.
-- **Ground-truth noise** — weaver retrospectives are authored once,
+- **Ground-truth noise** — first-party retrospectives are authored once,
   not consensus-reviewed. Jury commentary is a single committee's
   read. The judge's "alignment with ground truth" inherits whatever
   flavor that ground truth has. Treat alignment as one axis among

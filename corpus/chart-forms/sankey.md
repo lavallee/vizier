@@ -60,9 +60,9 @@ details:
     - Default black path-fill leaks through on bezier ribbons — always set fill=none on the link paths
     - Using a sankey when the left-total doesn't actually equal the right-total — the chart lies by construction
   related_principles:
-    - weaver/principle-order-stage-categories-meaningfully
-    - weaver/principle-reading-guide-directly-above-each-novel-diagram
-    - weaver/principle-break-apart-near-deterministic-columns
+    - principles/principle-order-stage-categories-meaningfully
+    - principles/principle-reading-guide-directly-above-each-novel-diagram
+    - principles/principle-break-apart-near-deterministic-columns
   related_projects:
     - title: "Sankey: when and how (and when not to)"
       href: ../sankey-when-and-how/

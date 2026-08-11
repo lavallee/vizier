@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from vizier.db import query as Q  # noqa: E402
 
 
-EXCLUDE_SOURCES = ["chart-forms", "weaver", "rubrics", "ft-vocab"]
+EXCLUDE_SOURCES = ["chart-forms", "principles", "rubrics", "ft-vocab"]
 
 PATTERN_KEYWORDS = {
     # Additional keyword queries beyond the capsule, for patterns where
