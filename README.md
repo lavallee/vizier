@@ -13,17 +13,24 @@ vizier for the decision instead of re-deriving it from a half-remembered rule.
 
 ## Install
 
-The primary path is the Claude Code plugin, where vizier fires *before* a chart gets
-built:
+The primary path is the agent plugin, where vizier fires *before* a chart gets
+built. In Claude Code:
 
 ```
 /plugin marketplace add lyra-forge/marketplace
 /plugin install vizier@lyra-forge
 ```
 
+In Codex:
+
+```bash
+codex plugin marketplace add lyra-forge/marketplace
+codex plugin add vizier@lyra-forge
+```
+
 Two skills — `chart-design` (decide a chart) and `chart-critique` (judge one) — plus
 vizier's MCP server, so the same answers are available as tools. The skills drive the
-`vizier` CLI, which installs separately:
+`vizier` CLI, which installs separately. Start a new harness session after installing:
 
 ```bash
 uv tool install datavizier        # or: pip install datavizier
@@ -78,7 +85,8 @@ fails. See [docs/computed-color-checks.md](docs/computed-color-checks.md).
 ## MCP server
 
 `vizier mcp` serves everything above (plus the corpus query) as an MCP stdio server, so
-Claude Code / Cursor / any MCP client can call it. The plugin registers it for you;
+Codex, Claude Code, Cursor, and other MCP clients can call it. Either marketplace
+plugin registers it for you;
 elsewhere:
 
 ```bash

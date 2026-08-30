@@ -1,0 +1,39 @@
+{
+  "name": "vizier",
+  "version": "0.3.1",
+  "description": "Chart-form selection and critique grounded in reader questions, honest comparison, and documented patterns.",
+  "author": {
+    "name": "Marc Lavallee"
+  },
+  "homepage": "https://lavallee.github.io/vizier/",
+  "repository": "https://github.com/lavallee/vizier",
+  "license": "MIT",
+  "keywords": [
+    "dataviz",
+    "charts",
+    "data-visualization",
+    "journalism",
+    "critique",
+    "accessibility",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "vizier — chart judgment",
+    "shortDescription": "Choose and critique charts with evidence",
+    "longDescription": "Choose chart forms from the reader's question, run newsroom-style honesty checks, and critique finished graphics against a documented pattern library.",
+    "developerName": "Marc Lavallee",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "websiteURL": "https://lavallee.github.io/vizier/",
+    "defaultPrompt": [
+      "Use Vizier to choose a chart for this question.",
+      "Use Vizier to critique this chart for misleading choices.",
+      "Use Vizier to check this chart's comparison and denominator."
+    ]
+  }
+}

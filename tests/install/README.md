@@ -37,20 +37,28 @@ corpus index. Then, in order:
 4. **Checks the critique path's failure modes** — missing extra, missing
    provider key, missing vision key, bad input — all of which must be messages
    naming the fix, never tracebacks.
-5. **Installs the plugin through a marketplace**, from a staged git copy of the
-   working tree, and asserts both skills and the bundled MCP server are
-   registered and that the launcher starts.
+5. **Installs the Claude Code plugin through a marketplace**, from a staged git
+   copy of the working tree, and asserts both skills and the bundled MCP server
+   are registered and that the launcher starts.
 
 Sections self-skip when a prerequisite is absent (no `claude` CLI → the plugin
 section skips), so the harness stays runnable in CI and on a bare machine.
 
+The unit suite separately checks both manifest versions and that the Codex
+manifest declares `.mcp.json`. Before publishing a release through
+`lyra-forge/marketplace`, also create a temporary marketplace with a unique
+name, install `vizier` with `codex plugin add vizier@<temporary-name>`, and
+confirm the installed component inventory in a new Codex session. Remove the
+temporary plugin and marketplace afterward. That smoke test is deliberately
+kept separate because Codex marketplace configuration is user state.
+
 ## The live check
 
-`run.sh` proves the plugin installs and registers. It can't prove the thing that
-actually matters — that the skills *fire*, and that the answer comes from
-vizier's corpus rather than the model's habits. `live.sh` runs real headless
-`claude` sessions against a sandbox install and reports which skills and tools
-fired:
+`run.sh` proves the Claude Code plugin installs and registers. It can't prove
+the thing that actually matters — that the skills *fire*, and that the answer
+comes from vizier's corpus rather than the model's habits. `live.sh` runs real
+headless `claude` sessions against a sandbox install and reports which skills
+and tools fired:
 
 ```bash
 tests/install/live.sh                    # three standard prompts

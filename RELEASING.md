@@ -7,12 +7,13 @@ conventions as the sibling `somm` package so the two release the same way.
 ## Versioning
 
 vizier follows [semantic versioning](https://semver.org). The version lives in
-**three** places that move in lockstep (`tests/test_plugin.py` fails if the
+**four** places that move in lockstep (`tests/test_plugin.py` fails if either
 plugin manifest falls behind):
 
 - `pyproject.toml` → `version`
 - `src/vizier/__init__.py` → `__version__`
 - `.claude-plugin/plugin.json` → `version`
+- `.codex-plugin/plugin.json` → `version`
 
 Bump rules:
 
@@ -40,23 +41,28 @@ changelog.
    `.github/workflows/ci.yml`.) The install test is the one that matters most
    at release time: it builds the wheel and checks what a *user* gets — the
    corpus riding along inside it, the index self-building, the MCP server
-   answering a handshake, the plugin installing from a marketplace, and the
-   optional paths naming their own fix. A source checkout hides every one of
-   those failures.
+   answering a handshake, the Claude Code plugin installing from a marketplace,
+   and the optional paths naming their own fix. A source checkout hides every
+   one of those failures. Also perform the temporary Codex marketplace smoke
+   documented in `tests/install/README.md` before publishing either catalog.
 
-2. **Bump the version in all three places.**
+2. **Bump the version in all four places.**
    ```bash
    OLD=0.2.0; NEW=0.3.0
    sed -i "s/^version = \"$OLD\"/version = \"$NEW\"/" pyproject.toml
    sed -i "s/__version__ = \"$OLD\"/__version__ = \"$NEW\"/" src/vizier/__init__.py
    sed -i "s/\"version\": \"$OLD\"/\"version\": \"$NEW\"/" .claude-plugin/plugin.json
+   sed -i "s/\"version\": \"$OLD\"/\"version\": \"$NEW\"/" .codex-plugin/plugin.json
    ```
 
-   Then update the plugin's entry in the
-   [marketplace](https://github.com/lyra-forge/marketplace) —
-   `.claude-plugin/marketplace.json` (`version`) and the README's plugin
-   section — so `/plugin install vizier@lyra-forge` resolves to the release
-   you just cut. Validate it there with `claude plugin validate . --strict`.
+   Then inspect the plugin's entries in the
+   [marketplace](https://github.com/lyra-forge/marketplace). The current Vizier
+   entries track the default branch and carry no duplicate version, so a
+   normal version bump does not require a catalog edit. If its source, pin, or
+   install copy changes, update both catalogs and the README together. Publish
+   this repository first; only then validate and publish the marketplace so
+   `/plugin install vizier@lyra-forge` and
+   `codex plugin add vizier@lyra-forge` can resolve both manifests.
 
 3. **Refresh the bundled chart-pattern data** if any pattern, rubric, or the
    taxonomy changed. The guide ships a snapshot that goes stale otherwise:

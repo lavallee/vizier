@@ -5,10 +5,12 @@ an MCP server. Once registered, agents in other sessions can call
 `recommend_form`, `implementation_guide`, `get_pattern`, `analyze_artifact`,
 `suggest_palette`, `search`, and the rest as tools.
 
-> **The plugin does this for you.** `/plugin install vizier@lyra-forge`
-> registers the server as part of the install — nothing below is needed
-> unless you're wiring up a different client, or running against a source
-> checkout. See the [install section](https://lavallee.github.io/vizier/#install).
+> **The plugin does this for you.** In Claude Code, run
+> `/plugin install vizier@lyra-forge`; in Codex, run
+> `codex plugin add vizier@lyra-forge`. Both plugin manifests register the
+> bundled server — nothing below is needed unless you're wiring up a different
+> client or running against a source checkout. See the
+> [install section](https://lavallee.github.io/vizier/#install).
 
 > **The index is automatic.** vizier builds it from the packaged corpus on
 > first use (a few seconds, no network), so `recommend_form` and the pattern
@@ -25,12 +27,16 @@ SQLite DB paths separated by the platform path separator (`:` on macOS/Linux,
 sibling `vizier-private/corpus/vizier-private.db` is auto-discovered without any
 env var.
 
-## Claude Code (without the plugin)
+## Codex or Claude Code without the plugin
 
-With vizier installed (`uv tool install datavizier`), one line from the
-project that should consume it:
+With vizier installed (`uv tool install datavizier`), register it directly in
+the client that should consume it:
 
 ```sh
+# Codex
+codex mcp add vizier -- vizier mcp
+
+# Claude Code, from the consuming project
 cd /path/to/consuming-project
 claude mcp add vizier -- vizier mcp
 ```
@@ -38,20 +44,23 @@ claude mcp add vizier -- vizier mcp
 Against a source checkout instead of an installed package:
 
 ```sh
+# Codex
+codex mcp add vizier -- uv --directory /absolute/path/to/vizier run vizier mcp
+
+# Claude Code
 claude mcp add vizier -- uv --directory /absolute/path/to/vizier run vizier mcp
 ```
 
-This writes the server into that project's `.claude/settings.json`
-under `mcpServers`. Verify with:
+Verify the registration in the corresponding client:
 
 ```sh
+codex mcp list
 claude mcp list
-# → should show `vizier` with the uv command
+# → each should show `vizier` with the selected command
 ```
 
-Inside a Claude Code session in that project, the tools appear as
-`mcp__vizier__search`, `mcp__vizier__find_similar`, etc. Calling
-`list_patterns` or `get_pattern` is a good smoke test.
+Start a new session after registering it. Tool names are namespaced by the
+client; calling `list_patterns` or `get_pattern` is a good smoke test.
 
 ## Claude Desktop / Cursor / claude.ai
 

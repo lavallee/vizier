@@ -1,10 +1,11 @@
-"""The Claude Code plugin's manifest, skills, and bundled MCP server.
+"""The Claude Code and Codex plugin manifests, skills, and bundled MCP server.
 
 The plugin is a second, independent surface on the same package: it declares
 its own version, it ships skills that name CLI commands, and it launches the
 MCP server through a wrapper script. Each of those can drift out of sync with
 the code silently — an install still "succeeds", it just does the wrong thing.
-`tests/install/run.sh` proves the plugin installs; this proves it stays true.
+`tests/install/run.sh` proves the Claude Code install path; this proves the
+shared package and both manifests stay true.
 """
 
 from __future__ import annotations
@@ -19,22 +20,27 @@ import pytest
 from vizier import __version__
 
 ROOT = Path(__file__).resolve().parents[1]
-MANIFEST = ROOT / ".claude-plugin" / "plugin.json"
+MANIFESTS = (
+    ROOT / ".claude-plugin" / "plugin.json",
+    ROOT / ".codex-plugin" / "plugin.json",
+)
 MCP_CONFIG = ROOT / ".mcp.json"
 LAUNCHER = ROOT / "bin" / "vizier-mcp"
 SKILLS = ROOT / "skills"
 
 
-@pytest.fixture(scope="module")
-def manifest() -> dict:
-    return json.loads(MANIFEST.read_text())
-
-
-def test_plugin_version_tracks_the_package(manifest):
+@pytest.mark.parametrize("manifest_path", MANIFESTS)
+def test_plugin_version_tracks_the_package(manifest_path):
+    manifest = json.loads(manifest_path.read_text())
     assert manifest["version"] == __version__, (
-        "bump .claude-plugin/plugin.json alongside src/vizier/__init__.py "
+        f"bump {manifest_path.relative_to(ROOT)} alongside src/vizier/__init__.py "
         "and pyproject.toml — see RELEASING.md"
     )
+
+
+def test_codex_manifest_declares_the_mcp_server():
+    manifest = json.loads(MANIFESTS[1].read_text())
+    assert manifest["mcpServers"] == "./.mcp.json"
 
 
 def test_plugin_declares_the_mcp_server():

@@ -14,12 +14,21 @@ tests/install/run.sh                   # what a user's install does — see test
 Run the install test before anything that touches packaging, the corpus layout,
 the MCP server, or the plugin. It's the only thing that exercises a wheel
 install, and the failures it catches are invisible from a source checkout.
+It currently exercises the Claude Code marketplace path. Before publishing a
+dual-harness change, also validate `.codex-plugin/plugin.json` and install the
+plugin through a temporary Codex marketplace; see
+[`tests/install/README.md`](tests/install/README.md).
 
 Opening this repo in Claude Code warns that `CLAUDE_PLUGIN_ROOT` is unset for
 the `vizier` MCP server. That's expected: the repo root doubles as the plugin
 root, so its `.mcp.json` is written for the plugin's environment. Ignore the
 warning, or register the server yourself with
 `claude mcp add vizier -- uv --directory . run vizier mcp`.
+
+The repository carries independent Claude Code and Codex manifests over the
+same `skills/`, `.mcp.json`, and launcher. Keep both manifest versions equal,
+and keep `mcpServers: "./.mcp.json"` in the Codex manifest so the root MCP file
+is not silently ignored.
 
 ## The two halves — keep them distinct
 
