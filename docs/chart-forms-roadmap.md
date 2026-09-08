@@ -202,7 +202,7 @@ to full objects.
 
 **Vizier (Python + uv):**
 ```
-cd /Users/lavallee/Projects/vizier
+cd /path/to/vizier
 
 # corpus health
 uv run vizier stats                    # items per source
@@ -234,7 +234,7 @@ files (this is also what GitHub Pages serves out of `docs/`).
   "mcpServers": {
     "vizier": {
       "command": "uv",
-      "args": ["--directory", "/Users/lavallee/Projects/vizier", "run", "vizier", "mcp"]
+      "args": ["--directory", "/path/to/vizier", "run", "vizier", "mcp"]
     }
   }
 }
