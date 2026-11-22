@@ -27,13 +27,21 @@ def main(argv: list[str] | None = None) -> int:
         decision = needs_charts(bd)
         out = bd / "draft" / args.out_name
         write_decision(decision, out)
+        if not decision.ok:
+            print(f"!! {bd.name}: gate FAILED — {decision.error}", file=sys.stderr)
+            rc = 1
+            continue
         verdict_lines = []
         for v in decision.verdicts:
-            mark = "KEEP" if v.keep else "drop"
-            verdict_lines.append(f"    [{mark}] {v.candidate.get('title', '?')} — {v.reason[:80]}")
+            if v.keep:
+                tip = f" (improve: {v.improve[0][:60]})" if v.improve else ""
+                verdict_lines.append(f"    [KEEP] {v.candidate.get('title', '?')} — {v.reason[:80]}{tip}")
+            else:
+                alt = (v.instead or {}).get("form", "?")
+                verdict_lines.append(f"    [instead: {alt}] {v.candidate.get('title', '?')} — {v.reason[:80]}")
         print(
             f"{bd.name}: {'YES' if decision.needs_charts else 'no'} "
-            f"({decision.n_kept}/{decision.n_candidates} kept) — {decision.summary[:120]}"
+            f"({decision.n_kept}/{decision.n_candidates} kept as proposed) — {decision.summary[:120]}"
         )
         for line in verdict_lines:
             print(line)
