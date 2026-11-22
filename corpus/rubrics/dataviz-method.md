@@ -1,8 +1,8 @@
 ---
 axes:
-- description: 'Is it even a chart? A single number is a stat tile / hero figure,
-    not a one-bar bar chart; >~7 classes that all carry meaning is a table. If a chart
-    IS right, the data''s job picks the type: magnitude→bar/column (heatmap for a
+- description: 'Which form serves the reader? A single number reads best as a stat
+    tile / hero figure, not a one-bar bar chart; >~7 classes that all carry meaning
+    want a table beside (or instead of) the chart. For a chart, the data''s job picks the type: magnitude→bar/column (heatmap for a
     grid); trend→line; tell series apart→grouped/stacked bar or multi-line; one series
     is the point→emphasis (highlight one, gray the rest); above/below a baseline→diverging
     bar; part-to-whole→stacked bar; before→after per item→dumbbell. Emphasis is the
@@ -67,7 +67,7 @@ type: rubric
 
 A procedure, run in order — **color comes last**; most bad charts pick colors first:
 
-1. **Pick the form** by the data's job (or decide it's not a chart — a stat tile, hero number, or table).
+1. **Pick the form** by the data's job (which may be a stat tile, hero number, or table).
 2. **Assign color by the job it does** (categorical / ordinal / sequential / diverging / status), not by taste.
 3. **VALIDATE the palette by computation, not by eye** — colorblind ΔE, contrast, OKLCH band/chroma. (`vizier validate "#.." --pairs all|adjacent`, or the analyze_artifact / validate_palette MCP tools.)
 4. **Apply mark specs & the two spacers** (surface gap between fills, surface ring on dots).
@@ -76,7 +76,7 @@ A procedure, run in order — **color comes last**; most bad charts pick colors 
 
 **The non-negotiables** (true in every design system): never a dual-axis chart; assign categorical hues in a fixed order, never cycled (a 9th series folds into 'Other', small multiples, or composite encoding); sequential = one hue light→dark, diverging = two hues + a gray midpoint (never a rainbow, never a hue at the diverging midpoint); status colors are reserved and ship with icon+label; text wears text tokens, never the series color; a legend is always present for ≥2 series.
 
-**Anti-pattern catalog — if a chart matches an entry, it's wrong:**
+**Anti-pattern catalog — if a chart matches an entry, fix it:**
 - Dual-axis (two y-scales) — invents a correlation; the #1 mistake.
 - Recolor-on-filter — color must follow the entity, not its current rank/row.
 - Cycling/generating hues past 8 — indistinguishable under CVD.

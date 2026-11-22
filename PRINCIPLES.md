@@ -1,9 +1,9 @@
 # Vizier principles
 
-Working practices for evaluation and judgment. Making a graphic is
-**execution**; vizier is about **evaluation**. The two share a vision
-(information-design tradition, chart-form rigor, audience-first framing)
-and divide the roles.
+Working practices for showing data and judging the result. vizier began as
+an evaluator; it now also makes the figure, and the same knowledge serves
+both: the pattern library that critiques a form also ranks and draws it, and
+the checks that judge a palette also generate one that passes.
 
 The file is organized by workflow stage (Collect → Retrieve →
 Evaluate → Deliver → Measure) with cross-cutting meta-principles
@@ -15,15 +15,40 @@ moving between them is expected.
 
 ## Cross-cutting
 
-### Evaluation is not execution
+### Someone asked to see their data; show them how
 
-The maker makes, vizier judges. The disciplines overlap but diverge in
-method:
+The starting point is a person with a table and a reason to look at it.
+That is a good request, and vizier's job is to serve it well:
 
-- **The maker's discipline** is generative: "I have a blank canvas;
-  what's the right move?"
-- **Vizier's discipline** is forensic: "I have an artifact; what did
-  the maker catch, miss, or not yet see?"
+- **Best form first, trade-offs stated.** Rank the ways to show the data,
+  draw the top few from the real rows, and say for each what it shows well,
+  what it hides, and the mistakes most often made with it.
+- **Say when a sentence or a table serves better — and provide it.** Two
+  numbers often read best as a sentence; precise lookup as a table. Those are
+  offered as forms in the ranking, written out, beside any chart that can be
+  drawn. They are never a refusal and never the only answer when a chart is
+  drawable.
+- **Notes, not vetoes.** A truncated axis, too many series, a small sample, a
+  rate without its denominator, suppressed values: each becomes a note that
+  says what a reader could misread and what fixes it. Where the fix is
+  mechanical (zero baselines for bars, folding a tail into "Other", small
+  multiples instead of a second y-axis, gaps instead of zeros), vizier applies
+  it and says it did.
+- **Never refuse.** When a request can't be met exactly, return the best valid
+  answer plus what to change.
+
+Keep the taste — strong defaults and honest warnings — and lose the
+contempt. Language that sneers at a request ("that's not a real job", "be
+strict") teaches nothing; a concrete alternative does.
+
+### Evaluation and execution, kept honest with each other
+
+vizier now draws. It still keeps the critic's discipline: every figure `show`
+produces is run back through vizier's own analyzers (color, contrast,
+structure, well-formedness) and the result travels with the figure. The
+maker's question ("what's the right move on this blank canvas?") and the
+critic's ("what did this artifact catch, miss, or not yet see?") are asked of
+the same output, by the same rules.
 
 Principles that work for both (match chart form to licit comparisons;
 name the audience; declare the headline claim) live in both books —
@@ -31,37 +56,33 @@ vizier's judgment principles here, the making principles in the corpus.
 Principles uniquely about judgment (constraint-difficulty accounting;
 ground-truth exclusion in retrieval; prior-art citation) live here.
 
-When a principle appears in both, the wording matches — the cross-
-reference is explicit so the two stay consistent as they grow.
-
 ### Generation and critique are one expertise
 
 vizier's knowledge is bidirectional. The checks that *judge* a palette
 also *generate* a passing one; the pattern library that critiques a
-form also recommends it. So vizier is not only the critic — it is the
-dataviz **expertise**, and the split with whatever renders is sharpening
-accordingly:
+form also recommends it and now draws it. vizier is the dataviz
+**expertise**, and it is useful at every point in the chain:
 
-- **the renderer renders** — the SVG/DOM, layout, motion, the actual pixels.
-- **vizier decides** — which form, which colors, does the palette clear
-  colorblind + contrast, what did a finished artifact get wrong.
+- **vizier shows** — profile the table, rank the forms, draw the core forms
+  as offline SVG/HTML, or build the chart in Datawrapper, or emit a neutral
+  spec for another renderer.
+- **any renderer can still ask** — form, colors, ink, honesty checks are
+  callable primitives (`src/vizier/analyze`, `src/vizier/show`, the MCP
+  tools `show` / `suggest_palette` / `suggest_ramp` / `ink_on` /
+  `validate_palette` / `analyze_artifact` / `check_contrast`) for projects
+  that draw their own graphics.
 
-"Evaluation is not execution" still holds: vizier never draws. But the
-*computable* decisions — colorblind-safe palettes, ordinal ramps,
-legible ink, form-fit — now live in vizier as callable primitives
-(`src/vizier/analyze`, exposed over the MCP tools `suggest_palette` /
-`suggest_ramp` / `ink_on` / `validate_palette` / `analyze_artifact` /
-`check_contrast`). Any renderer or generator should *ask vizier* at
-generation time rather than duplicate the color math or re-derive the
-form taxonomy. What vizier suggests is what vizier would pass — the same
+vizier is not a general charting library: it draws the forms its pattern
+library can vouch for, with its defaults, and leaves bespoke graphics to the
+renderer. What vizier suggests is what vizier would pass — the same
 thresholds serve both directions.
 
-Keep the two halves distinct in kind, though: the generation
-primitives above are **computable and deterministic** (correct by
-construction, no LLM). The corpus-backed judgment — prior-art
-citation, constraint-difficulty, publication lens — stays critique-
-side and LLM-mediated. Don't let "vizier generates now" blur into
-"vizier's LLM opinions are ground truth." Only the computed part is.
+Keep the two halves distinct in kind, though: profiling, ranking, rendering
+and the color/structure checks are **computable and deterministic** (correct
+by construction, no LLM). The corpus-backed judgment — prior-art citation,
+constraint-difficulty, publication lens — stays critique-side and
+LLM-mediated. Don't let "vizier draws now" blur into "vizier's LLM opinions
+are ground truth." Only the computed part is.
 
 ### Pattern recognition, not general reasoning
 

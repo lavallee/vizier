@@ -32,7 +32,7 @@ details:
     - Vertical bars with long labels — use horizontal bars
     - Color used to encode magnitude (already on the length) — save color for a second dimension or an accent
     - Evenly-spaced categories on the x-axis when they represent unequal time intervals — use a time-axis chart instead
-    - A single-bar "chart" — the number is the story; use a stat tile / hero figure, not one lonely bar
+    - A single-bar "chart" — the number is the story; use a stat tile / hero figure rather than a single bar
   alternatives:
     - id: dot-plot
       when: Many categories, small magnitudes — dots are tidier than many thin bars

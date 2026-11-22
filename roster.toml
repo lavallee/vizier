@@ -3,11 +3,33 @@
 [app]
 name = "vizier"
 version = "0.1.0"
-description = "Generation + critique for journalistic data visualizations: chart-form recommendation, colorblind-safe palette/ramp generation, computable color checks, corpus-backed chart critique, and the adaptive needs-charts gate. Supersedes `malo` (deprecated 2026-07-10) — malo's roster forwards its needs_charts and critique_chart capabilities here. PyPI dist is `datavizier`; the import package and CLI are both `vizier`. Reachable as a CLI, a 14-tool MCP server (stdio), and direct Python entry points."
+description = "Shows how to visualize data, and critiques the result: `show` profiles a table, ranks the ways to show it (charts, and a sentence / stat tile / table when one serves better) and draws the best from the real rows as offline SVG/HTML or a Datawrapper chart, with honesty notes attached; plus chart-form recommendation, colorblind-safe palette/ramp generation, computable color checks, corpus-backed chart critique, and the keep-or-show-instead gate. Supersedes `malo` (deprecated 2026-07-10) — malo's roster forwards its needs_charts and critique_chart capabilities here. PyPI dist is `datavizier`; the import package and CLI are both `vizier`. Reachable as a CLI, an 18-tool MCP server (stdio), and direct Python entry points."
+
+[[capabilities]]
+id = "show"
+description = "Show how to visualize a table — deterministic, no LLM, no network. Profiles the columns (types, units, geography, missing and suppressed values; reads a Frictionless datapackage beside the table), ranks the ways to show it — chart forms from the pattern corpus plus sentence / stat tile / table, each with what it shows, what it hides and common mistakes — and draws the top options from the real rows as self-contained SVG + HTML with title, axis units, source, caveats and honesty notes (mechanical fixes applied). Never refuses. Optional Datawrapper build (dry run without a token) and a neutral spec."
+entry_cli = "vizier show {table} --for {claim} --format {format}"
+entry_python = "vizier.show:show"
+entry_mcp = "vizier mcp → show"
+inputs = [
+  { name = "table", type = "path", schema = "csv-or-json-table" },
+  { name = "claim", type = "str", schema = "text", optional = true },
+  { name = "format", type = "str", schema = "html|svg|datawrapper|spec", optional = true },
+  { name = "caveats", type = "path", schema = "vizier/caveats/v1", optional = true },
+  { name = "geometry", type = "path", schema = "geojson", optional = true },
+]
+outputs = [
+  { name = "result", type = "object", schema = "vizier/show-spec/v1" },
+  { name = "figures", type = "path", schema = "svg+html" },
+]
+tags = ["show", "rendering", "chart-form", "honesty-notes", "computable", "no-llm", "datawrapper"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/show/ (profile.py, rank.py, render.py, notes.py, datawrapper.py); src/vizier/cli.py (show); src/vizier/mcp_server.py (show). Datawrapper needs DATAWRAPPER_API_TOKEN; tested only against a fake server."
 
 [[capabilities]]
 id = "recommend_form"
-description = "Recommend chart form(s) for a free-text data-job or FT family — deterministic, no LLM. Returns ranked patterns (capsule, when-to/when-not, alternatives, common mistakes) and form-heuristic guards (e.g. a single value is a stat tile, not a chart)."
+description = "Recommend chart form(s) for a free-text data-job or FT family — deterministic, no LLM. Returns ranked patterns (capsule, when-to/when-not, alternatives, common mistakes) and form-heuristic notes (e.g. a single value reads best as a stat tile; past ~7 classes, pair the chart with a table)."
 entry_cli = "vizier recommend-form \"{job}\" --family {family} --n-series {n_series}"
 entry_python = "vizier.analyze.forms:recommend_form"
 entry_mcp = "vizier mcp → recommend_form"
@@ -46,7 +68,7 @@ notes = "src/vizier/cli.py:350-381; src/vizier/mcp_server.py:355-385. Set --sema
 
 [[capabilities]]
 id = "suggest_palette"
-description = "Generate a CVD-safe categorical palette of N colors, validated before it's returned (Machado-2009 colorblind ΔE, WCAG contrast, OKLCH band/chroma). Refuses infeasible requests (n>8) rather than returning something that fails."
+description = "Generate a CVD-safe categorical palette of N colors, validated before it's returned (Machado-2009 colorblind ΔE, WCAG contrast, OKLCH band/chroma). Past the validated ceiling (8) it returns the largest palette that passes with met=false and advice (fold into 'Other', small multiples, direct labels) — never an invalid palette, never an error for an infeasible count."
 entry_cli = "vizier suggest-palette {n} --mode {mode} --theme {theme} --pairs {pairs}"
 entry_python = "vizier.analyze.generate:suggest_palette"
 entry_mcp = "vizier mcp → suggest_palette"
@@ -66,7 +88,7 @@ notes = "src/vizier/cli.py:275-296; src/vizier/mcp_server.py:279-291. Core depen
 
 [[capabilities]]
 id = "suggest_ramp"
-description = "Generate a one-hue ordinal/sequential ramp of STEPS, validated (monotone lightness, visible ΔL, light end clears the surface). Errors clearly when a hue can't hold the requested step count."
+description = "Generate a one-hue ordinal/sequential ramp of STEPS, validated (monotone lightness, visible ΔL, light end clears the surface). When a hue can't hold the requested steps it returns the longest ramp that passes, with met=false and advice."
 entry_cli = "vizier suggest-ramp {steps} --hue {hue} --mode {mode}"
 entry_python = "vizier.analyze.generate:suggest_ramp"
 entry_mcp = "vizier mcp → suggest_ramp"
@@ -172,19 +194,19 @@ notes = "src/vizier/cli.py:465-509; src/vizier/critique/adhoc.py:246. Needs the 
 
 [[capabilities]]
 id = "needs_charts"
-description = "Adaptive gate: decide whether a reporting bundle warrants chart authoring at all, given the compositor's candidate chart proposals. Returns a decision (yes/no) plus per-candidate verdicts (keep/drop + reason), and a chart_spec for each kept candidate. Direct successor to malo's `needs_charts` alias."
+description = "Gate over the compositor's candidate charts for a reporting bundle: for each candidate, keep it (with `improve` — how to make it better) or set it aside with `instead` — what to show in its place (a better chart, a sentence, a stat tile or a table, from the same vocabulary `show` ranks). A model reply that can't be parsed returns status=\"error\" and needs_charts=null, never a silent 'no charts'. Direct successor to malo's `needs_charts` alias; name kept for compatibility."
 entry_cli = "python -m vizier.gate {bundle_dir}"
 entry_python = "vizier.gate:needs_charts"
 inputs = [
   { name = "bundle_dir", type = "path", schema = "frank/reporting-bundle/v1" },
 ]
 outputs = [
-  { name = "decision", type = "object", schema = "vizier/gate-decision/v1" },
+  { name = "decision", type = "object", schema = "vizier/gate-decision/v2" },
 ]
 tags = ["gate", "llm", "editorial-judgment"]
 quality_tier = "high"
 status = "live"
-notes = "src/vizier/gate.py:108-218; src/vizier/__main__gate.py. IMPORTANT mismatch: malo's roster.toml advertises `malo decide {bundle_dir}` forwarding to \"vizier.gate\", implying a `vizier decide`/`vizier gate` subcommand — but `vizier.gate` is NOT wired into src/vizier/cli.py's click group at all. The only real invocation is `python -m vizier.gate <bundle_dir> [<bundle_dir> ...]` (argparse entry in __main__gate.py), which writes draft/vizier-decision.json into each bundle. Needs the `critique` extra (somm gateway)."
+notes = "src/vizier/gate.py; src/vizier/__main__gate.py. Decision v2 adds status / error / raw_response, and per-verdict improve / instead / instead_source; existing fields keep their names. `python -m vizier.gate` now runs (gate.py delegates to __main__gate.main) and exits 1 on a failed decision. Mismatch still open: malo's roster.toml advertises `malo decide {bundle_dir}` forwarding to \"vizier.gate\", implying a `vizier decide`/`vizier gate` subcommand — but `vizier.gate` is NOT wired into src/vizier/cli.py's click group at all. The only real invocation is `python -m vizier.gate <bundle_dir> [<bundle_dir> ...]` (argparse entry in __main__gate.py), which writes draft/vizier-decision.json into each bundle. Needs the `critique` extra (somm gateway)."
 
 [[capabilities]]
 id = "corpus_query"

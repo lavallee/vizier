@@ -53,6 +53,21 @@ optional if it cannot outperform the computable layer plus a clear rubric.
 source checkout. *Kill:* no extension point becomes permanent without a second
 real consumer.
 
+## Outcome 5 — Prove `show` on real tables
+
+- Run `vizier show` on real notebook and newsroom tables (with datapackages,
+  suppressed values and geography) and record where the ranking, the words or
+  the notes needed a human override.
+- Verify the Datawrapper path against the live API with a real token (the
+  suite only covers a fake server), including the type ids and the metadata
+  keys for scatter axes and table heatmaps.
+- Decide whether an interactive variant (vendored, pinned d3) earns its place
+  beside the static SVG.
+
+*Graduation:* the top-ranked option is used as drawn, or with only word
+changes, on most real tables tried. *Kill:* forms that keep needing hand
+repair drop out of the renderable set and stay ranked-only.
+
 ## Keeping this file honest
 
 Released capabilities move to `CHANGELOG.md`; compatibility promises carry an

@@ -112,7 +112,8 @@ governing discipline is "visual essays that answer a question the \
 reader didn't know they wanted answered." Apply it rigorously:
 
 - There must be a *question* the piece answers, phrased in plain \
-language. Essays without a question are decoration.
+language. Without one, the essay reads as a tour of the data; name \
+the question it should answer.
 - Pivots, abandonment, and scope changes are legitimate. Judge whether \
 the final scope answers a focused question well, not whether the \
 original scope was ambitious.

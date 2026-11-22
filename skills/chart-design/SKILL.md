@@ -1,124 +1,136 @@
 ---
 name: chart-design
-description: ALWAYS use this before creating, designing, choosing, or recommending ANY chart, graph, plot, figure, or dashboard — in any library or medium (d3, Vega, matplotlib, plotly, Recharts, Observable, hand-written SVG), and whenever someone asks what chart to use or how to show some data. Use it even when another visualization or design skill is available — this one runs FIRST and decides *what* to build, then hands off. It picks the form from the reader's question against 43 documented chart forms and their when-not-to-use lists, runs the honesty checks a newsroom applies before publishing (fair comparison, denominator, counter-reading, benchmark), and names the anti-patterns for the form you land on. Skipping it means deciding the chart from habit.
+description: ALWAYS use this before creating, designing, choosing, or recommending ANY chart, graph, plot, figure, or dashboard — in any library or medium (d3, Vega, matplotlib, plotly, Recharts, Observable, Datawrapper, hand-written SVG), and whenever someone asks to see their data, what chart to use, or how to show a table. Use it even when another visualization or design skill is available — this one runs FIRST. It shows how to visualize the data — `vizier show` ranks the ways to show a table against 43 documented chart forms, draws the best ones from the real rows with titles, units, source and honesty notes, and offers a sentence or table when that serves better — then hands off. Skipping it means deciding the chart from habit.
 ---
 
 # chart-design
 
-Most bad charts are not ugly. They are a defensible-looking answer to a
-question nobody asked, or an honest-looking answer to a question the data
-can't support. Both failures happen before the first line of code, which is
-why this runs first.
+Someone asked to see their data. Show them how: the best form first, drawn
+from their rows, with the trade-offs stated and the honest warnings attached.
+When a sentence or a table would serve the reader better, say so and provide
+it — beside the chart, not instead of one you could draw. Never answer a
+request to see data with a refusal.
 
-The order below is the whole skill. Form is decided against a documented
-library, not from memory. Color is the last five percent and takes one
-command.
+The taste is real and it stays: forms come from a documented library, not
+from habit; bars start at zero; color is the last five percent. It shows up
+as strong defaults and as notes with fixes, not as gatekeeping.
 
 **If a styling or design-system skill is also available**, run this one first
-and that one after: this decides *what* to build — the form, the encoding, the
-checks it has to survive — and that decides how it looks. Don't let a palette
-be the first decision made about a chart.
+and that one after: this decides *what* to show — the form, the encoding, the
+checks it has to survive — and that decides how it looks.
 
 **Preflight:** if `vizier --version` fails, install it — `uv tool install
 datavizier` (or `pip install datavizier`). No keys, no network, nothing
 proprietary: everything in this skill runs on the core install. `vizier
 doctor` reports what's live. If vizier's MCP tools are available
-(`…__recommend_form`, `…__get_pattern`, `…__implementation_guide` — the prefix
-depends on how the server was registered), they return the same answers as the
-CLI commands below; use either.
+(`…__show`, `…__recommend_form`, `…__get_pattern`, `…__implementation_guide`
+— the prefix depends on how the server was registered), they return the same
+answers as the CLI commands below; use either.
 
-## 1. Say what the reader gets
+## 1. If there's a table, start with `vizier show`
 
-Write one sentence before anything else:
+```bash
+vizier show data.csv --for "<the claim or question the figure serves>"
+```
+
+It profiles the columns (types, units, geography, missing and suppressed
+values — a `datapackage.json` beside the file is read for titles, units and
+missing-value codes), ranks the ways to show them, and writes a folder with
+an offline `index.html` and one `.svg` per drawn option. Read the ranking,
+not just the winner:
+
+- **Each option says what it shows well, what it hides, and the mistakes most
+  often made with it** — quoted from the pattern library.
+- **A sentence, stat tile or table can rank first.** Two numbers usually read
+  best as a sentence; vizier writes it. A chart is still drawn beside it so
+  the person can choose.
+- **The honesty notes travel with the figure.** Each says what a reader could
+  misread and the fix; `applied` means vizier already did it (bars from zero,
+  a tail folded into "Other", gaps instead of zeros, separate figures instead
+  of a second y-axis).
+
+Steer it when the defaults guess wrong: `--x`, `--y`, `--series`, `--label`;
+`--caveats caveats.json` puts dataset caveats in the figure notes;
+`--geometry areas.geojson --geo-key fips` draws a map; `--annotate
+"Newark=Highest in the state"` fills an annotation slot. `--format spec`
+prints a neutral JSON (form, roles, colors, words, notes) to hand to another
+renderer; `--format datawrapper` builds the chart in Datawrapper (a dry run
+until `DATAWRAPPER_API_TOKEN` is set).
+
+## 2. Say what the reader gets
+
+Whether or not `show` drew it, write one sentence:
 
 > After reading this, the reader can **\_\_\_**.
 
-Decide / compare / notice / rank / locate are jobs. "See the data" is not a
-job — it's a request for a table. If you can't finish the sentence, ask the
-user what the chart is for; do not start guessing at forms.
+Decide / compare / notice / rank / locate / look up their own row — all good
+jobs. "See the data" is a fine starting point too: it usually means *look up
+my row* (a table, which `show` provides) or *get the overall shape* (a
+distribution or trend). If the job is unclear, ask what the figure is for,
+and meanwhile show the top options so the person has something to react to.
 
-Then name the **headline claim**: the one factual statement the chart has to
-carry. Build backward from it. A chart with no claim gets no annotation, no
-sort order, and no reason to prefer one form over another.
+Then name the **headline claim**: the one factual statement the figure has to
+carry. Pass it as `--for`; it becomes the title. Build backward from it — the
+claim decides the annotation and the sort order.
 
-## 2. Get the form from the library, not from habit
+## 3. Check the form against the library
 
 ```bash
 vizier recommend-form "<the comparison, in the reader's words>" --n-series <N>
+vizier patterns show <id>        # add --json to parse it
 ```
 
-`--n-series` is load-bearing — it triggers the guards that catch "this
-shouldn't be a chart at all" and "this form collapses past six categories."
-
-Read what comes back properly:
+`--n-series` adds the notes on when a stat tile or a table should sit beside
+the chart and when a form collapses past six categories.
 
 - **`when_not_to_use` on the top form** matters more than `when_to_use`. If
-  your case is on that list, the recommendation is wrong for you — take the
-  alternative that names your situation.
+  your case is on that list, take the alternative that names your situation.
 - **The alternatives are where the judgment is.** Each says *when* to switch.
-  Two forms that disagree on the same data are teaching you what the data
-  actually is.
-- Pull one form in full when you need the detail:
-  `vizier patterns show <id>` (add `--json` to parse it).
+  Two forms that disagree on the same data are teaching you what the data is.
 
 Browse by purpose when the job is fuzzy: `vizier patterns list --family Flow`
 — families are Change over time, Correlation, Deviation, Distribution, Flow,
 Magnitude, Part-to-whole, Ranking, Spatial.
 
-**When not to make a chart at all.** Two numbers are a sentence. Precise
-lookup is a table. A single number with no comparison is a stat line, not a
-chart — and if you're building a stat tile anyway, it still needs the
-comparison that makes the number mean something.
-
-## 3. Run the honesty checks
+## 4. Run the journalism checks
 
 ```bash
 vizier guide "<the job>" --context "<headline or caption>" --n-series <N>
 ```
 
-This returns the checks a graphics desk applies before publishing. Answer
-each one *in the chart or its caption* — not in your head:
+Answer each check *in the figure or its caption*:
 
-- **Fair comparison** — name the benchmark that makes the value
-  interpretable: prior period, peer group, target, statewide, or an explicit
-  "no fair comparison available."
+- **Fair comparison** — the benchmark that makes the value interpretable:
+  prior period, peer group, target, statewide, or an explicit "no fair
+  comparison available."
 - **Unit and denominator** — percent *of what*, dollars *per whom*, count of
-  *which* rows. Put it in the axis or the caption, near the chart.
-- **Counter-reading** — the most likely *wrong* reading. Block it with an
-  annotation or a caption line. Don't bury it in methodology.
+  *which* rows, near the chart.
+- **Counter-reading** — the most likely wrong reading, blocked with an
+  annotation or a caption line.
 - **Reader affordance** — direct labels, endpoint labels, a table fallback.
   Never let color carry the only meaning.
 
 If a check can't be satisfied, say so in the caption. An acknowledged gap is
 honest; a silent one is the defect.
 
-## 4. Encode by strength, then annotate
+## 5. Encode by strength, then annotate
 
-- Position beats length beats angle beats area beats color. Push the most
-  important comparison onto the strongest channel available.
-- Sort by value, not alphabetically, unless the category order is itself
-  meaningful (time, size buckets, a funnel).
-- Direct labels over a legend whenever they fit — a legend is a lookup task
-  you're handing the reader.
-- Zero baseline is mandatory for bars and area (length encodes the value);
-  not required for lines, where the story is change.
-- The annotation is part of the chart, not decoration. The headline claim
-  should be readable off the graphic without the surrounding prose.
+- Position beats length beats angle beats area beats color. Put the most
+  important comparison on the strongest channel available.
+- Sort by value unless the order itself means something (time, size buckets,
+  a funnel).
+- Direct labels over a legend whenever they fit.
+- Zero baseline for bars and areas (length encodes the value); lines may start
+  elsewhere if the axis says so.
+- The annotation is part of the figure: the headline claim should be readable
+  off the graphic without the surrounding prose.
 
-Then check the form's documented traps before you build:
-`vizier patterns show <id>` → **Common mistakes**. They are specific and
-they are the ones people actually hit (alphabetical stacking order, middle
-segments nobody can compare, clipped in-segment labels).
+Avoid dual y-axes (two arbitrary scales invent a relationship — show two
+panels), 3D, truncated bar baselines, pies for comparison or past about five
+slices, and rainbow ramps for ordered data. The form's **Common mistakes**
+(`vizier patterns show <id>`) list the traps people actually hit.
 
-**Never**: dual y-axes (the correlation is an artifact of two arbitrary
-scales), 3D anything, truncated bar baselines, pie charts used for
-comparison or with more than about five slices, rainbow ramps for ordered
-data.
-
-## 5. Color: one command, then move on
-
-Color is the last five percent of a good chart and the first ninety percent
-of most chart advice. Resist that. Get a validated palette and go:
+## 6. Color: one command, then move on
 
 ```bash
 vizier suggest-palette 6              # categorical, colorblind-safe, validated
@@ -128,26 +140,25 @@ vizier ink "#0072b2"                  # legible label color on that fill
 ```
 
 Everything returned has already cleared colorblind separation, contrast, and
-lightness/chroma checks — there is nothing further to eyeball. If a request
-can't be satisfied honestly (a ninth categorical hue, too many ordinal
-steps), vizier errors instead of returning something that fails; take the
-error as the answer and change the encoding, usually by grouping categories
-or switching to small multiples.
+lightness/chroma checks. If a request can't be met exactly (a ninth
+categorical hue, too many ordinal steps), vizier returns the best valid answer
+and what to change — usually grouping categories into "Other", small
+multiples, or direct labels. `show` applies that fallback itself.
 
-Two rules that matter more than the hues: **use ordered color for ordered
-data and categorical color for categorical data**, and **never encode
-anything in color alone** — pair it with position, a label, or a shape.
+Use ordered color for ordered data and categorical color for categorical
+data, and never encode anything in color alone.
 
-## 6. Check the artifact you actually built
+## 7. Check the artifact you actually built
+
+`show` already runs this on what it draws. For a figure made elsewhere:
 
 ```bash
 vizier analyze chart.svg     # or .html — pulls the real palette out and checks it
 ```
 
-This reads the rendered file, so it catches what the library did rather than
-what you intended. Then walk the form's **Reading checklist**
-(`vizier patterns show <id>`) against your own chart, answering each question
-from the graphic alone. Anything you can't answer, a reader can't either.
+Then walk the form's **Reading checklist** (`vizier patterns show <id>`)
+against the figure, answering each question from the graphic alone. Anything
+you can't answer, a reader can't either.
 
 To go further — a full critique of a rendered chart against the corpus of
 critical writing — use the `chart-critique` skill.

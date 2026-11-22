@@ -1,15 +1,21 @@
 # vizier
 
-**Chart judgment for people and agents.** Most bad charts aren't ugly — they're a
-defensible-looking answer to a question nobody asked, or an honest-looking answer the
-data can't support. Both failures happen before the first line of plotting code. vizier
-moves that decision onto something documented: it picks the chart *form* from the
-reader's question, runs the checks a graphics desk runs before publishing, and — with a
-corpus of critical writing — judges what a finished chart got wrong.
+**Show people how to visualize their data — and judge the result.** Hand vizier a table
+and, if you have one, the claim or question the figure should serve. It profiles the
+columns, ranks the ways to show them, and draws the best few from your actual rows as
+self-contained SVG and HTML: the form that fits first, with what each option shows well,
+what it hides, and the mistakes people most often make with it. When a sentence, a stat
+tile or a table would serve the reader better, vizier says so *and writes it* — beside the
+charts, never instead of a chart it could draw.
 
-It answers the parts of a chart that are actually *decidable*, and refuses the ones that
-aren't honest. It's built to be **called by an agent or a generator**, so the tool asks
-vizier for the decision instead of re-deriving it from a half-remembered rule.
+The taste is in the defaults and the notes: sorted bars on a zero baseline, direct labels,
+validated colorblind-safe color, gaps (never zeros) for suppressed values, and honesty
+notes for the things a reader could misread — each with its fix, applied where the fix is
+mechanical. The same knowledge runs the other way as critique: vizier checks the SVG it
+just drew, and anyone else's chart, against its pattern library and color math.
+
+It's built to be **called by a person, an agent or a generator**, works with no model and
+no network, and hands off to Datawrapper or to any renderer through a neutral spec.
 
 ## Install
 
@@ -28,7 +34,7 @@ codex plugin marketplace add lyra-forge/marketplace
 codex plugin add vizier@lyra-forge
 ```
 
-Two skills — `chart-design` (decide a chart) and `chart-critique` (judge one) — plus
+Two skills — `chart-design` (show data / design a chart) and `chart-critique` (judge one) — plus
 vizier's MCP server, so the same answers are available as tools. The skills drive the
 `vizier` CLI, which installs separately. Start a new harness session after installing:
 
@@ -48,14 +54,21 @@ pip install "datavizier[ingest]"       # + rebuild the corpus from source
 ```
 
 The core has no proprietary and no heavyweight dependencies, and needs no key and no
-network: form recommendation, the journalism checks, the pattern library, structural
-analysis, and color all work from `pip install datavizier` alone. The 43 chart-form
+network: `vizier show`, form recommendation, the journalism checks, the pattern library,
+structural analysis, and color all work from `pip install datavizier` alone. The 43 chart-form
 patterns ship inside the package; the index builds itself on first use.
 
 ## Quickstart
 
 ```bash
-# decide — give me one that's right
+# show — the front door
+vizier show data.csv --for "Rents rose fastest downtown"     # ranked, drawn, annotated
+vizier show data.csv --x year --y rent --series district      # say which columns play which role
+vizier show data.csv --caveats caveats.json --geometry areas.geojson --geo-key fips
+vizier show data.csv --format spec                            # neutral JSON for other tools
+vizier show data.csv --format datawrapper                     # dry run without a token
+
+# decide by hand — the same knowledge, one question at a time
 vizier recommend-form "how a budget splits, across five districts" --n-series 5
 vizier patterns show stacked-bar         # when to use, when NOT, mistakes, checklist
 vizier guide "per-pupil spending vs the state average" --context "<headline>"
@@ -71,16 +84,63 @@ vizier validate "#e69f00,#0072b2,#009e73" --pairs all
 vizier ink "#0072b2"                     # the legible text color for a fill
 ```
 
+### `vizier show`
+
+`vizier show TABLE` writes a folder (default `./vizier-show-<name>/`) with `index.html` —
+the best option first, the others after it, the full ranking, the honesty notes, the
+column profile and the data — plus one `.svg` per drawn chart and a `spec.json`. The page
+has no scripts and fetches nothing; it opens from `file://`.
+
+- **Profiling** reads CSV or JSON (nested records flatten), and a Frictionless
+  `datapackage.json` beside the table for titles, units, descriptions and
+  `missingValues`. Columns are typed (number, date with granularity, category, identifier,
+  geography — FIPS, ZIP/ZCTA, ISO codes, state names, lat/lon) and given roles. A
+  `<field>__state` column marks values as suppressed or not collected: they are drawn as
+  hatched gaps or labelled in place, and counted in the notes — never drawn as zero.
+- **Ranking** covers bar (grouped, stacked, top-N), line, slope, scatter, dot, strip,
+  histogram, small multiples, heatmap, stacked area, choropleth (when outlines are
+  supplied, as GeoJSON or an SVG path column — otherwise it says what's needed), and the
+  sentence, stat tile and table. `--for` routes by the words in your claim; a claim
+  becomes the title, a question becomes the subtitle.
+- **Words on the figure**: title, subtitle, axis labels with units, source line (from the
+  datapackage or `--source`), `--annotate KEY=TEXT` slots, and `--caveats FILE` (a JSON
+  list of `{effect, misuse, instead}`) in the notes.
+- **Honesty notes**: axis not at zero, dual axis (never drawn — each measure gets its own
+  figure), too many series (tail folded to gray "Other"), small sample, a rate without a
+  denominator, suppressed and missing values, correlation-not-cause on scatters,
+  area-weight on maps. Each says what could be misread and the fix.
+- **Checks**: every drawn SVG goes back through `vizier analyze`'s color and structure
+  checks, and the result is printed with it.
+- **Datawrapper**: `--format datawrapper` builds the chosen form through Datawrapper's API
+  when `DATAWRAPPER_API_TOKEN` is set (create, upload, unpublished draft by default;
+  `--publish` to publish) and prints the edit URL. Without a token it prints the exact
+  requests it would send. Forms map to Datawrapper types as follows; strip plots, maps,
+  stat tiles, sentences and multiple scatters have no automatic equivalent and say so.
+
+  | vizier form | Datawrapper type |
+  |---|---|
+  | bar chart (sorted / top-N / median) | `d3-bars` |
+  | grouped bars | `d3-bars-grouped` |
+  | columns over time, histogram (pre-binned) | `column-chart` |
+  | stacked bar | `d3-bars-stacked` |
+  | line chart | `d3-lines` |
+  | stacked area | `d3-area` |
+  | scatterplot | `d3-scatter-plot` |
+  | dot plot | `d3-dot-plot` |
+  | slope chart | `d3-arrow-plot` |
+  | small multiples of lines / bars | `multiple-lines` / `multiple-columns` |
+  | heatmap, table | `tables` |
+
 `recommend-form` returns the form that fits *with* its `when_not_to_use` list and the
-alternatives that name your situation — the alternatives are where the judgment is.
-`guide` returns the honesty checks for the job: the benchmark that makes a number
-interpretable, percent *of what* and dollars *per whom*, the most likely wrong reading
-and where you're blocking it.
+alternatives that name your situation. `guide` returns the honesty checks for the job: the
+benchmark that makes a number interpretable, percent *of what* and dollars *per whom*, the
+most likely wrong reading and where you're blocking it.
 
 Color is the last five percent, and it's handled: every palette is validated before it's
-returned (colorblind ΔE via Machado-2009, WCAG contrast, OKLCH lightness/chroma), and a
-request that can't be satisfied honestly errors rather than returning something that
-fails. See [docs/computed-color-checks.md](docs/computed-color-checks.md).
+returned (colorblind ΔE via Machado-2009, WCAG contrast, OKLCH lightness/chroma). A request
+that can't be met exactly — a ninth categorical hue, more steps than a ramp holds — returns
+the best valid answer with `met: false` and what to change (fold the tail into "Other",
+small multiples, direct labels). See [docs/computed-color-checks.md](docs/computed-color-checks.md).
 
 ## MCP server
 
@@ -93,7 +153,7 @@ elsewhere:
 claude mcp add vizier -- vizier mcp
 ```
 
-Tools: `recommend_form`, `implementation_guide`, `list_patterns`, `get_pattern`,
+Tools: `show`, `recommend_form`, `implementation_guide`, `list_patterns`, `get_pattern`,
 `analyze_artifact`, `validate_palette`, `suggest_palette`, `suggest_ramp`, `ink_on`,
 `check_contrast`, plus corpus query (`search`, `find_similar`, `list_rubrics`, …).
 Setup + troubleshooting: [docs/mcp-setup.md](docs/mcp-setup.md).
@@ -167,18 +227,27 @@ demonstrates the measured lift from the computable findings — see
 
 ## vizier & artoo
 
-vizier decides and judges the chart. [`artoo`](https://github.com/lavallee/artoo)
+vizier shows the data and judges the chart. [`artoo`](https://github.com/lavallee/artoo)
 builds and ships the page it lives on — a self-contained HTML mini-site that carries
 the research behind the presentation, with provenance, a private-file firewall, and
 deployment (`uv tool install artoo-artifacts`).
 
-They meet at the artifact: artoo owns packaging and publication, vizier owns whether
-the graphic on the page earns its place. This repo's own chart-forms guide is an artoo
-artifact — see [`docs/reader/artifact.toml`](docs/reader/artifact.toml).
+They meet at the artifact: artoo owns packaging and publication; vizier owns the figure
+— drawing it with `show`, or judging one drawn elsewhere. This repo's own chart-forms
+guide is an artoo artifact — see [`docs/reader/artifact.toml`](docs/reader/artifact.toml).
 
-More generally, vizier is built to be *asked*: any renderer or generator can call it
-for the form and the color instead of re-deriving them, and the same thresholds serve
+More generally, vizier is built to be *asked*: any renderer or generator can take
+`vizier show --format spec` (the form, field roles, colors, words and notes) and draw it
+its own way, or call the primitives for form and color, and the same thresholds serve
 both directions. See [`PRINCIPLES.md`](PRINCIPLES.md).
+
+### Why the figures are drawn in Python, not d3
+
+The static SVG is the deliverable that gets embedded and critiqued, so it has to exist
+without a browser. vizier's renderers generate it directly in Python — deterministic,
+offline, testable, and no 280 KB script inside every figure; hover detail rides on native
+SVG `<title>` elements. The layouts follow the hand-written d3 demos in the chart-forms
+guide (`docs/reader/live-examples.js`), which still vendor a pinned d3 for that guide.
 
 ## Development
 
