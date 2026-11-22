@@ -305,21 +305,25 @@ def legend(items: list[tuple[str, str]], x: float, y: float, width: float, *, si
     return "\n".join(parts), (cy - y) + lh
 
 
-def frame(body: str, body_height: float, words: Words, *, width: float, aria: str = "", form: str = "") -> str:
-    """Wrap a plot body with the title, subtitle, notes and source line."""
-    pad = 16
+def frame(body: str, body_height: float, words: Words, *, width: float, aria: str = "", form: str = "",
+          compact: bool = False, view_id: str | None = None) -> str:
+    """Wrap a plot body with the title, subtitle, notes and source line.
+
+    `compact` sets smaller headline type for contact-sheet views."""
+    pad = 12 if compact else 16
     inner = width - 2 * pad
+    ts, ss = (15, 12) if compact else (20, 14)
     parts: list[str] = []
     y = pad
-    title_lines = wrap(words.title, 20, inner) if words.title else []
+    title_lines = wrap(words.title, ts, inner) if words.title else []
     for ln in title_lines:
-        y += 24
-        parts.append(text(pad, y, ln, size=20, fill=INK, weight="600", extra='class="vz-title"'))
+        y += ts + 4
+        parts.append(text(pad, y, ln, size=ts, fill=INK, weight="600", extra='class="vz-title"'))
     if words.subtitle:
-        y += 4
-        for ln in wrap(words.subtitle, 14, inner):
-            y += 19
-            parts.append(text(pad, y, ln, size=14, fill=INK2, extra='class="vz-subtitle"'))
+        y += 3
+        for ln in wrap(words.subtitle, ss, inner):
+            y += ss + 5
+            parts.append(text(pad, y, ln, size=ss, fill=INK2, extra='class="vz-subtitle"'))
     y += 14
     parts.append(f'<g class="vz-plot" transform="translate(0,{y:.1f})">{body}</g>')
     y += body_height
@@ -341,7 +345,8 @@ def frame(body: str, body_height: float, words: Words, *, width: float, aria: st
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width:.0f} {total:.0f}" '
         f'width="{width:.0f}" height="{total:.0f}" role="img" aria-label="{label}" '
-        f'font-family="{FONT}" data-form="{esc(form)}">'
+        f'font-family="{FONT}" data-form="{esc(form)}"'
+        + (f' data-view="{esc(view_id)}"' if view_id else "") + ">"
         f'<title>{esc(words.title or form)}</title><desc>{label}</desc>{DEFS}'
         f'<rect width="100%" height="100%" fill="{SURFACE}"/>'
         + "\n".join(parts)

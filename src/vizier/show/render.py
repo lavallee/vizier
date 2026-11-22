@@ -52,6 +52,12 @@ class Ctx:
     anchors: dict[str, tuple[float, float]] = field(default_factory=dict)
     top: int = 15
     ramp: list[str] = field(default_factory=list)
+    #: exploration hooks — all optional, defaults leave `show` unchanged
+    height: int | None = None             # plot height override for compact views
+    highlight: set[int] = field(default_factory=set)   # row indices to ring and label
+    min_group: int = 0                    # strip: groups smaller than this are listed last, unranked
+    label_n: bool = False                 # strip: put n beside every group label
+    keep_order: bool = False              # bars: keep row order (e.g. an "other" bar last)
 
     # ------------------------------------------------------------ data access
     def r(self, key: str):
@@ -227,7 +233,7 @@ def render_bar(ctx: Ctx) -> tuple[str, float]:
         items = srt[: ctx.top]
         ctx.apply("too-many-categories",
                   f"Showing the top {ctx.top} of {ctx.top + more} by {ctx.label(ycol).lower()}; the full list is in the table.")
-    return _bars_simple(ctx, items, unit=ctx.unit(ycol), sort=True)
+    return _bars_simple(ctx, items, unit=ctx.unit(ycol), sort=not ctx.keep_order)
 
 
 def _bars_simple(ctx: Ctx, items, *, unit, sort=True, value_label: str | None = None) -> tuple[str, float]:
@@ -275,7 +281,7 @@ def _bars_simple(ctx: Ctx, items, *, unit, sort=True, value_label: str | None = 
 
 
 def _columns_time(ctx: Ctx, items, *, unit) -> tuple[str, float]:
-    W, H = ctx.width, 300
+    W, H = ctx.width, ctx.height or 300
     left, right, top, bottom = 56, 20, 26, 44
     present = [v for _, v, _ in items if v is not None]
     d0, d1, ticks = S.nice_domain(min(present, default=0), max(present, default=1), 5, zero=True)
@@ -444,7 +450,7 @@ def _line_path(pts, xs, ys) -> list[str]:
 
 def render_line(ctx: Ctx, *, area: bool = False) -> tuple[str, float]:
     o = ctx.option
-    W, H = ctx.width, 340
+    W, H = ctx.width, ctx.height or 340
     data, unit = _series_points(ctx)
     keys = list(data)
     last = {k: next((v for _, v, _ in reversed(data[k]) if v is not None), None) for k in keys}
@@ -565,7 +571,9 @@ def render_stacked_area(ctx: Ctx) -> tuple[str, float]:
 # ------------------------------------------------------------------ scatter
 
 def render_scatter(ctx: Ctx, *, panel: tuple[float, float, float, float] | None = None,
-                   xcol: str | None = None, ycol: str | None = None, shared: tuple | None = None) -> tuple[str, float]:
+                   xcol: str | None = None, ycol: str | None = None, shared: tuple | None = None,
+                   shared_x: tuple | None = None, rows: set[int] | None = None,
+                   panel_title: str | None = None) -> tuple[str, float]:
     o = ctx.option
     xcol = xcol or o.roles["x"]
     ycol = ycol or o.roles["y"]
@@ -574,15 +582,16 @@ def render_scatter(ctx: Ctx, *, panel: tuple[float, float, float, float] | None 
     X, Y = ctx.num(xcol), ctx.num(ycol)
     L = ctx.cat(lab) if lab else [None] * len(X)
     C = ctx.cat(series) if series else [None] * len(X)
-    pts = [(x, y, l, c, i) for i, (x, y, l, c) in enumerate(zip(X, Y, L, C)) if x is not None and y is not None]
+    pts = [(x, y, l, c, i) for i, (x, y, l, c) in enumerate(zip(X, Y, L, C))
+           if x is not None and y is not None and (rows is None or i in rows)]
     dropped = len(X) - len(pts)
-    if dropped:
+    if dropped and rows is None:
         supp = sum(1 for i in range(len(X)) if ctx.state(xcol, i) or ctx.state(ycol, i))
         ctx.apply("missing-not-plotted",
                   f"{dropped} row(s) with a missing {ctx.label(xcol).lower()} or {ctx.label(ycol).lower()} are not plotted"
                   + (f" ({supp} suppressed)" if supp else "") + "; none were drawn as zero.")
     W = ctx.width if panel is None else panel[2]
-    H = 400 if panel is None else panel[3]
+    H = (ctx.height or 400) if panel is None else panel[3]
     if not pts:
         return S.text(20, 30, "No rows have both values.", size=13), 50
     xu, yu = ctx.unit(xcol), ctx.unit(ycol)
@@ -590,6 +599,8 @@ def render_scatter(ctx: Ctx, *, panel: tuple[float, float, float, float] | None 
     yd = S.nice_domain(min(p[1] for p in pts), max(p[1] for p in pts), 5, zero=ctx.zero)
     if shared:
         yd = shared
+    if shared_x:
+        xd = shared_x
     yf = S.tick_formatter(yd[2], yu)
     xf = S.tick_formatter(xd[2], xu)
     left = (_left_margin([yf(t) for t in yd[2]], 11) + 8) if panel is None else 44
@@ -599,6 +610,8 @@ def render_scatter(ctx: Ctx, *, panel: tuple[float, float, float, float] | None 
     out = _y_axis(yd[2], ys, left, W - right, yf,
                   label=(ctx.words.y_label or f"{ctx.label(ycol)}{S.unit_suffix(yu)}") if panel is None else "")
     out += _x_axis(xd[2], xs, H - bottom, xf, label=f"{ctx.label(xcol)}{S.unit_suffix(xu)}", grid_top=top, x_end=W - right)
+    if panel_title:
+        out.append(S.text(left, 12, panel_title, size=11, fill=S.INK, weight="600"))
     if series:
         keys = list(dict.fromkeys(c for *_, c, _ in pts if c is not None))
         counts = {k: sum(1 for p in pts if p[3] == k) for k in keys}
@@ -615,8 +628,15 @@ def render_scatter(ctx: Ctx, *, panel: tuple[float, float, float, float] | None 
         out.append(S.circle(xs(x), ys(y), r, fill, extra=f'class="vz-mark" fill-opacity="0.72" stroke="{S.SURFACE}" stroke-width="0.8"', tip=tip))
         if l:
             ctx.anchors[str(l)] = (xs(x), ys(y))
+    for x, y, l, c, i in pts:
+        if i in ctx.highlight:
+            out.append(S.circle(xs(x), ys(y), r + 2.5, "none", extra=f'class="vz-highlight" stroke="{S.INK}" stroke-width="1.5"'))
+            if l:
+                anchor = "end" if xs(x) > W * 0.6 else "start"
+                out.append(S.text(xs(x) + (-8 if anchor == "end" else 8), ys(y) + 4, S.truncate(l, 10, 120), size=10,
+                                  fill=S.INK, anchor=anchor, extra=f'stroke="{S.SURFACE}" stroke-width="3" paint-order="stroke"'))
     # label the extremes so the reader has names to hold on to
-    if lab and panel is None and len(pts) >= 3:
+    if lab and panel is None and len(pts) >= 3 and not ctx.highlight:
         hi = max(pts, key=lambda p: p[1])
         lo = min(pts, key=lambda p: p[1])
         for p in (hi, lo):
@@ -704,14 +724,16 @@ def render_strip(ctx: Ctx) -> tuple[str, float]:
     dropped = sum(1 for x in X if x is None)
     if dropped:
         ctx.apply("missing-not-plotted", f"{dropped} row(s) with no {ctx.label(xcol).lower()} are not plotted (not drawn as zero).")
-    keys = sorted(groups, key=lambda g: -median([v for v, _ in groups[g]]))
+    keys = sorted(groups, key=lambda g: (len(groups[g]) < ctx.min_group, -median([v for v, _ in groups[g]])))
+    shown = {g: (f"{g} (n={len(groups[g])}{', not ranked' if len(groups[g]) < ctx.min_group else ''})" if ctx.label_n else g)
+             for g in keys}
     unit = ctx.unit(xcol)
     allv = [v for g in groups.values() for v, _ in g]
     if not allv:
         return S.text(20, 30, "No values to draw.", size=13), 50
-    d0, d1, ticks = S.nice_domain(min(allv), max(allv), 5, zero=ctx.zero)
+    d0, d1, ticks = S.nice_domain(min(allv), max(allv), 5 if W >= 500 else 3, zero=ctx.zero)
     single = keys == ["__all__"]
-    left = 20 if single else _left_margin(keys, 12, cap=W * 0.3) + 8
+    left = 20 if single else _left_margin([shown[k] for k in keys], 11 if ctx.label_n else 12, cap=W * 0.45) + 8
     right = 24
     band = 70 if single else max(16, min(34, 360 / max(1, len(keys))))
     top = 14
@@ -730,7 +752,10 @@ def render_strip(ctx: Ctx) -> tuple[str, float]:
     for j, g in enumerate(keys):
         cy = top + j * band + band / 2
         if not single:
-            out.append(S.text(left - 8, cy + 4, S.truncate(g, 12, left - 12), size=12, fill=S.INK, anchor="end"))
+            small = len(groups[g]) < ctx.min_group
+            fs = 11 if ctx.label_n else 12
+            out.append(S.text(left - 8, cy + 4, S.truncate(shown[g], fs, left - 12), size=fs,
+                              fill=S.MUTED if small else S.INK, anchor="end"))
         for i, (v, l) in enumerate(groups[g]):
             y = cy + _jitter(i, len(groups[g])) * band * 0.32
             out.append(S.circle(xs(v), y, r, acc, extra='class="vz-mark" fill-opacity="0.55"',
@@ -752,7 +777,7 @@ def render_strip(ctx: Ctx) -> tuple[str, float]:
 
 def render_histogram(ctx: Ctx) -> tuple[str, float]:
     o = ctx.option
-    W, H = ctx.width, 300
+    W, H = ctx.width, ctx.height or 300
     xcol = o.roles["x"]
     X = [v for v in ctx.num(xcol) if v is not None]
     dropped = len(ctx.num(xcol)) - len(X)
@@ -1036,9 +1061,18 @@ def render_heatmap(ctx: Ctx) -> tuple[str, float]:
     top = 24
     out = []
     every = max(1, math.ceil(len(xkeys) / max(1, (W - left) / 48)))
+    stagger = every <= 2 and cw >= 28 and max(S.text_width(x, 11) for x in xkeys) > cw - 4
+    if stagger:
+        every = 1
+    if stagger:
+        top += 14
     for j, x in enumerate(xkeys):
         if j % every == 0:
-            out.append(S.text(left + j * cw + cw / 2, top - 8, S.truncate(x, 11, cw * every), size=11, fill=S.MUTED, anchor="middle"))
+            cx = left + j * cw + cw / 2
+            room = (2 * cw - 18) if stagger else cw * every - 6
+            room = min(room, 2 * (W - cx) - 4)
+            dy = (14 if j % 2 == 0 else 0) if stagger else 0
+            out.append(S.text(cx, top - 8 - dy, S.truncate(x, 11, room), size=11, fill=S.MUTED, anchor="middle"))
     show_vals = cw >= 34 and ch >= 18
     for i, y in enumerate(ykeys):
         yy = top + i * ch
