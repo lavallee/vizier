@@ -2,7 +2,7 @@
   "name": "vizier",
   "displayName": "vizier — chart judgment",
   "version": "0.4.0",
-  "description": "Shows how to visualize data: ranks the ways to show a table against 43 documented chart forms, draws the best ones from the real rows with honesty notes attached (or offers a sentence or table when that serves better), and critiques finished charts against a corpus of critical writing.",
+  "description": "Look first, then show: explores what is in a table as a contact sheet of honest small views, and shows how to visualize it — ranks the ways to show a table against 43 documented chart forms, draws the best ones from the real rows with honesty notes attached (or offers a sentence or table when that serves better), and critiques finished charts against a corpus of critical writing.",
   "author": { "name": "Marc Lavallee" },
   "homepage": "https://lavallee.github.io/vizier/",
   "repository": "https://github.com/lavallee/vizier",

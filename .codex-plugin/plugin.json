@@ -31,6 +31,7 @@
     ],
     "websiteURL": "https://lavallee.github.io/vizier/",
     "defaultPrompt": [
+      "Use Vizier to explore this table.",
       "Use Vizier to show this table.",
       "Use Vizier to choose a chart for this question.",
       "Use Vizier to critique this chart for misleading choices.",

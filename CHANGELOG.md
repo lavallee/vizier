@@ -24,6 +24,22 @@ All notable changes to vizier are recorded here. The format follows
   and "Essays without a question are decoration" in the Pudding critique lens.
 
 ### Added
+- **`vizier explore <table.csv|.json>`** — exploration as a first-class
+  purpose: "what is in this table?", before there is a claim. Also an MCP
+  tool (`explore`) and `vizier.show.explore.explore`. Draws a contact sheet
+  of small static views — a field sheet with oddities (round-number spikes,
+  long tails, dominant values, impossible values, likely missing-value
+  codes), missingness by field and by group, relationships ranked by
+  Spearman's ρ with a leverage check and a view conditioned on the likeliest
+  confounder (partial rank correlation, shared-scale panels), breakdowns
+  ranked by Kruskal–Wallis ε², trends, and an outliers table — and writes
+  `index.html`, the SVGs and `explore.json` (`vizier/explore/v1`). Its
+  honesty is built in as notes: comparisons examined are counted, n is given
+  beside every statistic, rankings are withheld (not hidden) under n=10 for
+  pairs and n=5 for groups, associations that rest on a handful of rows are
+  marked, nothing is called a cause, and small multiples share scales.
+  `--focus`, `--by`, `--where` and `--view ID` (redraw one view larger). Each
+  view carries `show_args` for `vizier show`: look first; then show.
 - **`vizier show <table.csv|.json>`** — the new front door, also an MCP tool
   (`show`) and a library call (`vizier.show.show`). Deterministic, no model,
   no network:
