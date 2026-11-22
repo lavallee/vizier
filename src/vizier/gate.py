@@ -1,20 +1,22 @@
-"""vizier.gate — adaptive "does this need data visuals?" gate.
+"""vizier.gate — which candidate charts to author now, and what to show instead.
 
-Sits in front of a chart-authoring pipeline: an upstream
-orchestrator asks vizier whether a piece warrants chart authoring before
-committing to the cost of producing charts.
+Sits in front of a chart-authoring pipeline: an upstream orchestrator hands
+vizier a reporting bundle with the compositor's proposed chart candidates and
+asks which to build. vizier answers for every candidate:
+
+- **keep** — author it, plus how to make it better (`improve`);
+- **set aside** — and what to show *instead* (`instead`: a form from the same
+  ranking `vizier show` uses — another chart, a sentence, a stat tile or a
+  table — with why and how). A dropped candidate never comes back bare.
 
 Input: a reporting-bundle directory (with `draft/annotations.json` from the
 compositor agent that proposed candidate charts).
-Output: a structured decision — yes/no, kept candidates, dropped
-candidates with reasons. Each kept candidate is a vizier/chart-spec/v1
-ready to be authored.
+Output: a `Decision`. `status` is `"ok"`, `"no_candidates"` or `"error"`; a
+model reply that can't be parsed is an **error** (`needs_charts=None`, the raw
+reply kept in `raw_response`), never a quiet "no charts".
 
-The gate uses vizier's existing taste-discovery infrastructure where
-available (the `informed` critique path); for now it leans on a focused
-LLM call against vizier's house principles plus the compositor's
-candidate proposals. Promotion to retrieval-grounded judgment is a
-follow-up.
+`needs_charts` keeps its name and meaning for existing callers: true when at
+least one candidate is kept. The model call goes through somm, as before.
 """
 
 from __future__ import annotations
@@ -22,31 +24,43 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from somm import SommLLM
+if TYPE_CHECKING:  # somm is the optional `critique` extra; import it only when a call is made
+    from somm import SommLLM
 
 
 WORKLOAD = "vizier_gate"
 
-# Vizier's taste posture in a single block. Pulled from vizier/PRINCIPLES.md
-# tone — kept tight so the gate stays a fast call.
-HOUSE_TASTE = """\
-Vizier's posture on charts in a research-review piece:
+#: The forms a candidate can be redirected to — the vocabulary `vizier show` ranks.
+SHOW_FORMS = (
+    "sentence", "stat-tile", "table", "bar-chart", "stacked-bar", "line-chart", "slope-chart",
+    "scatterplot", "dot-plot", "strip-plot", "histogram", "small-multiples", "heatmap",
+    "choropleth", "stacked-area",
+)
 
-- A chart earns its place when it changes a reader's decision or carries a
-  comparison the prose can't. Every axis exists to be looked at; every line
-  exists to be compared.
-- Decorative or "look how much data we have" charts fail. So do charts that
-  restate one number the prose already gave precisely.
-- Cost-over-time, before/after metrics, distributional evidence, and
-  timeline-of-events are usually keepers. Static "ecosystem" diagrams,
-  funnel diagrams without numbers, and word clouds usually fail.
-- Two strong charts beat five middling ones. A piece can also have zero;
-  not every research review needs a figure.
-- Prefer the chart type that matches the comparison: line for change,
-  bar for level, dot for distribution, sankey for flow, timeline for events.
-- If the dossier doesn't actually contain the numbers the chart would
-  show, the chart can't be authored — drop it.
+# Vizier's posture, kept tight so the gate stays a fast call.
+HOUSE_TASTE = """\
+Vizier's posture on figures in a research-review piece:
+
+- Someone proposed each candidate because they wanted a reader to see
+  something. Take that seriously: for every candidate, say the best way to
+  show it — which may be this chart, a better chart, a sentence, a stat tile
+  or a table.
+- A chart is the right call when it carries a comparison, a trend, a spread
+  or a relationship that prose would make the reader assemble in their head.
+- Two numbers usually read best as a sentence; one number with a benchmark
+  as a stat tile; precise lookup across many rows as a table. Those are good
+  answers, not consolation prizes — and they still need to be written.
+- Prefer the form that matches the comparison: line for change, bar for
+  level, dot or strip for distribution, scatter for relationship, slope for
+  two points in time, small multiples for many series.
+- Diagrams with no numbers, and word clouds, rarely carry a claim; redirect
+  them to the numbers or the sentence they were standing in for.
+- If the dossier doesn't contain the numbers a chart needs, say which numbers
+  are missing and what can be shown with what is there.
+- Several figures can earn their place; so can none. Fewer, sharper figures
+  usually serve the reader better than many.
 """
 
 
@@ -57,13 +71,19 @@ class ChartVerdict:
     confidence: float  # 0..1
     reason: str
     chart_spec: dict | None = None  # filled when keep=True
+    #: kept candidates: concrete ways to make the chart better
+    improve: list[str] = field(default_factory=list)
+    #: dropped candidates: {"form", "why", "how"} — what to show instead
+    instead: dict | None = None
+    #: "model" when the model supplied `instead`, "default" when vizier filled the gap
+    instead_source: str | None = None
 
 
 @dataclass
 class Decision:
     bundle: str
     artifact_name: str
-    needs_charts: bool
+    needs_charts: bool | None  # None when status == "error": the gate could not decide
     n_candidates: int
     n_kept: int
     verdicts: list[ChartVerdict] = field(default_factory=list)
@@ -72,9 +92,17 @@ class Decision:
     model: str = ""
     cost_usd: float = 0.0
     call_id: str = ""
+    status: str = "ok"  # ok | no_candidates | error
+    error: str = ""
+    raw_response: str = ""
+
+    @property
+    def ok(self) -> bool:
+        return self.status != "error"
 
     def to_dict(self) -> dict:
         d = asdict(self)
+        d["ok"] = self.ok
         return d
 
 
@@ -105,10 +133,32 @@ def _read_bundle_summary(bundle_dir: Path) -> tuple[str, str, list[dict]]:
     return artifact_name, current_md, chart_candidates
 
 
+def _default_instead(candidate: dict) -> dict:
+    """What to show when the model set a candidate aside without saying."""
+    return {
+        "form": "table",
+        "why": "The gate set this aside without naming an alternative; a small table of the "
+               "candidate's numbers keeps them available to the reader.",
+        "how": "List the values the candidate would have plotted, with units and the source; "
+               "run `vizier show` on them to see the ranked options.",
+    }
+
+
+def _parse_json(raw: str) -> dict:
+    text = raw.strip()
+    if text.startswith("```"):
+        lines = text.splitlines()
+        text = "\n".join(lines[1:-1] if lines[-1].startswith("```") else lines[1:])
+    parsed = json.loads(text)
+    if not isinstance(parsed, dict):
+        raise ValueError(f"expected a JSON object, got {type(parsed).__name__}")
+    return parsed
+
+
 def needs_charts(
     bundle_dir: Path,
     *,
-    llm: SommLLM | None = None,
+    llm: "SommLLM | None" = None,
     model: str = "deepseek-v4-pro",
     provider: str = "deepseek",
 ) -> Decision:
@@ -122,19 +172,25 @@ def needs_charts(
             needs_charts=False,
             n_candidates=0,
             n_kept=0,
-            summary="Compositor proposed zero chart candidates. No charts to gate.",
+            status="no_candidates",
+            summary="The compositor proposed no chart candidates, so there is nothing to choose between.",
         )
 
-    llm = llm or SommLLM(project="vizier")
+    if llm is None:
+        from somm import SommLLM
+
+        llm = SommLLM(project="vizier")
 
     cand_blob = "\n".join(
         f"{i + 1}. " + json.dumps(c, ensure_ascii=False) for i, c in enumerate(candidates)
     )
 
     system = (
-        "You are vizier, the dataviz taste gate for a research-review longform "
-        "piece. Decide which proposed chart candidates are worth authoring "
-        "and which to drop. Be strict — the prose alone is often enough. "
+        "You are vizier, the data-visualisation editor for a research-review longform "
+        "piece. For each proposed chart candidate, decide whether to author it as "
+        "proposed; for every one you keep, say how to make it better, and for every one "
+        "you set aside, say what to show instead (a better chart, a sentence, a stat "
+        "tile or a table). Never set a candidate aside without an alternative. "
         "Output strict JSON. No commentary."
     )
 
@@ -143,18 +199,23 @@ def needs_charts(
         f"## Article excerpt (first ~12KB of locked draft)\n{draft_excerpt}\n\n"
         f"## Compositor's chart candidates\n{cand_blob}\n\n"
         f"---\n\n"
+        f"Forms you may name: {', '.join(SHOW_FORMS)}.\n\n"
         f"Output JSON of this exact shape:\n"
         '{\n'
         '  "needs_charts": true|false,\n'
-        '  "summary": "one sentence why this piece does or does not need charts",\n'
+        '  "summary": "one sentence on how this piece should show its numbers",\n'
         '  "verdicts": [\n'
         '    {"candidate_index": 1, "keep": true|false, "confidence": 0.0..1.0, '
-        '"reason": "why", "chart_spec": {...}}\n'
+        '"reason": "why", "chart_spec": {...}, '
+        '"improve": ["..."], '
+        '"instead": {"form": "<one of the forms>", "why": "...", "how": "..."}}\n'
         '  ]\n'
         '}\n'
-        "If keep=true, fill chart_spec with: kind, title, x_axis, y_axis, "
-        "data (a tiny inline series or pointer to where the numbers live), "
-        "section, supports_decision."
+        "If keep=true: fill chart_spec with kind, title, x_axis, y_axis, data (a tiny "
+        "inline series or a pointer to where the numbers live), section, "
+        "supports_decision; and give 1-3 concrete `improve` items. "
+        "If keep=false: `instead` is required — the form to show, why it serves the "
+        "reader better, and how to make it (for a sentence, write the sentence)."
     )
 
     result = llm.generate(
@@ -167,21 +228,21 @@ def needs_charts(
         model=model,
     )
 
-    raw = result.text.strip()
-    if raw.startswith("```"):
-        lines = raw.splitlines()
-        raw = "\n".join(lines[1:-1] if lines[-1].startswith("```") else lines[1:])
+    raw = result.text or ""
     try:
-        parsed = json.loads(raw)
-    except json.JSONDecodeError:
-        # Couldn't parse — treat as failure, return a single uncommitted decision.
+        parsed = _parse_json(raw)
+    except (json.JSONDecodeError, ValueError) as exc:
+        # A reply we can't read is a failed decision, not a decision against charts.
         return Decision(
             bundle=str(bundle_dir),
             artifact_name=artifact_name,
-            needs_charts=False,
+            needs_charts=None,
             n_candidates=n_cand,
             n_kept=0,
-            summary=f"vizier gate parse error; raw response stored. ({len(raw)} chars)",
+            status="error",
+            error=f"could not parse the gate's reply as JSON: {exc}",
+            raw_response=raw,
+            summary=f"vizier gate failed: unparseable model reply ({len(raw)} chars); no decision was made.",
             provider=result.provider,
             model=result.model,
             cost_usd=result.cost_usd,
@@ -190,15 +251,31 @@ def needs_charts(
 
     verdicts: list[ChartVerdict] = []
     for v in parsed.get("verdicts", []):
-        idx = v.get("candidate_index", 0) - 1
+        if not isinstance(v, dict):
+            continue
+        idx = int(v.get("candidate_index", 0) or 0) - 1
         cand = candidates[idx] if 0 <= idx < n_cand else {}
+        keep = bool(v.get("keep", False))
+        improve = v.get("improve") or []
+        if isinstance(improve, str):
+            improve = [improve]
+        instead = v.get("instead") if isinstance(v.get("instead"), dict) else None
+        source = None
+        if not keep:
+            if instead and instead.get("form"):
+                source = "model"
+            else:
+                instead, source = _default_instead(cand), "default"
         verdicts.append(
             ChartVerdict(
                 candidate=cand,
-                keep=bool(v.get("keep", False)),
-                confidence=float(v.get("confidence", 0.0)),
+                keep=keep,
+                confidence=float(v.get("confidence", 0.0) or 0.0),
                 reason=v.get("reason", ""),
                 chart_spec=v.get("chart_spec"),
+                improve=[str(x) for x in improve] if keep else [],
+                instead=None if keep else instead,
+                instead_source=source,
             )
         )
 
@@ -221,3 +298,9 @@ def needs_charts(
 def write_decision(decision: Decision, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(decision.to_dict(), indent=2, ensure_ascii=False))
+
+
+if __name__ == "__main__":  # `python -m vizier.gate <bundle_dir> ...`
+    from vizier.__main__gate import main as _main
+
+    raise SystemExit(_main())
