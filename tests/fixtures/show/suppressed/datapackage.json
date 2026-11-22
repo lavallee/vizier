@@ -1,0 +1,19 @@
+{
+  "name": "district-rates",
+  "title": "District absence rates",
+  "sources": [{"title": "Example State Department of Education"}],
+  "resources": [{
+    "name": "rates",
+    "path": "rates.csv",
+    "schema": {
+      "missingValues": ["", "-99"],
+      "fields": [
+        {"name": "district", "type": "string", "title": "District"},
+        {"name": "year", "type": "year", "title": "School year"},
+        {"name": "rate", "type": "number", "title": "Chronic absence rate", "unit": "%",
+         "description": "Share of enrolled students missing 10% or more of school days"},
+        {"name": "rate__state", "type": "string"}
+      ]
+    }
+  }]
+}

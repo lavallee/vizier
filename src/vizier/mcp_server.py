@@ -34,7 +34,10 @@ except ModuleNotFoundError:  # pragma: no cover - exercised by the older SDK
 mcp = _Server(
     "vizier",
     instructions=(
-        "vizier is data-visualization expertise — generation and critique. "
+        "vizier shows people how to visualize their data, and judges the result. "
+        "START with `show` when someone has a table and wants to see it: it ranks the "
+        "ways to show it (including a sentence or table when those serve better), "
+        "draws the best ones, and attaches honesty notes. "
         "COMPUTABLE color/form decisions (deterministic, no LLM): when building a "
         "chart, `suggest_palette` for CVD-safe series colors, `suggest_ramp` for a "
         "one-hue ordinal ramp, `ink_on` for a legible label color, and "
@@ -277,15 +280,16 @@ def analyze_artifact(
     description=(
         "GENERATE a CVD-safe categorical palette of `n` colors, validated before "
         "return — the generation counterpart to validate_palette. What vizier suggests "
-        "is what vizier would pass. Assigned in a fixed CVD-safe order; n>8 is refused "
-        "(fold the tail into 'Other'). theme='default' is bright/high-separation; "
+        "is what vizier would pass. Assigned in a fixed CVD-safe order; past 8 it "
+        "returns the 8 that pass with met=false and advice (fold the tail into "
+        "'Other', small multiples, direct labels). theme='default' is bright/high-separation; "
         "'muted' is editorial (calmer on warm surfaces, light mode only). pairs='all' "
         "if the marks are a scatter/map. Use this when building a chart and you need "
         "series colors."
     ),
 )
 def suggest_palette(
-    n: Annotated[int, Field(ge=1, le=8, description="Number of categorical series")],
+    n: Annotated[int, Field(ge=1, le=64, description="Number of categorical series")],
     mode: Annotated[str, Field(description="'light' or 'dark'")] = "light",
     surface: Annotated[str | None, Field(description="Chart surface hex; default per mode")] = None,
     theme: Annotated[str, Field(description="'default' (bright) or 'muted' (editorial, light only)")] = "default",
@@ -303,8 +307,8 @@ def suggest_palette(
         "GENERATE a one-hue ordinal/sequential ramp of `steps`, validated (monotone "
         "lightness, visible ΔL, a light end that clears the surface). hue is one of "
         "blue/navy/green/teal/orange/gray, or pass explicit light/dark anchor hexes. "
-        "Returns an error if the request is infeasible (warm hues can't hold many "
-        "steps — past ~6 ordered classes a table usually reads better)."
+        "If the hue can't hold that many steps it returns the longest ramp that passes, "
+        "with met=false and advice (bin into fewer classes, or use blue/navy/gray)."
     ),
 )
 def suggest_ramp(
@@ -342,15 +346,15 @@ def ink_on(
         "critiquing a chart against its pattern. Pass a free-text `job` ('part-to-"
         "whole over time, 5 series') and/or an FT `family`, plus optional `n_series`. "
         "Returns ranked patterns (capsule, when-to / when-not, alternatives, common "
-        "mistakes) and form-heuristic notes — including when the answer is NOT a "
-        "chart (a single value is a stat tile; >7 classes is a table). Use before "
-        "drawing to pick the form."
+        "mistakes) and form-heuristic notes — including when a stat tile or a table "
+        "would serve alongside or instead (a single value; more than ~7 classes). Use "
+        "before drawing to pick the form; use `show` to have it drawn."
     ),
 )
 def recommend_form(
     job: Annotated[str | None, Field(description="Free-text data-question / job")] = None,
     family: Annotated[str | None, Field(description="FT family: Deviation/Correlation/Ranking/Distribution/Change over time/Magnitude/Part-to-whole/Spatial/Flow")] = None,
-    n_series: Annotated[int | None, Field(description="Series/category count — drives the 'is it even a chart?' guards")] = None,
+    n_series: Annotated[int | None, Field(description="Series/category count — drives the stat-tile / table notes")] = None,
     k: Annotated[int, Field(ge=1, le=10, description="How many forms to return")] = 4,
 ) -> dict[str, Any]:
     from .analyze import forms as F
@@ -391,6 +395,60 @@ def implementation_guide(
         )
     except ValueError as e:
         return {"error": str(e)}
+
+
+@mcp.tool(
+    description=(
+        "SHOW how to visualize a table — the front door. Give a CSV/JSON `path` (a "
+        "datapackage.json beside it is read for units, descriptions and missing values) "
+        "or inline `rows` (a list of records), and optionally `claim`: the claim or "
+        "question the figure should serve. vizier profiles the columns, ranks the ways "
+        "to show it — charts, and a sentence, stat tile or table when one serves "
+        "better (each with what it shows, what it hides, and common mistakes) — and "
+        "draws the top `top` options from the real rows as offline SVG + HTML with "
+        "title, axis units, source and honesty notes (truncated axis, too many series, "
+        "small sample, rate without denominator, suppressed values) attached, applying "
+        "mechanical fixes itself. Never refuses. No model, no network. Pass `out_dir` "
+        "to write files; `include_svg` to get the SVG text back. Returns the "
+        "vizier/show-spec/v1 result (chosen form, field roles, colors, words, notes)."
+    ),
+)
+def show(
+    path: Annotated[str | None, Field(description="Path to a CSV or JSON table")] = None,
+    rows: Annotated[list[dict[str, Any]] | None, Field(description="Inline records, instead of a path")] = None,
+    claim: Annotated[str | None, Field(description="The claim or question the figure should serve")] = None,
+    x: Annotated[str | None, Field(description="Column for the x axis / categories")] = None,
+    y: Annotated[str | None, Field(description="Measure column(s), comma-separated")] = None,
+    series: Annotated[str | None, Field(description="Column that splits series")] = None,
+    label: Annotated[str | None, Field(description="Column that names each row")] = None,
+    top: Annotated[int, Field(ge=1, le=10, description="How many ranked options to draw")] = 3,
+    out_dir: Annotated[str | None, Field(description="Directory to write index.html, SVGs and spec.json")] = None,
+    caveats: Annotated[list[dict[str, str]] | None, Field(description="Dataset caveats: [{effect, misuse, instead}]")] = None,
+    zero: Annotated[bool, Field(description="Start every value axis at zero")] = False,
+    include_svg: Annotated[bool, Field(description="Return each drawn SVG's text in the result")] = False,
+) -> dict[str, Any]:
+    from .show import show as _show
+    from .show.table import table_from_records
+    if not path and not rows:
+        return {"error": "give a `path` to a CSV/JSON table, or inline `rows`"}
+    source = path if path else table_from_records(rows or [], name="rows")
+    try:
+        r = _show(source, claim=claim, overrides={"x": x, "y": y, "series": series, "label": label},
+                  out_dir=out_dir, top=top, caveats=caveats, zero=zero)
+    except (ValueError, OSError) as e:
+        return {"error": str(e)}
+    if include_svg:
+        if out_dir:
+            from pathlib import Path
+            for o in r["options"]:
+                f = (o.get("files") or {}).get("svg")
+                if f:
+                    o["svg"] = (Path(out_dir) / f).read_text(encoding="utf-8")
+        else:
+            r["note"] = "include_svg needs out_dir (SVGs are returned from the written files)."
+    if not include_svg:
+        r.pop("profile", None)  # keep the default reply small; the spec carries the fields chosen
+    return r
 
 
 def main() -> None:

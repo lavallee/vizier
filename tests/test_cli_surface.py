@@ -15,6 +15,7 @@ def test_cli_exposes_expected_command_surface():
         "mcp",
         "patterns",
         "recommend-form",
+        "show",
         "snapshot",
         "stats",
         "suggest-palette",

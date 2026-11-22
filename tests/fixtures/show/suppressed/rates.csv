@@ -1,0 +1,10 @@
+district,year,rate,rate__state
+Alder,2021,14.2,
+Alder,2022,15.1,
+Alder,2023,0,suppressed
+Birch,2021,9.8,
+Birch,2022,-99,
+Birch,2023,10.4,
+Cedar,2021,22.0,
+Cedar,2022,,not_collected
+Cedar,2023,19.5,

@@ -382,7 +382,7 @@ def ink(background: str):
 @click.argument("job", required=False)
 @click.option("--family", default=None, help="FT family, e.g. 'Part-to-whole', 'Flow', 'Ranking'.")
 @click.option("--n-series", type=int, default=None,
-              help="Series/category count — drives the 'is it even a chart?' guards.")
+              help="Series/category count — drives the stat-tile / table notes.")
 @click.option("-k", default=4, type=int, help="How many forms to return.")
 def recommend_form_cmd(job: str | None, family: str | None, n_series: int | None, k: int):
     """Recommend chart form(s) for a data-job. JOB is a free-text data-question.
@@ -431,6 +431,149 @@ def guide_cmd(
         semantic=semantic,
     )
     click.echo(G.format_guide(r))
+
+
+@main.command("show")
+@click.argument("table", type=click.Path(exists=True, dir_okay=False))
+@click.option("--for", "claim", default=None,
+              help="The claim or question this figure should serve. A claim becomes the title.")
+@click.option("--x", default=None, help="Column for the x axis / categories.")
+@click.option("--y", default=None, help="Measure column(s) for the value axis (comma-separated).")
+@click.option("--series", default=None, help="Column that splits the data into series.")
+@click.option("--facet", default=None, help="Column to split into small multiples.")
+@click.option("--label", "label_col", default=None, help="Column that names each row (points, bars).")
+@click.option("--out", "out_dir", default=None, type=click.Path(file_okay=False),
+              help="Output directory (default: ./vizier-show-<table name>).")
+@click.option("--format", "fmt", type=click.Choice(["html", "svg", "datawrapper", "spec"]), default="html",
+              help="html (page + SVGs), svg (print SVG paths), datawrapper (build it there), spec (neutral JSON).")
+@click.option("--top", default=3, type=int, help="How many ranked options to draw.")
+@click.option("--caveats", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="JSON list of {effect, misuse, instead}; placed in the figure notes.")
+@click.option("--geometry", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="GeoJSON outlines for a choropleth.")
+@click.option("--geo-key", default=None, help="GeoJSON feature property that matches the table's key column.")
+@click.option("--datapackage", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="Frictionless datapackage.json (default: one beside the table, if present).")
+@click.option("--zero", is_flag=True, default=False, help="Start every value axis at zero.")
+@click.option("--title", default=None, help="Override the figure title.")
+@click.option("--subtitle", default=None, help="Override the subtitle.")
+@click.option("--source", "source_line", default=None, help="Source line (default: datapackage sources, else file name).")
+@click.option("--annotate", multiple=True, metavar="KEY=TEXT",
+              help="Annotate the mark named KEY (a category, point label or x value). Repeatable.")
+@click.option("--width", default=680, type=int, help="Figure width in px.")
+@click.option("--publish", is_flag=True, default=False, help="With --format datawrapper: publish (default: draft).")
+@click.option("--dry-run", is_flag=True, default=False,
+              help="With --format datawrapper: print the requests, send nothing (the default with no token).")
+@click.option("--json", "as_json", is_flag=True, default=False, help="Print the full result as JSON.")
+def show_cmd(table, claim, x, y, series, facet, label_col, out_dir, fmt, top, caveats, geometry, geo_key,
+             datapackage, zero, title, subtitle, source_line, annotate, width, publish, dry_run, as_json):
+    """Show how to visualize TABLE (CSV or JSON): ranked forms, drawn from your rows.
+
+    Profiles the table, ranks the ways to show it (charts, and a sentence, stat
+    tile or table when one serves better), draws the best few as offline SVG +
+    HTML with titles, units, source and honesty notes, and checks the result.
+    No model, no network.
+
+        vizier show data.csv --for "Rents rose fastest downtown"
+        vizier show data.csv --x year --y rent --series district --format spec
+        vizier show data.csv --format datawrapper          # dry run without a token
+    """
+    import json as _json
+    from pathlib import Path
+
+    from .show import show as _show
+    from .show import datawrapper as DW
+
+    ann = {}
+    for a in annotate:
+        if "=" not in a:
+            raise click.BadParameter(f"--annotate wants KEY=TEXT, got {a!r}")
+        k, v = a.split("=", 1)
+        ann[k.strip()] = v.strip()
+    overrides = {"x": x, "y": y, "series": series or facet, "label": label_col}
+    write = fmt != "spec" or out_dir
+    out = Path(out_dir) if out_dir else (Path(f"vizier-show-{Path(table).stem}") if write else None)
+    client = None
+    if fmt == "datawrapper" and dry_run:
+        client = DW.DatawrapperClient(token="")
+    try:
+        r = _show(table, claim=claim, overrides=overrides, out_dir=out, top=top, caveats=caveats,
+                  geometry=geometry, geo_key=geo_key, zero=zero, width=width, title=title, subtitle=subtitle,
+                  source_line=source_line, annotations=ann, datawrapper=(fmt == "datawrapper"),
+                  publish=publish, dw_client=client, datapackage=datapackage)
+    except ValueError as e:
+        click.echo(str(e), err=True)
+        sys.exit(2)
+    if as_json:
+        click.echo(_json.dumps(r, indent=2, ensure_ascii=False, default=str))
+        return
+    if fmt == "spec":
+        click.echo(_json.dumps(_neutral_spec(r), indent=2, ensure_ascii=False, default=str))
+        return
+    click.echo(_format_show(r, fmt))
+
+
+def _neutral_spec(r: dict) -> dict:
+    """The chosen form, its field roles, colors, words and notes — for other tools."""
+    chosen = next(o for o in r["options"] if o["rank"] == r["chosen"])
+    keep = ("rank", "form", "variant", "title", "roles", "reason", "shows", "hides", "mistakes",
+            "words", "colors", "palette_advice", "notes", "datawrapper", "text", "files", "checks")
+    return {
+        "schema": r["schema"],
+        "vizier_version": r["vizier_version"],
+        "source": r["source"],
+        "claim": r["claim"],
+        "fields": r["fields"],
+        "chosen": {k: chosen[k] for k in keep if k in chosen},
+        "alternatives": [{k: o[k] for k in ("rank", "form", "variant", "title", "reason", "roles", "drawable", "needs")
+                          if k in o} for o in r["options"] if o["rank"] != r["chosen"]],
+        "caveats": r.get("caveats", []),
+    }
+
+
+def _format_show(r: dict, fmt: str) -> str:
+    lines = [f"{r['source']['name']}: {r['source']['rows']} rows" + (f" — for: {r['claim']}" if r.get("claim") else ""), ""]
+    for o in r["options"]:
+        mark = "*" if o.get("rendered") else " "
+        lines.append(f"{mark}{o['rank']:>2}. {o['title']}" + (f" ({o['variant']})" if o.get("variant") else "")
+                     + ("" if o.get("drawable", True) else "  [not drawable yet]"))
+        lines.append(f"     {o['reason']}")
+        if o.get("needs"):
+            lines.append(f"     needs: {o['needs']}")
+        if o.get("text"):
+            lines.append(f"     \u201c{o['text']}\u201d")
+        for n in o.get("notes") or []:
+            tag = "applied" if n.get("applied") else n.get("severity", "")
+            lines.append(f"     [{tag}] {n['check']}: {n.get('detail') or n['fix']}")
+        if o.get("checks"):
+            lines.append(f"     checks: {o['checks']['summary']}")
+    if r.get("out_dir"):
+        lines.append("")
+        lines.append(f"wrote {r['out_dir']}/index.html")
+        for o in r["options"]:
+            for v in (o.get("files") or {}).values():
+                if fmt == "svg" and not v.endswith(".svg"):
+                    continue
+                lines.append(f"      {r['out_dir']}/{v}")
+    dw = r.get("datawrapper")
+    if dw:
+        lines.append("")
+        if dw.get("sent"):
+            lines.append(f"Datawrapper: {dw['type']} chart {dw['id']} — edit: {dw['edit_url']}"
+                         + (f" — published: {dw['public_url']}" if dw.get("public_url") else " (unpublished draft)"))
+        elif dw.get("dry_run"):
+            lines.append(f"Datawrapper dry run ({dw['form']} -> {dw['type']}): {dw['message']}")
+            import json as _json
+            for req in dw["requests"]:
+                lines.append(f"  {req['method']} https://api.datawrapper.de/v3{req['path']}  [{req['content_type']}]")
+                body = req["body"]
+                lines.append("    " + (_json.dumps(body, ensure_ascii=False, indent=2).replace("\n", "\n    ")
+                                       if not isinstance(body, str) else body.rstrip().replace("\n", "\n    ")))
+        else:
+            lines.append(f"Datawrapper: nothing sent — {dw.get('why')}")
+        for sk in dw.get("skipped") or []:
+            lines.append(f"  (skipped {sk['form']}: {sk['why']})")
+    return "\n".join(lines)
 
 
 @main.group()
