@@ -40,14 +40,35 @@ def test_common_ramps_pass():
         assert G.suggest_ramp(7, hue=hue)["ok"], f"{hue} 7"
 
 
-def test_infeasible_ramp_raises_not_returns_bad():
-    # a returned ramp is always valid; an impossible request errors clearly
-    assert _raises(G.suggest_ramp, 7, hue="green")
+def test_infeasible_ramp_returns_best_valid_with_advice():
+    # A returned ramp is always valid. An impossible request no longer errors: it
+    # returns the longest ramp the hue can hold, says so, and names what to change.
+    r = G.suggest_ramp(7, hue="green")
+    assert r["ok"], r["text"]
+    assert r["met"] is False
+    assert 2 <= len(r["ramp"]) < 7
+    assert r["advice"] and "blue/navy/gray" in " ".join(r["advice"])
 
 
-def test_missing_theme_mode_raises():
-    assert _raises(G.suggest_palette, 4, mode="dark", theme="muted")
-    assert _raises(G.suggest_palette, 99)  # past the categorical ceiling
+def test_palette_past_ceiling_returns_best_valid_with_advice():
+    r = G.suggest_palette(12)
+    assert r["ok"], r["text"]
+    assert r["met"] is False and r["requested"] == 12
+    assert len(r["palette"]) == 8
+    joined = " ".join(r["advice"]).lower()
+    assert "other" in joined and "small multiples" in joined
+
+
+def test_theme_without_mode_falls_back_and_says_so():
+    r = G.suggest_palette(4, mode="dark", theme="muted")
+    assert r["ok"] and r["theme"] == "default" and r["met"] is False
+    assert any("muted" in a for a in r["advice"])
+
+
+def test_malformed_requests_still_raise():
+    assert _raises(G.suggest_palette, 0)
+    assert _raises(G.suggest_palette, 4, theme="no-such-theme")
+    assert _raises(G.suggest_ramp, 1)
 
 
 def test_ink_on():

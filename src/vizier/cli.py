@@ -336,6 +336,8 @@ def suggest_palette_cmd(n: int, mode: str, surface: str | None, theme: str, pair
         click.echo(str(e), err=True)
         sys.exit(2)
     click.echo(",".join(r["palette"]))
+    for a in r.get("advice") or []:
+        click.echo(f"note: {a}", err=True)
     click.echo()
     click.echo(r["text"])
 
@@ -350,7 +352,10 @@ def suggest_palette_cmd(n: int, mode: str, surface: str | None, theme: str, pair
 @click.option("--surface", default=None)
 def suggest_ramp_cmd(steps: int, hue: str, light: str | None, dark: str | None,
                      mode: str, surface: str | None):
-    """Generate a one-hue ordinal ramp of STEPS, validated (or a clear error)."""
+    """Generate a one-hue ordinal ramp of STEPS, validated.
+
+    If the hue can't hold STEPS, prints the longest ramp that passes and what to change.
+    """
     from .analyze import generate as G
     try:
         r = G.suggest_ramp(steps, hue=hue, light=light, dark=dark, mode=mode, surface=surface)
@@ -358,6 +363,8 @@ def suggest_ramp_cmd(steps: int, hue: str, light: str | None, dark: str | None,
         click.echo(str(e), err=True)
         sys.exit(1)
     click.echo(",".join(r["ramp"]))
+    for a in r.get("advice") or []:
+        click.echo(f"note: {a}", err=True)
     click.echo()
     click.echo(r["text"])
 
