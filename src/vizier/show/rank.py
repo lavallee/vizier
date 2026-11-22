@@ -143,6 +143,13 @@ def claim_score(col: ColumnProfile, claim: str | None) -> int:
     return len(ct & words)
 
 
+_RELATE = re.compile(r"\b(relates?|related|vary|varies|depends?|changes?|scales?|tracks?|moves?)\s+(to|with|on|against|by)\b", re.I)
+
+
+def _word_index(text: str, char_pos: int) -> int:
+    return len(_WORD.findall(text[:char_pos].lower()))
+
+
 def mention_position(col: ColumnProfile, claim: str | None) -> int:
     """Where in the claim this column is first named (large if never)."""
     if not claim:
@@ -248,6 +255,14 @@ def choose_fields(profile: Profile, claim: str | None = None, overrides: dict[st
     elif "y" in ov:
         xy = None if len(measures) < 2 else (measures[1].name, measures[0].name)
     mentioned = [m.name for m in measures if claim_score(m, claim) > 0]
+    if xy is None and claim and len(mentioned) >= 2:
+        # "How does A relate to / vary with / depend on B": A is the outcome (y), B is x.
+        m = _RELATE.search(claim)
+        if m:
+            before = [n for n in mentioned if mention_position(profile.get(n), claim) < _word_index(claim, m.start())]
+            after = [n for n in mentioned if n not in before]
+            if before and after:
+                xy = (after[0], before[0])
     return Fields(time=time, measures=measures, dims=dims, label=label,
                   geometry=profile.geometry, geo=profile.geographies, xy=xy, mentioned=mentioned)
 

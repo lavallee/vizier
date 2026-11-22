@@ -138,6 +138,15 @@ def test_rank_suppressed_table_is_drawn_with_gaps(tmp_path):
     assert 'data-state="suppressed"' in svg and 'data-state="not collected"' in svg
 
 
+def test_scatter_axes_follow_the_claim():
+    rows = [{"asthma": 8 + (i % 5), "diesel": i / 10, "income": 40000 + i * 500} for i in range(30)]
+    p = profile_table(table_from_records(rows))
+    opts, _ = rank_forms(p, "How does asthma relate to diesel and income?")
+    assert (opts[0].roles["x"], opts[0].roles["y"]) == ("diesel", "asthma")
+    opts, _ = rank_forms(p, "Diesel, income and asthma")
+    assert (opts[0].roles["x"], opts[0].roles["y"]) == ("diesel", "asthma")
+
+
 def test_rank_claim_routes_family():
     rows = [{"visits": i, "wait_days": (i * 7) % 11, "staff": i % 4} for i in range(40)]
     opts, f = rank_forms(profile_table(table_from_records(rows)), "How are wait days distributed?")
