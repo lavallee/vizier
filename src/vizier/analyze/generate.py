@@ -52,28 +52,47 @@ def suggest_palette(
 
     `pairs='all'` when the marks are a scatter/map (any two can neighbor);
     'adjacent' for stacks/bars/lines. Returns the palette, the validation report,
-    and whether it passed — so the caller never has to trust it blind."""
+    and whether it passed — so the caller never has to trust it blind.
+
+    A request that can't be met exactly is not an error. Past the validated
+    ceiling the answer is the largest palette that passes, `met=False`, and
+    `advice` naming what to change (fold the tail into "Other", small multiples,
+    direct labels). A theme with no variant for `mode` falls back to the default
+    theme's, and says so. Only a malformed request (`n < 1`, an unknown theme
+    name) raises."""
     if n < 1:
         raise ValueError("n must be >= 1")
     modes = _THEMES.get(theme)
     if modes is None:
         raise ValueError(f"unknown theme '{theme}'; available: {sorted(_THEMES)}")
+    advice: list[str] = []
+    used_theme = theme
     base = modes.get(mode)
     if base is None:
-        raise ValueError(f"theme '{theme}' has no '{mode}' variant yet "
-                         f"(has: {sorted(modes)}) — use theme='default' for {mode}")
-    if n > len(base):
-        raise ValueError(
-            f"{n} categorical hues exceeds the {len(base)}-slot ceiling for theme "
-            f"'{theme}/{mode}'. Past ~8, fold the tail into 'Other', facet into small "
-            "multiples, or use composite encoding (hue × shape) — never a generated 9th hue."
-        )
-    pal = base[:n]
+        used_theme = "default"
+        base = _THEMES["default"][mode]
+        advice.append(f"theme '{theme}' has no '{mode}' variant yet (has: {sorted(modes)}); "
+                      f"used theme 'default' for {mode}.")
+    met = n <= len(base)
+    if not met:
+        advice += [
+            f"{n} categorical hues can't all be told apart; the validated ceiling for "
+            f"'{used_theme}/{mode}' is {len(base)}. Returned the {len(base)} that pass.",
+            f"Fold the tail into 'Other' (keep the {len(base) - 1} that matter, then one "
+            "neutral gray for the rest).",
+            "Or facet into small multiples — one panel per series needs no hue at all.",
+            "Or direct-label the lines/points and let color carry only a highlight.",
+        ]
+    pal = base[: min(n, len(base))]
     report = C.validate_categorical(pal, mode=mode, surface=surface, pairs=pairs)
     return {
         "palette": pal,
-        "theme": theme,
+        "theme": used_theme,
         "mode": mode,
+        "requested": n,
+        "met": met and used_theme == theme,
+        "advice": advice,
+        "other": "#a3a29c" if mode == "light" else "#6b6a65",
         "ok": report.ok,
         "report": report.to_dict(),
         "text": C.format_report(report),
@@ -101,7 +120,10 @@ def suggest_ramp(
 ) -> dict:
     """A one-hue ordinal ramp of `steps`, validated (monotone lightness, visible
     ΔL, a light end that clears the surface). Pass a named `hue` (blue/navy/green/
-    teal/orange/gray) or explicit `light`/`dark` anchor hexes."""
+    teal/orange/gray) or explicit `light`/`dark` anchor hexes.
+
+    When the hue can't hold `steps`, the result is the longest ramp that passes,
+    with `met=False` and `advice` — not an error. A returned ramp is always valid."""
     if steps < 2:
         raise ValueError("steps must be >= 2")
     if light and dark:
@@ -113,24 +135,45 @@ def suggest_ramp(
                          f"{sorted(_RAMP_ANCHORS)}")
     ramp = [_interp(a, b, i / (steps - 1)) for i in range(steps)]
     report = C.validate_ordinal(ramp, mode=mode, surface=surface)
+    advice: list[str] = []
+    met = report.ok
     if not report.ok:
-        # Guarantee a returned ramp is valid. Warm hues can't hold a ≥2:1 light end
-        # AND enough ΔL for many steps, so find the max that passes and say so.
+        # Warm hues can't hold a >=2:1 light end AND enough ΔL for many steps.
+        # Return the most steps this hue holds, validated, and say what to change.
         hi = steps
+        trial, trial_report = ramp, report
         while hi > 2:
             hi -= 1
             trial = [_interp(a, b, i / (hi - 1)) for i in range(hi)]
-            if C.validate_ordinal(trial, mode=mode, surface=surface).ok:
+            trial_report = C.validate_ordinal(trial, mode=mode, surface=surface)
+            if trial_report.ok:
                 break
-        raise ValueError(
-            f"'{hue}' ordinal ramp fails at {steps} steps on this surface "
-            f"(max ~{hi}). Use blue/navy/gray for more steps, or fewer steps — "
-            f"past ~6 ordered classes a table usually reads better anyway.\n"
-            + C.format_report(report)
-        )
+        failing_text = C.format_report(report)
+        ramp, report = trial, trial_report
+        advice = [
+            f"'{hue}' can't hold {steps} distinguishable ordered steps on this surface; "
+            f"returned the {hi} it can.",
+            f"Bin the data into {hi} classes, or use blue/navy/gray, which hold more steps.",
+            "Past ~6 ordered classes, label the values (or add a table) rather than "
+            "asking color to separate them.",
+        ]
+        return {
+            "ramp": ramp,
+            "hue": hue,
+            "requested": steps,
+            "met": False,
+            "advice": advice,
+            "ok": report.ok,
+            "report": report.to_dict(),
+            "text": C.format_report(report),
+            "requested_report": failing_text,
+        }
     return {
         "ramp": ramp,
         "hue": hue,
+        "requested": steps,
+        "met": met,
+        "advice": advice,
         "ok": report.ok,
         "report": report.to_dict(),
         "text": C.format_report(report),
