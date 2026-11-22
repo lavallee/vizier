@@ -18,7 +18,7 @@
   <div class="wrap">
     <a class="logo" href="./">
       <span class="mark">vizier</span>
-      <span class="mark-sub">/ v0.3.1</span>
+      <span class="mark-sub">/ v0.4.0</span>
     </a>
     <nav>
       <a href="#install">install</a>
@@ -113,14 +113,27 @@
 
   <section id="decides" class="section section-alt">
     <div class="wrap">
-      <h2>What it decides</h2>
+      <h2>What it does</h2>
       <p class="section-lede">
-        Everything below is deterministic — no LLM, no keys, no network. It
-        answers the parts of a chart that are actually <em>decidable</em>, and
-        refuses the ones that aren't honest.
+        Everything below except critique is deterministic — no LLM, no keys, no
+        network. Someone asked to see their data; vizier shows them how, with
+        the best form first and the trade-offs stated.
       </p>
 
       <div class="row-list">
+        <div class="row">
+          <h3>Show a table, drawn from its own rows</h3>
+          <p>
+            <code>vizier show data.csv --for "&lt;your claim&gt;"</code> profiles
+            the columns, ranks the ways to show them, and draws the best few as
+            offline SVG and HTML — title, units, source, caveats, and honesty
+            notes that say what a reader could misread and the fix (applied
+            where it's mechanical). When a sentence or a table would serve
+            better, it says so and writes it, beside the charts. It can also
+            build the chart in Datawrapper, or hand a neutral spec to your own
+            renderer.
+          </p>
+        </div>
         <div class="row">
           <h3>Which form answers the reader's question</h3>
           <p>
@@ -171,8 +184,9 @@
             <code>suggest-ramp</code> return categorical palettes and ordinal
             ramps that have already cleared colorblind separation, contrast, and
             lightness checks, so there's nothing left to eyeball;
-            <code>validate</code> checks one you were handed. An unsatisfiable
-            request errors rather than returning something that fails. Then go
+            <code>validate</code> checks one you were handed. A request that
+            can't be met exactly returns the best valid answer and what to
+            change. Then go
             back to the two rules that matter more than any hue: ordered color
             for ordered data, and never let color carry meaning alone.
           </p>
@@ -227,9 +241,10 @@
           <h3>Give me one that's right</h3>
           <p>
             Form recommendation against a documented library, the journalism
-            checks for the job, and validated color — every suggestion checked
-            before it's returned. A request that can't be satisfied honestly
-            errors instead of returning something that fails.
+            checks for the job, validated color, and the figure itself, drawn
+            by <code>vizier show</code> — every suggestion checked before it's
+            returned. A request that can't be met exactly gets the best valid
+            answer and what to change.
           </p>
         </div>
         <div class="half">
@@ -280,7 +295,7 @@
     <div class="wrap">
       <h2>Status</h2>
       <p class="section-lede">
-        v0.3.1 · MIT licensed. What the corpus draws on, and the philosophy
+        v0.4.0 · MIT licensed. What the corpus draws on, and the philosophy
         behind distilling broad expert taste into a determination, are in
         <a href="https://github.com/lavallee/vizier/blob/main/INFLUENCES.md">INFLUENCES.md</a>;
         the house posture on charts is in

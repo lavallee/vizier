@@ -1,7 +1,7 @@
 {
   "name": "vizier",
-  "version": "0.3.1",
-  "description": "Chart-form selection and critique grounded in reader questions, honest comparison, and documented patterns.",
+  "version": "0.4.0",
+  "description": "Shows how to visualize a table — ranked forms drawn from the real rows, with honesty notes — and critiques finished charts against documented patterns.",
   "author": {
     "name": "Marc Lavallee"
   },
@@ -20,9 +20,9 @@
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
-    "displayName": "vizier — chart judgment",
-    "shortDescription": "Choose and critique charts with evidence",
-    "longDescription": "Choose chart forms from the reader's question, run newsroom-style honesty checks, and critique finished graphics against a documented pattern library.",
+    "displayName": "vizier — show your data",
+    "shortDescription": "Show data well; critique charts with evidence",
+    "longDescription": "Show how to visualize a table: ranked forms drawn from the real rows as offline SVG/HTML or a Datawrapper chart, with newsroom-style honesty notes attached; critique finished graphics against a documented pattern library.",
     "developerName": "Marc Lavallee",
     "category": "Productivity",
     "capabilities": [
@@ -31,6 +31,7 @@
     ],
     "websiteURL": "https://lavallee.github.io/vizier/",
     "defaultPrompt": [
+      "Use Vizier to show this table.",
       "Use Vizier to choose a chart for this question.",
       "Use Vizier to critique this chart for misleading choices.",
       "Use Vizier to check this chart's comparison and denominator."
