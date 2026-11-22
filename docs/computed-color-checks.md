@@ -42,7 +42,7 @@ own:
 
 | Primitive | CLI | MCP | Returns |
 |---|---|---|---|
-| Categorical palette | `vizier suggest-palette 6 [--theme muted]` | `suggest_palette` | `n` CVD-safe hues, validated before return (n>8 refused) |
+| Categorical palette | `vizier suggest-palette 6 [--theme muted]` | `suggest_palette` | `n` CVD-safe hues, validated before return (past 8: the 8 that pass, `met: false`, and advice) |
 | Ordinal ramp | `vizier suggest-ramp 5 --hue navy` | `suggest_ramp` | a one-hue ramp that passes, or a clear error if infeasible |
 | Legible ink | `vizier ink "#0072b2"` | `ink_on` | the dark/light text color that clears WCAG on a fill |
 

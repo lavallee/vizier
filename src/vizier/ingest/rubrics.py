@@ -117,9 +117,9 @@ DATAVIZ_METHOD = Item(
     },
     axes=[
         {"name": "Form fit",
-         "description": "Is it even a chart? A single number is a stat tile / hero figure, not a "
-                        "one-bar bar chart; >~7 classes that all carry meaning is a table. If a chart "
-                        "IS right, the data's job picks the type: magnitude→bar/column (heatmap for a "
+         "description": "Which form serves the reader? A single number reads best as a stat tile / hero "
+                        "figure, not a one-bar bar chart; >~7 classes that all carry meaning want a table "
+                        "beside (or instead of) the chart. For a chart, the data's job picks the type: magnitude→bar/column (heatmap for a "
                         "grid); trend→line; tell series apart→grouped/stacked bar or multi-line; "
                         "one series is the point→emphasis (highlight one, gray the rest); above/below "
                         "a baseline→diverging bar; part-to-whole→stacked bar; before→after per item→"
@@ -161,7 +161,7 @@ DATAVIZ_METHOD = Item(
     ],
     body=(
         "A procedure, run in order — **color comes last**; most bad charts pick colors first:\n\n"
-        "1. **Pick the form** by the data's job (or decide it's not a chart — a stat tile, hero "
+        "1. **Pick the form** by the data's job (which may be a stat tile, hero "
         "number, or table).\n"
         "2. **Assign color by the job it does** (categorical / ordinal / sequential / diverging / "
         "status), not by taste.\n"
@@ -178,7 +178,7 @@ DATAVIZ_METHOD = Item(
         "gray midpoint (never a rainbow, never a hue at the diverging midpoint); status colors are "
         "reserved and ship with icon+label; text wears text tokens, never the series color; a legend "
         "is always present for ≥2 series.\n\n"
-        "**Anti-pattern catalog — if a chart matches an entry, it's wrong:**\n"
+        "**Anti-pattern catalog — if a chart matches an entry, fix it:**\n"
         "- Dual-axis (two y-scales) — invents a correlation; the #1 mistake.\n"
         "- Recolor-on-filter — color must follow the entity, not its current rank/row.\n"
         "- Cycling/generating hues past 8 — indistinguishable under CVD.\n"

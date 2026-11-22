@@ -2,7 +2,7 @@
 
 `vizier mcp` exposes the toolkit and the corpus query layer over stdio as
 an MCP server. Once registered, agents in other sessions can call
-`recommend_form`, `implementation_guide`, `get_pattern`, `analyze_artifact`,
+`show` (draw a table's best forms), `recommend_form`, `implementation_guide`, `get_pattern`, `analyze_artifact`,
 `suggest_palette`, `search`, and the rest as tools.
 
 > **The plugin does this for you.** In Claude Code, run

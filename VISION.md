@@ -1,40 +1,66 @@
 # Vision — vizier
 
-**North star:** Every journalistic chart decision that can be made honestly by
-rule or prior art is made consistently before publication, while choices that
-require editorial judgment stay explicit and receive evidence-backed critique.
+**North star:** When someone asks to see their data, vizier shows them how —
+the best form first, drawn from their rows, with the trade-offs stated and the
+honest warnings attached — and judges the result with the same knowledge it
+used to make it.
 
-**North-star metric:** reviewed artifact adoption — published graphics whose
-form, encoding, color, structure, and critique path used Vizier, with rule
-findings resolved or consciously overridden and downstream correction/review
-burden measured.
+**North-star metric:** shown-and-used figures — tables run through `vizier
+show` whose output (a drawn figure, a Datawrapper chart, a sentence or a table)
+was used, with its honesty notes resolved or consciously overridden, and the
+downstream correction/review burden measured.
 
 ## Strategy bets
 
-- **Generation and critique share one DNA.** The thresholds Vizier recommends
-  are the thresholds it validates, so proposed forms and palettes can survive
-  their own critic.
-- **Compute the decidable parts.** Deterministic form, color, contrast, ink,
-  and structure checks stay keyless, fast, explainable, and safe to call from
-  agents and generators.
+- **Show, don't gatekeep.** A request to see data is a good request. vizier
+  answers it with ranked options it has actually drawn, and says plainly when a
+  sentence, a stat tile or a table would serve better — then provides that
+  too. It never answers with a bare "no".
+- **Generation and critique share one DNA.** The thresholds vizier draws with
+  are the thresholds it validates against, so every figure it makes survives
+  its own critic. `show` runs vizier's analyzers on the SVG it just drew.
+- **Compute the decidable parts.** Profiling, form ranking, color, contrast,
+  ink, structure and the honesty checks stay deterministic, keyless, offline
+  and explainable — safe to call from agents and generators.
+- **Strong defaults, honest notes.** Taste lives in the defaults (sorted bars,
+  zero baselines, direct labels, validated color) and in notes that say what a
+  reader could misread and what fixes it. Where a fix is mechanical, vizier
+  applies it and says so.
 - **Retrieve judgment with its prior art.** Optional corpus-backed critique
   cites the practices and criticism it relies on instead of returning an
   ungrounded aesthetic opinion.
 
+## Goals
+
+- Draw the core journalistic forms from real rows as self-contained SVG and
+  HTML that open from `file://` with no network: bar (grouped, stacked), line,
+  scatter, dot, strip, histogram, slope, small multiples, heatmap, stacked
+  area, choropleth when outlines are supplied, and the stat tile.
+- Hand off to the tools people already publish with: Datawrapper through its
+  API, and a neutral spec for workbenches and other renderers.
+
 ## Non-goals
 
-- Rendering charts or replacing project-specific graphics code.
-- Automating editorial judgment, story framing, or ethical tradeoffs.
+- Being a general charting library. vizier draws the forms its pattern library
+  can vouch for, with its defaults; bespoke graphics and house styling belong
+  to the renderer or the page.
+- Automating editorial judgment, story framing, or ethical trade-offs. vizier
+  states the trade-offs; people make the call.
 - Shipping copyrighted critique corpora in the public package.
-- Returning a recommendation when constraints make an honest answer impossible.
+- Refusing. When a request can't be met exactly (more hues than can be told
+  apart, more steps than a ramp holds), vizier returns the best valid answer
+  and says what to change.
 
 ## Engine map
 
-- Pattern and rubric data define form-selection and reading contracts.
-- Deterministic color, contrast, ink, SVG/HTML, and structural analyzers handle
-  computable quality.
+- The table profiler and form ranker turn a CSV/JSON (plus an optional
+  Frictionless datapackage) into ranked, explained options.
+- Pattern and rubric data define form selection, trade-offs and reading
+  contracts; the ranker quotes them.
+- Python renderers produce the static SVG; the page wraps it with the ranking,
+  notes and data, with no scripts.
+- Deterministic color, contrast, ink, SVG/HTML and structural analyzers handle
+  computable quality, on vizier's own output and on anyone else's.
 - The public corpus interface, optional search/critique extras, and Somm model
-  routing provide evidence-backed judgment.
-- MCP and CLI surfaces let agents and generators call the same decision layer.
-- The renderer and the artifact toolchain produce the graphic; Vizier and
-  specialist review judge it before publication.
+  routing provide evidence-backed critique.
+- CLI and MCP surfaces let people, agents and generators call the same layer.
