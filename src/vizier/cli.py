@@ -576,6 +576,64 @@ def _format_show(r: dict, fmt: str) -> str:
     return "\n".join(lines)
 
 
+@main.command("explore")
+@click.argument("table", type=click.Path(exists=True, dir_okay=False))
+@click.option("--out", "out_dir", default=None, type=click.Path(file_okay=False),
+              help="Output directory (default: ./vizier-explore-<table name>).")
+@click.option("--max-views", default=24, type=int, help="How many views to draw (default 24).")
+@click.option("--focus", default=None, help="Put this field at the centre: its distribution, then everything against it.")
+@click.option("--by", default=None, help="Re-run the sheet for each of the largest groups of this column.")
+@click.option("--where", multiple=True, metavar="COL=VALUE",
+              help="Keep only matching rows (COL=VALUE or COL!=VALUE). Repeatable.")
+@click.option("--view", "view_id", default=None, help="Redraw one view, by id, at a larger size.")
+@click.option("--datapackage", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="Frictionless datapackage.json (default: one beside the table, if present).")
+@click.option("--json", "as_json", is_flag=True, default=False, help="Print explore.json to stdout.")
+def explore_cmd(table, out_dir, max_views, focus, by, where, view_id, datapackage, as_json):
+    """Explore TABLE: what is in it, before there is a claim. Look first; then show.
+
+    Draws many small, honest views as a contact sheet — a field sheet, missing
+    values, relationships (Spearman, with a leverage check and a conditioned
+    view), breakdowns by group, trends, and outliers — with notes on how many
+    comparisons were looked at. Every view lists the `vizier show` arguments
+    that turn it into a figure. No model, no network.
+
+        vizier explore data.csv
+        vizier explore data.csv --focus asthma --where "county=Essex County"
+        vizier explore data.csv --view rel-diesel--asthma --out big/
+    """
+    import json as _json
+    from pathlib import Path
+
+    from .show.explore import explore as _explore
+
+    out = Path(out_dir) if out_dir else Path(f"vizier-explore-{Path(table).stem}")
+    try:
+        r = _explore(table, out_dir=out, max_views=max_views, focus=focus, by=by, where=list(where),
+                     view=view_id, datapackage=datapackage)
+    except ValueError as e:
+        click.echo(str(e), err=True)
+        sys.exit(2)
+    if as_json:
+        click.echo(_json.dumps(r, indent=2, ensure_ascii=False, default=str))
+        return
+    if view_id:
+        v = r["views"][0]
+        click.echo(f"{v['id']}: {v['title']}")
+        click.echo(f"  {v['what']}")
+        if v.get("file"):
+            click.echo(f"  wrote {out}/{v['file']}")
+        return
+    click.echo(f"{r['source']['name']}: {r['source']['rows']:,} rows · {len(r['views'])} views")
+    for n in r["notes"]:
+        click.echo(f"  note: {n}")
+    for v in r["views"]:
+        st = v.get("stat") or {}
+        sv = f"  [{st['name']} {st['value']}, n={st['n']}]" if st.get("value") is not None else ""
+        click.echo(f"  {v['id']}{sv}" + (f"  ! {v['caution']}" if v.get("caution") and v["kind"] != "distribution" else ""))
+    click.echo(f"wrote {out}/index.html and {out}/explore.json")
+
+
 @main.group()
 def patterns():
     """Work with the chart_pattern corpus."""

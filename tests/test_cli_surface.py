@@ -16,6 +16,7 @@ def test_cli_exposes_expected_command_surface():
         "patterns",
         "recommend-form",
         "show",
+        "explore",
         "snapshot",
         "stats",
         "suggest-palette",

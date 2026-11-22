@@ -37,7 +37,8 @@ mcp = _Server(
         "vizier shows people how to visualize their data, and judges the result. "
         "START with `show` when someone has a table and wants to see it: it ranks the "
         "ways to show it (including a sentence or table when those serve better), "
-        "draws the best ones, and attaches honesty notes. "
+        "draws the best ones, and attaches honesty notes. Before there is a claim, "
+        "`explore` shows what is in the table as a contact sheet of small views. "
         "COMPUTABLE color/form decisions (deterministic, no LLM): when building a "
         "chart, `suggest_palette` for CVD-safe series colors, `suggest_ramp` for a "
         "one-hue ordinal ramp, `ink_on` for a legible label color, and "
@@ -449,6 +450,36 @@ def show(
     if not include_svg:
         r.pop("profile", None)  # keep the default reply small; the spec carries the fields chosen
     return r
+
+
+@mcp.tool(
+    description=(
+        "EXPLORE a table before there is a claim — what is in it? Look first; then show. "
+        "Give a CSV/JSON `path` (a datapackage.json beside it is read). Returns the "
+        "vizier/explore/v1 result: a field sheet (distribution, missing / suppressed "
+        "counts, range, median and oddities per field), missingness, relationships "
+        "between measures ranked by Spearman rho (with a leverage check and a view "
+        "conditioned on the likeliest confounder), breakdowns by group ranked by "
+        "epsilon-squared, trends and outliers. Notes say how many comparisons were "
+        "looked at; a pattern found by looking at many is a lead, not a finding. Each "
+        "view carries `show_args` to hand to `show`. `out_dir` writes index.html (a "
+        "static contact sheet), the SVGs and explore.json. No model, no network."
+    ),
+)
+def explore(
+    path: Annotated[str, Field(description="Path to a CSV or JSON table")],
+    out_dir: Annotated[str | None, Field(description="Directory for index.html, SVGs and explore.json")] = None,
+    max_views: Annotated[int, Field(ge=1, le=200, description="How many views to draw")] = 24,
+    focus: Annotated[str | None, Field(description="Field to put at the centre")] = None,
+    by: Annotated[str | None, Field(description="Re-run the sheet per group of this column")] = None,
+    where: Annotated[list[str] | None, Field(description="Row filters, each 'COL=VALUE' or 'COL!=VALUE'")] = None,
+    view: Annotated[str | None, Field(description="Redraw one view by id, larger")] = None,
+) -> dict[str, Any]:
+    from .show.explore import explore as _explore
+    try:
+        return _explore(path, out_dir=out_dir, max_views=max_views, focus=focus, by=by, where=where or [], view=view)
+    except (ValueError, OSError) as e:
+        return {"error": str(e)}
 
 
 def main() -> None:
