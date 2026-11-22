@@ -1,6 +1,7 @@
 """Form-dimension generation — the counterpart to critiquing a chart against its
 pattern. Given a data-job, route to the right chart form(s) over the 43-pattern
-library, guarded by the form heuristic's "is it even a chart?" checks.
+library, with the form heuristic's notes on when a stat tile or a table serves
+alongside or instead of a chart.
 
 Where `suggest_palette` answers "which colors," `recommend_form` answers "which
 form" — the other half of a generation-time decision a renderer would
@@ -31,7 +32,7 @@ _FAMILY_HINTS: dict[str, tuple[str, ...]] = {
                          "annual", "annually", "by year", "per year", "school years",
                          "budget years", "over years"),
     "Ranking": ("rank", "ranking", "top ", "largest", "biggest", "order by", "sorted", "leaderboard"),
-    "Distribution": ("distribution", "spread", "histogram", "frequency", "density", "variation", "outliers"),
+    "Distribution": ("distribution", "distributed", "spread", "histogram", "frequency", "density", "variation", "outliers"),
     "Correlation": ("correlation", "relationship", " vs ", "versus", "against", "scatter", "x and y"),
     "Magnitude": ("magnitude", "compare amounts", "how many", "how much", "size of", "counts by"),
     "Deviation": ("deviation", "above below", "above/below", "surplus", "deficit", "vs baseline",
@@ -119,7 +120,8 @@ def recommend_form(
     Pass a free-text `job` ("part-to-whole over time, 5 series"), and/or an FT
     `family`, and optionally `n_series`. Returns ranked patterns (capsule,
     when-to / when-not, alternatives, common mistakes) plus form-heuristic
-    `notes` — including when the answer is *not a chart* (a stat tile or a table).
+    `notes` — including when a stat tile or a table would serve the reader better,
+    offered beside the chart forms rather than instead of them.
     """
     if not job and not family:
         raise ValueError("give a `job` (free-text data-question) or a `family`")
@@ -129,21 +131,21 @@ def recommend_form(
     if job:
         target += [f for f in _infer_families(job) if f not in target]
 
-    # "Is it even a chart?" guards, straight from the form heuristic.
+    # Form-heuristic notes: when a tile or a table is the better offer.
     if isinstance(n_series, int):
         if n_series <= 1:
             if "Change over time" not in target:
                 notes.append(
-                    "A single current value is a stat tile / hero figure, not a chart "
-                    "(a single ratio against a limit is a meter) — don't reach for a "
-                    "one-bar bar chart or a 2-slice pie."
+                    "A single current value reads best as a stat tile / hero figure with "
+                    "its benchmark (a single ratio against a limit is a meter); a one-bar "
+                    "bar chart or a 2-slice pie adds ink without a comparison. "
+                    "`vizier show` draws the tile."
                 )
         elif n_series > 7:
             notes.append(
-                f"{n_series} classes all carrying meaning is usually a table (or "
-                "table + chart), not more colors — past ~7 the categorical channel "
-                "blurs. If a chart is still right, fold the tail into 'Other' or "
-                "facet into small multiples."
+                f"{n_series} classes all carrying meaning: past ~7 the categorical "
+                "color channel blurs, so pair the chart with a table, fold the tail "
+                "into 'Other', or facet into small multiples."
             )
 
     # BM25 relevance rank over the pattern text (used as a tiebreak / for job words

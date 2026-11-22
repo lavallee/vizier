@@ -1,0 +1,7 @@
+﻿id,county_fips,state,lat,lon,date,month,amount,share,label,notes
+r1,01001,Alabama,32.5,-86.6,2024-03-01,2024-01,"$1,234",12%,Autauga,ok
+r2,01003,Alabama,30.7,-87.7,2024-03-02,2024-02,"$2,500.50",N/A,Baldwin,
+r3,02013,Alaska,55.2,-161.9,2024-03-03,2024-03,-,7.5%,Aleutians East,late
+r4,04001,Arizona,35.4,-109.5,2024-03-04,2024-04,"$980",30%,Apache,
+r5,05001,Arkansas,34.3,-91.4,2024-03-05,2024-05,NA,18%,Arkansas,ok
+
