@@ -1,5 +1,9 @@
 # vizier
 
+**Look first; then show.** `vizier explore` answers "what is in this table?" before
+anyone has a claim — a contact sheet of small, honest views. `vizier show` answers "how
+do I show this finding?".
+
 **Show people how to visualize their data — and judge the result.** Hand vizier a table
 and, if you have one, the claim or question the figure should serve. It profiles the
 columns, ranks the ways to show them, and draws the best few from your actual rows as
@@ -61,6 +65,11 @@ patterns ship inside the package; the index builds itself on first use.
 ## Quickstart
 
 ```bash
+# explore — what is in this table? (before there is a claim)
+vizier explore data.csv                                       # contact sheet: index.html + SVGs + explore.json
+vizier explore data.csv --focus rent --where "city=Newark"    # one field at the centre, a subgroup
+vizier explore data.csv --view rel-income--rent --out big/    # redraw one view, larger
+
 # show — the front door
 vizier show data.csv --for "Rents rose fastest downtown"     # ranked, drawn, annotated
 vizier show data.csv --x year --y rent --series district      # say which columns play which role
@@ -83,6 +92,29 @@ vizier suggest-ramp 5 --hue navy         # a one-hue ordinal ramp, validated
 vizier validate "#e69f00,#0072b2,#009e73" --pairs all
 vizier ink "#0072b2"                     # the legible text color for a fill
 ```
+
+### `vizier explore`
+
+`vizier explore TABLE` writes `index.html` — one static page readable as a contact sheet —
+plus one SVG per view and `explore.json` (`vizier/explore/v1`). In order:
+
+1. **Field sheet** — one compact distribution per field (histogram, top values, timeline),
+   with n, missing and suppressed counts, range, median, and oddities called out: a spike at
+   a round number, a long tail, a dominant value, impossible values, likely missing-value codes.
+2. **Missingness** — which fields are missing together, and in which groups.
+3. **Relationships** — pairs of measures ranked by Spearman's ρ, each a small scatter with a
+   leverage check (ρ recomputed without the rows that drive it, which are ringed); the
+   strongest few also conditioned on the likeliest confounder (partial rank correlation),
+   with panels for each third of it side by side on shared scales.
+4. **Breakdowns** — each measure by each low-cardinality dimension as strips with medians,
+   ranked by how much groups differ relative to the spread within them (ε²).
+5. **Trends** when there is a time field. 6. **Outliers** — rows furthest from the pattern.
+
+The notes say how many comparisons were examined and that a pattern found by looking at
+many is a lead to test, not a finding; n sits beside every statistic; groups under 5 rows
+and pairs under 10 are shown but not ranked. `--focus COL` centres one field; `--by COL`
+re-runs the sheet per group; `--where "COL=VALUE"` subsets. Every view carries the
+`show_args` that hand it to `vizier show`.
 
 ### `vizier show`
 
@@ -153,7 +185,7 @@ elsewhere:
 claude mcp add vizier -- vizier mcp
 ```
 
-Tools: `show`, `recommend_form`, `implementation_guide`, `list_patterns`, `get_pattern`,
+Tools: `explore`, `show`, `recommend_form`, `implementation_guide`, `list_patterns`, `get_pattern`,
 `analyze_artifact`, `validate_palette`, `suggest_palette`, `suggest_ramp`, `ink_on`,
 `check_contrast`, plus corpus query (`search`, `find_similar`, `list_rubrics`, …).
 Setup + troubleshooting: [docs/mcp-setup.md](docs/mcp-setup.md).

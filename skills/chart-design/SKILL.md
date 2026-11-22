@@ -1,6 +1,6 @@
 ---
 name: chart-design
-description: ALWAYS use this before creating, designing, choosing, or recommending ANY chart, graph, plot, figure, or dashboard — in any library or medium (d3, Vega, matplotlib, plotly, Recharts, Observable, Datawrapper, hand-written SVG), and whenever someone asks to see their data, what chart to use, or how to show a table. Use it even when another visualization or design skill is available — this one runs FIRST. It shows how to visualize the data — `vizier show` ranks the ways to show a table against 43 documented chart forms, draws the best ones from the real rows with titles, units, source and honesty notes, and offers a sentence or table when that serves better — then hands off. Skipping it means deciding the chart from habit.
+description: ALWAYS use this before creating, designing, choosing, or recommending ANY chart, graph, plot, figure, or dashboard — in any library or medium (d3, Vega, matplotlib, plotly, Recharts, Observable, Datawrapper, hand-written SVG), and whenever someone asks to see or explore their data, what is in a table, what chart to use, or how to show a table. Use it even when another visualization or design skill is available — this one runs FIRST. Look first, then show — `vizier explore` draws a contact sheet of honest small views of what is in a table; `vizier show` ranks the ways to show a table against 43 documented chart forms, draws the best ones from the real rows with titles, units, source and honesty notes, and offers a sentence or table when that serves better — then hands off. Skipping it means deciding the chart from habit.
 ---
 
 # chart-design
@@ -27,7 +27,24 @@ doctor` reports what's live. If vizier's MCP tools are available
 — the prefix depends on how the server was registered), they return the same
 answers as the CLI commands below; use either.
 
-## 1. If there's a table, start with `vizier show`
+## 1. Look first: `vizier explore` when there's no claim yet
+
+If the person has a table but not yet a point to make — or you need to know
+what's in the data before choosing — explore it:
+
+```bash
+vizier explore data.csv                    # contact sheet: index.html, SVGs, explore.json
+vizier explore data.csv --focus <field>    # one field at the centre
+```
+
+Read the notes before the views: they say how many comparisons were looked
+at. A pattern found by looking at many is a lead to test, not a finding —
+say so when you report it, give n, and never describe a correlation as a
+cause. Views marked "driven by a handful of rows" or "mostly explained by"
+another measure are telling you not to lead with them. Each view lists the
+`vizier show` arguments that turn it into a figure.
+
+## 2. Then show: `vizier show` for the claim
 
 ```bash
 vizier show data.csv --for "<the claim or question the figure serves>"
@@ -57,7 +74,7 @@ prints a neutral JSON (form, roles, colors, words, notes) to hand to another
 renderer; `--format datawrapper` builds the chart in Datawrapper (a dry run
 until `DATAWRAPPER_API_TOKEN` is set).
 
-## 2. Say what the reader gets
+## 3. Say what the reader gets
 
 Whether or not `show` drew it, write one sentence:
 
@@ -73,7 +90,7 @@ Then name the **headline claim**: the one factual statement the figure has to
 carry. Pass it as `--for`; it becomes the title. Build backward from it — the
 claim decides the annotation and the sort order.
 
-## 3. Check the form against the library
+## 4. Check the form against the library
 
 ```bash
 vizier recommend-form "<the comparison, in the reader's words>" --n-series <N>
@@ -92,7 +109,7 @@ Browse by purpose when the job is fuzzy: `vizier patterns list --family Flow`
 — families are Change over time, Correlation, Deviation, Distribution, Flow,
 Magnitude, Part-to-whole, Ranking, Spatial.
 
-## 4. Run the journalism checks
+## 5. Run the journalism checks
 
 ```bash
 vizier guide "<the job>" --context "<headline or caption>" --n-series <N>
@@ -113,7 +130,7 @@ Answer each check *in the figure or its caption*:
 If a check can't be satisfied, say so in the caption. An acknowledged gap is
 honest; a silent one is the defect.
 
-## 5. Encode by strength, then annotate
+## 6. Encode by strength, then annotate
 
 - Position beats length beats angle beats area beats color. Put the most
   important comparison on the strongest channel available.
@@ -130,7 +147,7 @@ panels), 3D, truncated bar baselines, pies for comparison or past about five
 slices, and rainbow ramps for ordered data. The form's **Common mistakes**
 (`vizier patterns show <id>`) list the traps people actually hit.
 
-## 6. Color: one command, then move on
+## 7. Color: one command, then move on
 
 ```bash
 vizier suggest-palette 6              # categorical, colorblind-safe, validated
@@ -148,7 +165,7 @@ multiples, or direct labels. `show` applies that fallback itself.
 Use ordered color for ordered data and categorical color for categorical
 data, and never encode anything in color alone.
 
-## 7. Check the artifact you actually built
+## 8. Check the artifact you actually built
 
 `show` already runs this on what it draws. For a figure made elsewhere:
 

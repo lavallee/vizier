@@ -1,9 +1,10 @@
 # Vision — vizier
 
-**North star:** When someone asks to see their data, vizier shows them how —
-the best form first, drawn from their rows, with the trade-offs stated and the
-honest warnings attached — and judges the result with the same knowledge it
-used to make it.
+**North star:** Look first; then show. When someone opens a table, vizier
+shows them what is in it — honestly, with the comparisons it made counted.
+When they have something to say, it shows them how — the best form first,
+drawn from their rows, with the trade-offs stated and the honest warnings
+attached — and judges the result with the same knowledge it used to make it.
 
 **North-star metric:** shown-and-used figures — tables run through `vizier
 show` whose output (a drawn figure, a Datawrapper chart, a sentence or a table)
@@ -12,6 +13,13 @@ downstream correction/review burden measured.
 
 ## Strategy bets
 
+- **Exploration is a first-class purpose.** Most looking happens before there
+  is a claim. `vizier explore` draws many small, quick views of a table (a
+  field sheet, missingness, relationships, breakdowns, trends, outliers) with
+  exploration's own honesty attached: how many comparisons were examined, n
+  beside every statistic, rankings withheld when n is too small, associations
+  that rest on a handful of rows marked, no causal language. Every view hands
+  off to `show`.
 - **Show, don't gatekeep.** A request to see data is a good request. vizier
   answers it with ranked options it has actually drawn, and says plainly when a
   sentence, a stat tile or a table would serve better — then provides that
@@ -32,6 +40,8 @@ downstream correction/review burden measured.
 
 ## Goals
 
+- Answer "what is in this table?" before anyone has a claim: a contact sheet
+  of honest small views, each a step away from a finished figure.
 - Draw the core journalistic forms from real rows as self-contained SVG and
   HTML that open from `file://` with no network: bar (grouped, stacked), line,
   scatter, dot, strip, histogram, slope, small multiples, heatmap, stacked

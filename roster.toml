@@ -3,7 +3,28 @@
 [app]
 name = "vizier"
 version = "0.1.0"
-description = "Shows how to visualize data, and critiques the result: `show` profiles a table, ranks the ways to show it (charts, and a sentence / stat tile / table when one serves better) and draws the best from the real rows as offline SVG/HTML or a Datawrapper chart, with honesty notes attached; plus chart-form recommendation, colorblind-safe palette/ramp generation, computable color checks, corpus-backed chart critique, and the keep-or-show-instead gate. Supersedes `malo` (deprecated 2026-07-10) — malo's roster forwards its needs_charts and critique_chart capabilities here. PyPI dist is `datavizier`; the import package and CLI are both `vizier`. Reachable as a CLI, an 18-tool MCP server (stdio), and direct Python entry points."
+description = "Look first, then show: `explore` draws a contact sheet of honest small views of what is in a table; `show` profiles a table, ranks the ways to show it (charts, and a sentence / stat tile / table when one serves better) and draws the best from the real rows as offline SVG/HTML or a Datawrapper chart, with honesty notes attached; plus chart-form recommendation, colorblind-safe palette/ramp generation, computable color checks, corpus-backed chart critique, and the keep-or-show-instead gate. Supersedes `malo` (deprecated 2026-07-10) — malo's roster forwards its needs_charts and critique_chart capabilities here. PyPI dist is `datavizier`; the import package and CLI are both `vizier`. Reachable as a CLI, a 19-tool MCP server (stdio), and direct Python entry points."
+
+[[capabilities]]
+id = "explore"
+description = "Explore a table before there is a claim — deterministic, no LLM, no network. A contact sheet of small static views: field sheet with oddities, missingness, relationships ranked by Spearman rho (leverage check, conditioned on the likeliest confounder), breakdowns ranked by epsilon-squared, trends, outliers. Exploration honesty as notes: comparisons counted, n beside every statistic, small-n rankings withheld, no causal language. Every view carries show_args for `show`."
+entry_cli = "vizier explore {table} --focus {focus} --where {where}"
+entry_python = "vizier.show.explore:explore"
+entry_mcp = "vizier mcp → explore"
+inputs = [
+  { name = "table", type = "path", schema = "csv-or-json-table" },
+  { name = "focus", type = "str", schema = "column", optional = true },
+  { name = "by", type = "str", schema = "column", optional = true },
+  { name = "where", type = "list", schema = "COL=VALUE", optional = true },
+]
+outputs = [
+  { name = "result", type = "object", schema = "vizier/explore/v1" },
+  { name = "sheet", type = "path", schema = "svg+html" },
+]
+tags = ["explore", "eda", "rendering", "honesty-notes", "computable", "no-llm"]
+quality_tier = "high"
+status = "live"
+notes = "src/vizier/show/explore.py; src/vizier/cli.py (explore); src/vizier/mcp_server.py (explore)."
 
 [[capabilities]]
 id = "show"

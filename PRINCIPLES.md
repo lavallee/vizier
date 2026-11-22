@@ -15,6 +15,28 @@ moving between them is expected.
 
 ## Cross-cutting
 
+### Look first; then show
+
+Exploration and publication are both first-class, and they need different
+honesty. `vizier explore` serves the first: many small views, cheaply drawn,
+of a table nobody has a claim about yet. Its honesty is about the *looking*:
+
+- **Count the comparisons.** Say how many pairs and breakdowns were examined
+  and how many are drawn. A pattern found by looking at many is a lead to
+  test, not a finding.
+- **n beside every statistic.** When n is too small to mean anything, withhold
+  the ranking position — still drawable on request, never hidden.
+- **Check what an association rests on.** Recompute without the rows that pull
+  hardest on it and show both; condition the strongest on the likeliest
+  confounder and show the panels side by side.
+- **Never call a correlation a cause.**
+- **Shared scales** across small multiples of the same measure, and say so
+  when they are not.
+
+Publication honesty (axis baselines, denominators, suppressed values, too many
+series) belongs to `show`. Every exploration view carries the arguments that
+hand it to `show`, so looking leads straight into showing.
+
 ### Someone asked to see their data; show them how
 
 The starting point is a person with a table and a reason to look at it.

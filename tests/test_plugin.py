@@ -95,6 +95,7 @@ def test_both_skills_are_present_and_shaped():
 @pytest.mark.parametrize(
     "command",
     [
+        "vizier explore",
         "vizier show",
         "vizier recommend-form",
         "vizier patterns show",
