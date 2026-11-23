@@ -5,7 +5,7 @@ All notable changes to vizier are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See
 [RELEASING.md](RELEASING.md) for the release process.
 
-## [0.4.0] — 2026-11-22
+## [0.4.0] — 2026-11-23
 
 ### Changed — the stance
 - **vizier now shows people how to visualize their data, instead of deciding
